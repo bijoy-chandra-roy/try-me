@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useTryOn } from '@/features/try-on/hooks/useTryOn';
 import { ImageUpload } from '@/features/try-on/components/ImageUpload';
@@ -17,6 +17,16 @@ interface TryOnModalProps {
 export function TryOnModal({ product, onClose }: TryOnModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { tryOn, loading, error, result, reset } = useTryOn();
+
+  useEffect(() => {
+    if (!product) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [product]);
 
   if (!product) return null;
 
@@ -39,8 +49,13 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
         role="presentation"
       />
 
-      <GlassCard className="relative z-10 w-full max-w-lg p-6 shadow-2xl" elastic={false}>
-        <div className="mb-5 flex items-start justify-between">
+      <GlassCard
+        className="relative z-10 flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col shadow-2xl"
+        elastic={false}
+        overflow="auto"
+      >
+        <div className="p-6">
+        <div className="mb-5 flex shrink-0 items-start justify-between">
           <div className="min-w-0 pr-4">
             <h2 className="font-serif text-xl font-semibold text-olive-700 dark:text-sand-100">
               Virtual Try-On
@@ -59,7 +74,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
           </button>
         </div>
 
-        <div className="mb-5 flex gap-4">
+        <div className="mb-5 flex shrink-0 gap-4">
           <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg ring-1 ring-sand-200/80 dark:ring-olive-600/60">
             <Image
               src={product.imageUrl}
@@ -85,7 +100,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
             <GlassButton
               onClick={handleSubmit}
               disabled={!selectedFile || loading}
-              className="mt-5 w-full py-3"
+              className="mt-5 w-full shrink-0 py-3"
             >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
@@ -106,11 +121,12 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               reset();
               setSelectedFile(null);
             }}
-            className="mt-4 w-full rounded-full border border-subtle py-2.5 text-sm font-medium text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-200 dark:hover:bg-olive-800/60"
+            className="mt-4 w-full shrink-0 rounded-full border border-subtle py-2.5 text-sm font-medium text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-200 dark:hover:bg-olive-800/60"
           >
             Try another photo
           </button>
         )}
+        </div>
       </GlassCard>
     </div>
   );

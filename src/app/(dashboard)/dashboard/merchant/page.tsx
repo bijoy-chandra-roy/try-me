@@ -6,6 +6,8 @@ import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { GlassButton } from '@/shared/components/GlassButton';
 import { RoleGate } from '@/shared/components/RoleGate';
+import { Select } from '@/shared/components/Select';
+import { Checkbox } from '@/shared/components/Checkbox';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { apiClient } from '@/shared/lib/api-client';
 import type { Merchant, Product, ProductCategory } from '@/shared/types';
@@ -277,25 +279,23 @@ export default function MerchantDashboardPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Category</label>
-                  <select
+                  <Select
                     value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value as ProductCategory })}
-                    className="input-glass w-full rounded-lg px-3 py-2"
-                  >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                    onChange={(category) => setForm({ ...form, category })}
+                    options={CATEGORIES.map((c) => ({
+                      value: c,
+                      label: c.charAt(0).toUpperCase() + c.slice(1),
+                    }))}
+                    aria-label="Category"
+                    className="w-full rounded-lg px-3 py-2"
+                  />
                 </div>
               </div>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={form.inStock}
-                  onChange={(e) => setForm({ ...form, inStock: e.target.checked })}
-                />
-                In stock
-              </label>
+              <Checkbox
+                checked={form.inStock}
+                onChange={(inStock) => setForm({ ...form, inStock })}
+                label="In stock"
+              />
               {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex gap-2">
                 <GlassButton type="submit" disabled={saving}>

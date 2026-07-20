@@ -6,6 +6,7 @@ export const config = {
   imgbbApiKey: process.env.IMGBB_API_KEY || '',
   vtoApiUrl:
     process.env.VTO_API_URL || 'https://yisol-idm-vton.hf.space/api/predict',
-  vtoTimeoutMs: parseInt(process.env.VTO_TIMEOUT_MS || '10000', 10),
+  vtoTimeoutMs: parseInt(process.env.VTO_TIMEOUT_MS || '50000', 10),
+  hfToken: process.env.HF_TOKEN || '',
   fallbackImagePath: path.join(process.cwd(), 'cache/fallback-vto-result.jpg'),
 };

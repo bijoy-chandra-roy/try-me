@@ -9,25 +9,47 @@ interface VtoResult {
 const EMBEDDED_FALLBACK_JPEG =
   '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=';
 
+function toFileData(imageUrl: string) {
+  return {
+    path: imageUrl,
+    url: imageUrl,
+    meta: { _type: 'gradio.FileData' as const },
+  };
+}
+
 class VtoApiClient {
-  constructor(private apiUrl: string) {}
+  constructor(
+    private apiUrl: string,
+    private hfToken: string
+  ) {}
 
   async generateTryOn(userImageUrl: string, garmentImageUrl: string): Promise<VtoResult> {
     const payload = {
       data: [
-        { path: userImageUrl, meta: { _type: 'gradio.FileData' } },
-        { path: garmentImageUrl, meta: { _type: 'gradio.FileData' } },
-        'upper_body',
-        false,
+        {
+          background: toFileData(userImageUrl),
+          layers: [] as [],
+          composite: null,
+        },
+        toFileData(garmentImageUrl),
+        'Short Sleeve Shirt',
+        true,
         false,
         30,
         42,
       ],
     };
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (this.hfToken) {
+      headers.Authorization = `Bearer ${this.hfToken}`;
+    }
+
     const response = await fetch(this.apiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload),
     });
 
@@ -78,5 +100,5 @@ class FallbackCache {
   }
 }
 
-export const vtoApiClient = new VtoApiClient(config.vtoApiUrl);
+export const vtoApiClient = new VtoApiClient(config.vtoApiUrl, config.hfToken);
 export const fallbackCache = new FallbackCache(config.fallbackImagePath);

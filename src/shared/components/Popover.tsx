@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { useFloatingPosition } from '@/shared/hooks/useFloatingPosition';
 
 interface PopoverItem {
   label: string;
@@ -15,27 +17,57 @@ interface PopoverProps {
 
 export function Popover({ label, items, children }: PopoverProps) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const coords = useFloatingPosition({
+    open,
+    triggerRef,
+    floatingRef: menuRef,
+    preferredSide: 'bottom',
+    align: 'end',
+    gap: 4,
+  });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
 
-    function handleClickOutside(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
+    function handlePointerDown(e: MouseEvent) {
+      const target = e.target as Node;
+      if (
+        triggerRef.current?.contains(target) ||
+        menuRef.current?.contains(target)
+      ) {
+        return;
       }
+      setOpen(false);
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div className="relative shrink-0">
       <button
+        ref={triggerRef}
         type="button"
         aria-label={label}
         aria-expanded={open}
+        aria-haspopup="menu"
         onClick={() => setOpen((prev) => !prev)}
         className="action-reveal rounded-full p-1.5 text-muted-subtle transition-colors hover:bg-sand-200/60 hover:text-olive-700 dark:hover:bg-olive-600/40 dark:hover:text-sand-100"
       >
@@ -48,27 +80,38 @@ export function Popover({ label, items, children }: PopoverProps) {
         )}
       </button>
 
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-full z-20 mt-1 min-w-[160px] overflow-hidden rounded-xl border border-sand-200/80 bg-sand-50/95 py-1 shadow-lg backdrop-blur-md dark:border-olive-500/50 dark:bg-olive-800/95"
-        >
-          {items.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                item.onClick();
-                setOpen(false);
-              }}
-              className="block w-full px-3 py-2 text-left text-sm text-olive-700 transition-colors hover:bg-sand-200/60 dark:text-sand-100 dark:hover:bg-olive-600/40"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
+      {mounted &&
+        open &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            className={`fixed z-[200] min-w-[160px] overflow-hidden rounded-xl border border-sand-200/80 bg-sand-50/95 py-1 shadow-lg backdrop-blur-md transition-opacity duration-150 dark:border-olive-500/50 dark:bg-olive-800/95 ${
+              coords ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={
+              coords
+                ? { top: coords.top, left: coords.left }
+                : { top: 0, left: 0 }
+            }
+          >
+            {items.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  item.onClick();
+                  setOpen(false);
+                }}
+                className="block w-full px-3 py-2 text-left text-sm text-olive-700 transition-colors hover:bg-sand-200/60 dark:text-sand-100 dark:hover:bg-olive-600/40"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

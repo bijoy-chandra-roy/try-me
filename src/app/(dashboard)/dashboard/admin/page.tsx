@@ -6,6 +6,7 @@ import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { GlassButton } from '@/shared/components/GlassButton';
 import { RoleGate } from '@/shared/components/RoleGate';
+import { Select } from '@/shared/components/Select';
 import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS, USER_ROLES } from '@/shared/auth/roles';
 import type { DashboardStats, Merchant, User, UserRole } from '@/shared/types';
@@ -147,26 +148,24 @@ export default function AdminDashboardPage() {
               required
               className="input-glass w-full rounded-lg px-3 py-2"
             />
-            <select
+            <Select
               value={newUser.role}
-              onChange={(e) => setNewUser({ ...newUser, role: e.target.value as UserRole })}
-              className="input-glass w-full rounded-lg px-3 py-2"
-            >
-              {assignableRoles.map((r) => (
-                <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-              ))}
-            </select>
+              onChange={(role) => setNewUser({ ...newUser, role })}
+              options={assignableRoles.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
+              aria-label="Role"
+              className="w-full rounded-lg px-3 py-2"
+            />
             {newUser.role === 'merchant' && (
-              <select
+              <Select
                 value={newUser.merchantId}
-                onChange={(e) => setNewUser({ ...newUser, merchantId: e.target.value })}
-                className="input-glass w-full rounded-lg px-3 py-2"
-              >
-                <option value="">No merchant linked (onboard later)</option>
-                {merchants.map((m) => (
-                  <option key={m._id} value={m._id}>{m.name}</option>
-                ))}
-              </select>
+                onChange={(merchantId) => setNewUser({ ...newUser, merchantId })}
+                options={[
+                  { value: '', label: 'No merchant linked (onboard later)' },
+                  ...merchants.map((m) => ({ value: m._id, label: m.name })),
+                ]}
+                aria-label="Merchant"
+                className="w-full rounded-lg px-3 py-2"
+              />
             )}
             {message && <p className="text-sm text-success">{message}</p>}
             <GlassButton type="submit">Create user</GlassButton>
@@ -190,15 +189,13 @@ export default function AdminDashboardPage() {
                   </span>
                   <RoleGate permission="assign_roles">
                     {user.role !== 'super_admin' && (
-                      <select
+                      <Select
                         value={user.role}
-                        onChange={(e) => changeRole(user._id, e.target.value as UserRole)}
-                        className="input-glass rounded-lg px-2 py-1 text-sm"
-                      >
-                        {assignableRoles.map((r) => (
-                          <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-                        ))}
-                      </select>
+                        onChange={(role) => changeRole(user._id, role)}
+                        options={assignableRoles.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
+                        aria-label={`Change role for ${user.name}`}
+                        className="rounded-lg px-2 py-1 text-sm"
+                      />
                     )}
                   </RoleGate>
                   {user.role !== 'super_admin' && (

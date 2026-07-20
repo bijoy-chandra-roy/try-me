@@ -6,6 +6,9 @@ import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { GlassButton } from '@/shared/components/GlassButton';
 import { RoleGate } from '@/shared/components/RoleGate';
+import { Select } from '@/shared/components/Select';
+import { Checkbox } from '@/shared/components/Checkbox';
+import { ScrollArea } from '@/shared/components/ScrollArea';
 import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS, USER_ROLES } from '@/shared/auth/roles';
 import type { DashboardStats, Merchant, User, UserRole } from '@/shared/types';
@@ -113,14 +116,14 @@ export default function SuperAdminDashboardPage() {
               Controls maintenance mode and guest try-on limits across the platform
             </p>
             <div className="mt-4 space-y-3">
-              <label className="flex items-center justify-between text-sm">
-                Maintenance mode
-                <input
-                  type="checkbox"
+              <div className="flex items-center justify-between text-sm">
+                <span>Maintenance mode</span>
+                <Checkbox
                   checked={flags.maintenanceMode}
-                  onChange={(e) => setFlags({ ...flags, maintenanceMode: e.target.checked })}
+                  onChange={(maintenanceMode) => setFlags({ ...flags, maintenanceMode })}
+                  aria-label="Maintenance mode"
                 />
-              </label>
+              </div>
               <label className="flex items-center justify-between text-sm">
                 Guest try-on limit (per hour)
                 <input
@@ -145,13 +148,17 @@ export default function SuperAdminDashboardPage() {
       <RoleGate permission="view_system_health">
         <GlassCard className="mb-10 p-6">
           <h2 className="font-serif text-xl font-semibold">Recent try-ons</h2>
-          <div className="mt-4 max-h-48 space-y-2 overflow-y-auto">
-            {stats?.recentTryOns.map((item) => (
-              <div key={item._id} className="text-sm">
-                <span className="font-medium">{item.productName}</span>
-                <span className="text-muted-subtle"> · {new Date(item.createdAt).toLocaleString()}</span>
+          <div className="mt-4">
+            <ScrollArea edgeInset={4} viewportClassName="max-h-48">
+              <div className="space-y-2">
+                {stats?.recentTryOns.map((item) => (
+                  <div key={item._id} className="text-sm">
+                    <span className="font-medium">{item.productName}</span>
+                    <span className="text-muted-subtle"> · {new Date(item.createdAt).toLocaleString()}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </ScrollArea>
           </div>
         </GlassCard>
       </RoleGate>
@@ -170,15 +177,13 @@ export default function SuperAdminDashboardPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="chip-category">{ROLE_LABELS[user.role]}</span>
-                  <select
+                  <Select
                     value={user.role}
-                    onChange={(e) => changeRole(user._id, e.target.value as UserRole)}
-                    className="input-glass rounded-lg px-2 py-1 text-sm"
-                  >
-                    {USER_ROLES.map((r) => (
-                      <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-                    ))}
-                  </select>
+                    onChange={(role) => changeRole(user._id, role)}
+                    options={USER_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
+                    aria-label={`Change role for ${user.name}`}
+                    className="rounded-lg px-2 py-1 text-sm"
+                  />
                   {user.role !== 'super_admin' && (
                     <GlassButton onClick={() => toggleUserStatus(user)}>
                       {user.status === 'active' ? 'Deactivate' : 'Activate'}

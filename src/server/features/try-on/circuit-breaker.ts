@@ -10,7 +10,8 @@ class CircuitBreaker<T> {
     try {
       const result = await this.executeWithTimeout(operation);
       return { data: result, fromFallback: false };
-    } catch {
+    } catch (error) {
+      console.error('[Circuit Breaker] Fallback triggered due to error:', error);
       const fallback = await this.fallbackFn();
       return { data: fallback, fromFallback: true };
     }
@@ -19,7 +20,7 @@ class CircuitBreaker<T> {
   private executeWithTimeout(operation: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(
-        () => reject(new Error('CIRCUIT_BREAKER_TIMEOUT')),
+        () => reject(new Error(`CIRCUIT_BREAKER_TIMEOUT_EXCEEDED (${this.timeoutMs}ms)`)),
         this.timeoutMs
       );
 
