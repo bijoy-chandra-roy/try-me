@@ -8,9 +8,12 @@ import { GlassButton } from '@/shared/components/GlassButton';
 import { RoleGate } from '@/shared/components/RoleGate';
 import { Select } from '@/shared/components/Select';
 import { Checkbox } from '@/shared/components/Checkbox';
+import { ImageUrlField } from '@/shared/components/ImageUrlField';
+import { TagListField } from '@/shared/components/TagListField';
+import { CustomFieldsEditor } from '@/shared/components/CustomFieldsEditor';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { apiClient } from '@/shared/lib/api-client';
-import type { Merchant, Product, ProductCategory } from '@/shared/types';
+import type { Merchant, Product, ProductCategory, ProductCustomField } from '@/shared/types';
 
 interface MerchantStats {
   productCount: number;
@@ -28,7 +31,8 @@ const emptyProduct = {
   price: 0,
   category: 'tops' as ProductCategory,
   imageUrl: '',
-  sizes: ['S', 'M', 'L'],
+  sizes: [] as string[],
+  customFields: [] as ProductCustomField[],
   inStock: true,
 };
 
@@ -154,7 +158,8 @@ export default function MerchantDashboardPage() {
       price: product.price,
       category: product.category,
       imageUrl: product.imageUrl,
-      sizes: product.sizes,
+      sizes: product.sizes ?? [],
+      customFields: product.customFields ?? [],
       inStock: product.inStock,
     });
   }
@@ -255,7 +260,7 @@ export default function MerchantDashboardPage() {
               {editingId ? 'Edit product' : 'Add product'}
             </h2>
             <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-              {(['name', 'description', 'imageUrl'] as const).map((field) => (
+              {(['name', 'description'] as const).map((field) => (
                 <div key={field}>
                   <label className="mb-1 block text-xs capitalize">{field}</label>
                   <input
@@ -266,6 +271,13 @@ export default function MerchantDashboardPage() {
                   />
                 </div>
               ))}
+              <ImageUrlField
+                label="image"
+                value={form.imageUrl}
+                onChange={(imageUrl) => setForm({ ...form, imageUrl })}
+                required
+                disabled={saving}
+              />
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs">Price</label>
@@ -291,6 +303,19 @@ export default function MerchantDashboardPage() {
                   />
                 </div>
               </div>
+              <TagListField
+                label="Sizes"
+                hint="Optional. Leave empty if this product has no sizes."
+                values={form.sizes}
+                onChange={(sizes) => setForm({ ...form, sizes })}
+                placeholder="e.g. S, M, L or 32"
+                disabled={saving}
+              />
+              <CustomFieldsEditor
+                fields={form.customFields}
+                onChange={(customFields) => setForm({ ...form, customFields })}
+                disabled={saving}
+              />
               <Checkbox
                 checked={form.inStock}
                 onChange={(inStock) => setForm({ ...form, inStock })}

@@ -74,15 +74,36 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
           />
         </div>
 
-        {product.sizes.length > 0 && (
+        {(product.sizes ?? []).length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {product.sizes.map((size) => (
+            {(product.sizes ?? []).map((size) => (
               <span key={size} className="chip-size">
                 {size}
               </span>
             ))}
           </div>
         )}
+
+        {(product.customFields ?? []).map((field, index) => {
+          const options = field.options ?? [];
+          if (options.length === 0) return null;
+          return (
+            <div key={`${field.label}-${index}`} className="space-y-1">
+              {field.label ? (
+                <p className="text-xs font-medium text-olive-700 dark:text-sand-200">
+                  {field.label}
+                </p>
+              ) : null}
+              <div className="flex flex-wrap gap-1.5">
+                {options.map((option) => (
+                  <span key={option} className="chip-size">
+                    {option}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
 
         <div className="mt-auto grid grid-cols-[1fr_auto] items-center gap-3">
           <span className="text-right text-lg font-semibold tabular-nums text-olive-600 dark:text-sand-200">

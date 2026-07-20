@@ -1,4 +1,4 @@
-import type { ProductCategory } from '@/shared/types';
+import type { ProductCategory, ProductCustomField } from '@/shared/types';
 
 export const SEED_PRODUCTS: {
   name: string;
@@ -7,6 +7,7 @@ export const SEED_PRODUCTS: {
   category: ProductCategory;
   imageUrl: string;
   sizes: string[];
+  customFields: ProductCustomField[];
   inStock: boolean;
 }[] = [
   {
@@ -18,6 +19,10 @@ export const SEED_PRODUCTS: {
     imageUrl:
       'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=800&fit=crop',
     sizes: ['S', 'M', 'L', 'XL'],
+    customFields: [
+      { label: 'Material', options: ['Linen-cotton blend'] },
+      { label: 'Fit', options: ['Relaxed', 'Regular'] },
+    ],
     inStock: true,
   },
   {
@@ -28,6 +33,10 @@ export const SEED_PRODUCTS: {
     imageUrl:
       'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=800&fit=crop',
     sizes: ['S', 'M', 'L'],
+    customFields: [
+      { label: 'Color', options: ['Deep olive', 'Charcoal'] },
+      { label: 'Lining', options: ['Partial'] },
+    ],
     inStock: true,
   },
   {
@@ -39,6 +48,10 @@ export const SEED_PRODUCTS: {
     imageUrl:
       'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&h=800&fit=crop',
     sizes: ['28', '30', '32', '34'],
+    customFields: [
+      { label: 'Rise', options: ['High'] },
+      { label: 'Care', options: ['Dry clean', 'Hand wash'] },
+    ],
     inStock: true,
   },
   {
@@ -50,6 +63,10 @@ export const SEED_PRODUCTS: {
     imageUrl:
       'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&h=800&fit=crop',
     sizes: ['XS', 'S', 'M', 'L'],
+    customFields: [
+      { label: 'Length', options: ['Midi'] },
+      { label: 'Closure', options: ['Wrap tie'] },
+    ],
     inStock: true,
   },
   {
@@ -61,6 +78,10 @@ export const SEED_PRODUCTS: {
     imageUrl:
       'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&h=800&fit=crop',
     sizes: ['S', 'M', 'L', 'XL'],
+    customFields: [
+      { label: 'Material', options: ['100% merino wool'] },
+      { label: 'Gauge', options: ['Fine'] },
+    ],
     inStock: true,
   },
   {
@@ -71,7 +92,12 @@ export const SEED_PRODUCTS: {
     category: 'accessories',
     imageUrl:
       'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=800&fit=crop',
-    sizes: ['One Size'],
+    sizes: [],
+    customFields: [
+      { label: 'Material', options: ['Heavy canvas'] },
+      { label: 'Colors', options: ['Ecru', 'Olive', 'Clay'] },
+      { label: '', options: ['Interior pocket', 'Reinforced handles'] },
+    ],
     inStock: true,
   },
 ];

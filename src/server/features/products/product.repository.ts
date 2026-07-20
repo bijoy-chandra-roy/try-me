@@ -1,4 +1,4 @@
-import type { ProductCategory } from '@/shared/types';
+import type { ProductCategory, ProductCustomField } from '@/shared/types';
 import { Product, type ProductDocument } from './product.model';
 
 export interface ProductFilters {
@@ -18,10 +18,38 @@ export type CreateProductInput = {
   price: number;
   category: ProductCategory;
   imageUrl: string;
-  sizes: string[];
+  sizes?: string[];
+  customFields?: ProductCustomField[];
   inStock: boolean;
   merchantId?: string | null;
 };
+
+function normalizeSizes(sizes?: string[] | null): string[] {
+  if (!Array.isArray(sizes)) return [];
+  return sizes.map((s) => String(s).trim()).filter(Boolean);
+}
+
+/** Accepts current { label, options } and legacy { label, value }. */
+function normalizeCustomFields(
+  fields?: Array<Partial<ProductCustomField> & { value?: string }> | null
+): ProductCustomField[] {
+  if (!Array.isArray(fields)) return [];
+
+  return fields
+    .map((f) => {
+      const fromOptions = Array.isArray(f?.options)
+        ? f.options.map((o) => String(o).trim()).filter(Boolean)
+        : [];
+      const fromLegacyValue =
+        typeof f?.value === 'string' && f.value.trim() ? [f.value.trim()] : [];
+
+      return {
+        label: String(f?.label ?? '').trim(),
+        options: fromOptions.length > 0 ? fromOptions : fromLegacyValue,
+      };
+    })
+    .filter((f) => f.options.length > 0);
+}
 
 class ProductRepository {
   private toRecord(doc: ProductDocument | Record<string, unknown>): ProductRecord {
@@ -33,12 +61,24 @@ class ProductRepository {
       price: d.price,
       category: d.category,
       imageUrl: d.imageUrl,
-      sizes: d.sizes,
+      sizes: normalizeSizes(d.sizes),
+      customFields: normalizeCustomFields(d.customFields),
       inStock: d.inStock,
       merchantId: d.merchantId ? String(d.merchantId) : null,
       createdAt: d.createdAt,
       updatedAt: d.updatedAt,
     };
+  }
+
+  private prepareInput(data: CreateProductInput | Partial<CreateProductInput>) {
+    const prepared: Partial<CreateProductInput> = { ...data };
+    if ('sizes' in data) {
+      prepared.sizes = normalizeSizes(data.sizes);
+    }
+    if ('customFields' in data) {
+      prepared.customFields = normalizeCustomFields(data.customFields);
+    }
+    return prepared;
   }
 
   async findAll(filters: ProductFilters = {}): Promise<ProductRecord[]> {
@@ -57,12 +97,20 @@ class ProductRepository {
   }
 
   async create(data: CreateProductInput): Promise<ProductRecord> {
-    const product = await Product.create(data);
+    const prepared = this.prepareInput({
+      ...data,
+      sizes: data.sizes ?? [],
+      customFields: data.customFields ?? [],
+    }) as CreateProductInput;
+    const product = await Product.create(prepared);
     return this.toRecord(product);
   }
 
   async update(id: string, data: Partial<CreateProductInput>): Promise<ProductRecord | null> {
-    const product = await Product.findByIdAndUpdate(id, data, { new: true }).lean();
+    const product = await Product.findByIdAndUpdate(id, this.prepareInput(data), {
+      new: true,
+      runValidators: true,
+    }).lean();
     if (!product) return null;
     return this.toRecord(product as unknown as ProductDocument);
   }
@@ -72,19 +120,14 @@ class ProductRepository {
     return !!result;
   }
 
-  async insertMany(
-    products: {
-      name: string;
-      description: string;
-      price: number;
-      category: ProductCategory;
-      imageUrl: string;
-      sizes: string[];
-      inStock: boolean;
-      merchantId?: string | null;
-    }[]
-  ) {
-    return Product.insertMany(products);
+  async insertMany(products: CreateProductInput[]) {
+    return Product.insertMany(
+      products.map((p) => ({
+        ...p,
+        sizes: normalizeSizes(p.sizes),
+        customFields: normalizeCustomFields(p.customFields),
+      }))
+    );
   }
 
   async deleteAll() {

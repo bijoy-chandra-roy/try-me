@@ -9,6 +9,12 @@ export type ProductCategory =
   | 'outerwear'
   | 'accessories';
 
+export interface ProductCustomField {
+  /** Optional heading; empty means options display like sizes */
+  label: string;
+  options: string[];
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -17,6 +23,7 @@ export interface Product {
   category: ProductCategory;
   imageUrl: string;
   sizes: string[];
+  customFields: ProductCustomField[];
   inStock: boolean;
   merchantId?: string | null;
 }

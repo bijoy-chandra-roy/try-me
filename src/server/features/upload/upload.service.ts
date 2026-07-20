@@ -6,8 +6,12 @@ export interface UploadedFile {
 }
 
 class UploadService {
-  async uploadUserImage(file: UploadedFile) {
+  async uploadImage(file: UploadedFile) {
     return imgbbClient.uploadImage(file.buffer, file.originalname);
+  }
+
+  async uploadUserImage(file: UploadedFile) {
+    return this.uploadImage(file);
   }
 }
 
