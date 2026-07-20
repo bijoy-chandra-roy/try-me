@@ -1,6 +1,7 @@
 import { AppError } from '@/server/lib/errors';
 import type { SessionUser } from '@/server/lib/auth-guard';
 import { hasPermission } from '@/shared/auth/permissions';
+import { reviewRepository } from '@/server/features/reviews/review.repository';
 import {
   productRepository,
   type ProductFilters,
@@ -8,17 +9,36 @@ import {
   type CreateProductInput,
 } from './product.repository';
 
+export type ProductWithReviews = ProductRecord & {
+  averageRating: number;
+  reviewCount: number;
+};
+
 class ProductService {
-  async getProducts(filters: ProductFilters): Promise<ProductRecord[]> {
-    return productRepository.findAll(filters);
+  private async withReviewStats(products: ProductRecord[]): Promise<ProductWithReviews[]> {
+    const stats = await reviewRepository.getStatsForProducts(products.map((p) => p._id));
+    return products.map((p) => {
+      const s = stats.get(p._id);
+      return {
+        ...p,
+        averageRating: s?.averageRating ?? 0,
+        reviewCount: s?.reviewCount ?? 0,
+      };
+    });
   }
 
-  async getProductById(id: string): Promise<ProductRecord> {
+  async getProducts(filters: ProductFilters): Promise<ProductWithReviews[]> {
+    const products = await productRepository.findAll(filters);
+    return this.withReviewStats(products);
+  }
+
+  async getProductById(id: string): Promise<ProductWithReviews> {
     const product = await productRepository.findById(id);
     if (!product) {
       throw new AppError('Product not found', 404);
     }
-    return product;
+    const [enriched] = await this.withReviewStats([product]);
+    return enriched;
   }
 
   async getMerchantProducts(merchantId: string): Promise<ProductRecord[]> {

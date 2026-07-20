@@ -7,6 +7,7 @@ import { Tooltip } from '@/shared/components/Tooltip';
 import { GlassButton } from '@/shared/components/GlassButton';
 import { ROLE_LABELS, getDashboardPath, isUserRole } from '@/shared/auth/roles';
 import { usePermissions } from '@/shared/hooks/useAuth';
+import { useCart } from '@/features/cart/hooks/useCart';
 
 const PERMISSION_SHORT_LABELS: Record<string, string> = {
   manage_products: 'Products',
@@ -15,6 +16,8 @@ const PERMISSION_SHORT_LABELS: Record<string, string> = {
   view_system_health: 'System health',
   manage_system: 'System config',
   assign_roles: 'Role management',
+  fulfill_orders: 'Orders',
+  view_all_orders: 'All orders',
 };
 
 export function Header() {
@@ -23,9 +26,19 @@ export function Header() {
   const role = rawRole && isUserRole(rawRole) ? rawRole : undefined;
   const permissions = usePermissions();
   const isAuthenticated = status === 'authenticated';
+  const { itemCount } = useCart();
+  const canCart = permissions.includes('manage_cart');
 
   const staffPermissions = permissions.filter(
-    (p) => p !== 'browse_catalog' && p !== 'try_on' && p !== 'view_own_try_on_history' && p !== 'manage_own_profile'
+    (p) =>
+      p !== 'browse_catalog' &&
+      p !== 'try_on' &&
+      p !== 'view_own_try_on_history' &&
+      p !== 'manage_own_profile' &&
+      p !== 'manage_cart' &&
+      p !== 'place_orders' &&
+      p !== 'view_own_orders' &&
+      p !== 'manage_reviews'
   );
 
   return (
@@ -43,6 +56,18 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3">
+          {isAuthenticated && canCart && (
+            <Link href="/cart" className="relative">
+              <GlassButton className="text-sm">
+                Cart
+                {itemCount > 0 && (
+                  <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-olive-700 px-1.5 text-xs text-sand-100 dark:bg-sand-200 dark:text-olive-800">
+                    {itemCount}
+                  </span>
+                )}
+              </GlassButton>
+            </Link>
+          )}
           {isAuthenticated && role ? (
             <>
               <Tooltip

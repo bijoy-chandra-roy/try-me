@@ -9,6 +9,7 @@ export const SEED_PRODUCTS: {
   sizes: string[];
   customFields: ProductCustomField[];
   inStock: boolean;
+  stockQuantity: number;
 }[] = [
   {
     name: 'Linen Blend Shirt',
@@ -24,6 +25,7 @@ export const SEED_PRODUCTS: {
       { label: 'Fit', options: ['Relaxed', 'Regular'] },
     ],
     inStock: true,
+    stockQuantity: 25,
   },
   {
     name: 'Structured Blazer',
@@ -38,6 +40,7 @@ export const SEED_PRODUCTS: {
       { label: 'Lining', options: ['Partial'] },
     ],
     inStock: true,
+    stockQuantity: 15,
   },
   {
     name: 'Wide-Leg Trousers',
@@ -53,6 +56,7 @@ export const SEED_PRODUCTS: {
       { label: 'Care', options: ['Dry clean', 'Hand wash'] },
     ],
     inStock: true,
+    stockQuantity: 20,
   },
   {
     name: 'Midi Wrap Dress',
@@ -68,6 +72,7 @@ export const SEED_PRODUCTS: {
       { label: 'Closure', options: ['Wrap tie'] },
     ],
     inStock: true,
+    stockQuantity: 18,
   },
   {
     name: 'Merino Crew Sweater',
@@ -83,6 +88,7 @@ export const SEED_PRODUCTS: {
       { label: 'Gauge', options: ['Fine'] },
     ],
     inStock: true,
+    stockQuantity: 30,
   },
   {
     name: 'Canvas Tote',
@@ -99,5 +105,6 @@ export const SEED_PRODUCTS: {
       { label: '', options: ['Interior pocket', 'Reinforced handles'] },
     ],
     inStock: true,
+    stockQuantity: 40,
   },
 ];

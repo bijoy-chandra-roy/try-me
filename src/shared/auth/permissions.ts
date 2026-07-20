@@ -13,6 +13,12 @@ export const PERMISSIONS = [
   'assign_roles',
   'view_system_health',
   'manage_system',
+  'manage_cart',
+  'place_orders',
+  'view_own_orders',
+  'fulfill_orders',
+  'view_all_orders',
+  'manage_reviews',
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -23,6 +29,10 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'try_on',
     'view_own_try_on_history',
     'manage_own_profile',
+    'manage_cart',
+    'place_orders',
+    'view_own_orders',
+    'manage_reviews',
   ],
   merchant: [
     'browse_catalog',
@@ -31,6 +41,11 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'manage_own_profile',
     'manage_products',
     'manage_merchants',
+    'manage_cart',
+    'place_orders',
+    'view_own_orders',
+    'fulfill_orders',
+    'manage_reviews',
   ],
   support: [
     'browse_catalog',
@@ -40,6 +55,11 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'manage_own_profile',
     'view_users',
     'view_system_health',
+    'manage_cart',
+    'place_orders',
+    'view_own_orders',
+    'view_all_orders',
+    'manage_reviews',
   ],
   admin: [
     'browse_catalog',
@@ -53,6 +73,12 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'manage_users',
     'assign_roles',
     'view_system_health',
+    'manage_cart',
+    'place_orders',
+    'view_own_orders',
+    'fulfill_orders',
+    'view_all_orders',
+    'manage_reviews',
   ],
   super_admin: [...PERMISSIONS],
 };

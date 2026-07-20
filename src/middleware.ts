@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(getDashboardPath(role), request.url));
   }
 
-  if (!canAccessDashboardPath(role, pathname)) {
+  if (pathname.startsWith('/dashboard') && !canAccessDashboardPath(role, pathname)) {
     return NextResponse.redirect(new URL('/unauthorized', request.url));
   }
 
@@ -38,5 +38,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard', '/dashboard/:path*'],
+  matcher: [
+    '/dashboard',
+    '/dashboard/:path*',
+    '/cart',
+    '/checkout',
+    '/orders/:path*',
+  ],
 };

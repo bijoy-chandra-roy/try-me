@@ -1,4 +1,3 @@
-import type { NextRequest } from 'next/server';
 import { ensureDbConnection } from '@/server/db/connection';
 import { getMerchantDashboardStats } from '@/server/features/dashboard/dashboard.service';
 import { requirePermission } from '@/server/lib/auth-guard';
@@ -15,6 +14,9 @@ export async function GET() {
           productCount: 0,
           tryOnCount: 0,
           inStockCount: 0,
+          lowStockCount: 0,
+          orderCount: 0,
+          unitsSold: 0,
           products: [],
           perProduct: {},
         });

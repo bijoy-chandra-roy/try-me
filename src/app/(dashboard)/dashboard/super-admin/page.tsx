@@ -11,6 +11,7 @@ import { Checkbox } from '@/shared/components/Checkbox';
 import { ScrollArea } from '@/shared/components/ScrollArea';
 import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS, USER_ROLES } from '@/shared/auth/roles';
+import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import type { DashboardStats, Merchant, User, UserRole } from '@/shared/types';
 
 interface SystemConfig {
@@ -99,13 +100,21 @@ export default function SuperAdminDashboardPage() {
     >
       <RoleGate permission="view_system_health">
         {stats && (
-          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <StatCard label="Users" value={stats.totalUsers} />
             <StatCard label="Products" value={stats.totalProducts} />
             <StatCard label="Merchants" value={stats.totalMerchants} />
             <StatCard label="Try-ons" value={stats.totalTryOns} />
+            <StatCard label="Orders" value={stats.totalOrders ?? 0} />
+            <StatCard label="Revenue" value={`$${(stats.totalRevenue ?? 0).toFixed(0)}`} />
           </div>
         )}
+      </RoleGate>
+
+      <RoleGate permission="view_all_orders">
+        <div className="mb-10">
+          <OrdersPanel mode="all" showSearch allowAdvance allowMarkPaid />
+        </div>
       </RoleGate>
 
       <RoleGate permission="manage_system">

@@ -20,7 +20,8 @@ export type CreateProductInput = {
   imageUrl: string;
   sizes?: string[];
   customFields?: ProductCustomField[];
-  inStock: boolean;
+  inStock?: boolean;
+  stockQuantity?: number;
   merchantId?: string | null;
 };
 
@@ -51,9 +52,30 @@ function normalizeCustomFields(
     .filter((f) => f.options.length > 0);
 }
 
+function resolveStock(data: {
+  stockQuantity?: number;
+  inStock?: boolean;
+}): { stockQuantity: number; inStock: boolean } {
+  if (typeof data.stockQuantity === 'number' && !Number.isNaN(data.stockQuantity)) {
+    const stockQuantity = Math.max(0, Math.floor(data.stockQuantity));
+    return { stockQuantity, inStock: stockQuantity > 0 };
+  }
+  if (typeof data.inStock === 'boolean') {
+    const stockQuantity = data.inStock ? 10 : 0;
+    return { stockQuantity, inStock: stockQuantity > 0 };
+  }
+  return { stockQuantity: 0, inStock: false };
+}
+
 class ProductRepository {
   private toRecord(doc: ProductDocument | Record<string, unknown>): ProductRecord {
     const d = doc as ProductDocument;
+    const stockQuantity =
+      typeof d.stockQuantity === 'number'
+        ? d.stockQuantity
+        : d.inStock
+          ? 10
+          : 0;
     return {
       _id: String(d._id),
       name: d.name,
@@ -63,7 +85,8 @@ class ProductRepository {
       imageUrl: d.imageUrl,
       sizes: normalizeSizes(d.sizes),
       customFields: normalizeCustomFields(d.customFields),
-      inStock: d.inStock,
+      stockQuantity,
+      inStock: stockQuantity > 0,
       merchantId: d.merchantId ? String(d.merchantId) : null,
       createdAt: d.createdAt,
       updatedAt: d.updatedAt,
@@ -77,6 +100,11 @@ class ProductRepository {
     }
     if ('customFields' in data) {
       prepared.customFields = normalizeCustomFields(data.customFields);
+    }
+    if ('stockQuantity' in data || 'inStock' in data) {
+      const stock = resolveStock(data);
+      prepared.stockQuantity = stock.stockQuantity;
+      prepared.inStock = stock.inStock;
     }
     return prepared;
   }
@@ -97,10 +125,13 @@ class ProductRepository {
   }
 
   async create(data: CreateProductInput): Promise<ProductRecord> {
+    const stock = resolveStock(data);
     const prepared = this.prepareInput({
       ...data,
       sizes: data.sizes ?? [],
       customFields: data.customFields ?? [],
+      stockQuantity: stock.stockQuantity,
+      inStock: stock.inStock,
     }) as CreateProductInput;
     const product = await Product.create(prepared);
     return this.toRecord(product);
@@ -115,6 +146,40 @@ class ProductRepository {
     return this.toRecord(product as unknown as ProductDocument);
   }
 
+  async decrementStock(id: string, quantity: number): Promise<ProductRecord | null> {
+    const product = await Product.findOneAndUpdate(
+      { _id: id, stockQuantity: { $gte: quantity } },
+      [
+        {
+          $set: {
+            stockQuantity: { $subtract: ['$stockQuantity', quantity] },
+            inStock: { $gt: [{ $subtract: ['$stockQuantity', quantity] }, 0] },
+          },
+        },
+      ],
+      { new: true }
+    ).lean();
+    if (!product) return null;
+    return this.toRecord(product as unknown as ProductDocument);
+  }
+
+  async incrementStock(id: string, quantity: number): Promise<ProductRecord | null> {
+    const product = await Product.findByIdAndUpdate(
+      id,
+      [
+        {
+          $set: {
+            stockQuantity: { $add: ['$stockQuantity', quantity] },
+            inStock: true,
+          },
+        },
+      ],
+      { new: true }
+    ).lean();
+    if (!product) return null;
+    return this.toRecord(product as unknown as ProductDocument);
+  }
+
   async delete(id: string): Promise<boolean> {
     const result = await Product.findByIdAndDelete(id);
     return !!result;
@@ -122,11 +187,16 @@ class ProductRepository {
 
   async insertMany(products: CreateProductInput[]) {
     return Product.insertMany(
-      products.map((p) => ({
-        ...p,
-        sizes: normalizeSizes(p.sizes),
-        customFields: normalizeCustomFields(p.customFields),
-      }))
+      products.map((p) => {
+        const stock = resolveStock(p);
+        return {
+          ...p,
+          sizes: normalizeSizes(p.sizes),
+          customFields: normalizeCustomFields(p.customFields),
+          stockQuantity: stock.stockQuantity,
+          inStock: stock.inStock,
+        };
+      })
     );
   }
 
@@ -138,6 +208,30 @@ class ProductRepository {
     const query: Record<string, unknown> = {};
     if (filters?.merchantId) query.merchantId = filters.merchantId;
     return Product.countDocuments(query);
+  }
+
+  /** Backfill stockQuantity for legacy documents that only have inStock. */
+  async migrateStockQuantities(): Promise<number> {
+    const missing = await Product.updateMany(
+      { $or: [{ stockQuantity: { $exists: false } }, { stockQuantity: null }] },
+      [
+        {
+          $set: {
+            stockQuantity: {
+              $cond: [{ $eq: ['$inStock', true] }, 10, 0],
+            },
+          },
+        },
+      ]
+    );
+    await Product.updateMany({}, [
+      {
+        $set: {
+          inStock: { $gt: ['$stockQuantity', 0] },
+        },
+      },
+    ]);
+    return missing.modifiedCount;
   }
 }
 

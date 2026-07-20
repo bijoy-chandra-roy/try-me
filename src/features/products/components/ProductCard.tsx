@@ -1,12 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { GlassButton } from '@/shared/components/GlassButton';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { Popover } from '@/shared/components/Popover';
 import { Tooltip } from '@/shared/components/Tooltip';
 import { useAuth, usePermission } from '@/shared/hooks/useAuth';
 import { useSystemStatus } from '@/shared/hooks/useSystemStatus';
+import { addToCart } from '@/features/cart/api/cart.api';
+import { setCartStore } from '@/features/cart/hooks/useCart';
+import { ApiError } from '@/shared/lib/api-client';
 import type { Product } from '@/shared/types';
 
 interface ProductCardProps {
@@ -15,18 +20,52 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onTryOn }: ProductCardProps) {
-  const isUnavailable = !product.inStock;
+  const isUnavailable = !product.inStock || product.stockQuantity <= 0;
   const { isAuthenticated } = useAuth();
   const hasTryOnPermission = usePermission('try_on');
+  const canManageCart = usePermission('manage_cart');
   const canTryOn = !isAuthenticated || hasTryOnPermission;
   const { tryOnBlocked } = useSystemStatus();
   const tryOnDisabled = isUnavailable || tryOnBlocked || !canTryOn;
+
+  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] ?? '');
+  const [adding, setAdding] = useState(false);
+  const [cartMessage, setCartMessage] = useState('');
 
   const tryOnTooltip = tryOnBlocked
     ? 'Try-on unavailable during maintenance'
     : isUnavailable
       ? 'This item is currently unavailable'
       : 'Preview on your photo';
+
+  const needsSize = (product.sizes?.length ?? 0) > 0;
+  const cartDisabled = isUnavailable || adding || (needsSize && !selectedSize);
+
+  async function handleAddToCart() {
+    if (!isAuthenticated) {
+      window.location.href = `/login?callbackUrl=${encodeURIComponent('/')}`;
+      return;
+    }
+    if (!canManageCart) {
+      setCartMessage('You cannot add items to cart');
+      return;
+    }
+    setAdding(true);
+    setCartMessage('');
+    try {
+      const cart = await addToCart({
+        productId: product._id,
+        quantity: 1,
+        size: needsSize ? selectedSize : undefined,
+      });
+      setCartStore(cart);
+      setCartMessage('Added to cart');
+    } catch (err) {
+      setCartMessage(err instanceof ApiError ? err.message : 'Could not add to cart');
+    } finally {
+      setAdding(false);
+    }
+  }
 
   return (
     <GlassCard
@@ -46,6 +85,11 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
             Out of stock
           </span>
         )}
+        {!isUnavailable && product.stockQuantity <= 5 && (
+          <span className="chip absolute left-3 top-3 bg-olive-700/80 text-sand-100">
+            Only {product.stockQuantity} left
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
@@ -58,6 +102,12 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
             <p className="mt-1 line-clamp-2 text-sm text-sand-600 dark:text-sand-300">
               {product.description}
             </p>
+            {(product.reviewCount ?? 0) > 0 && (
+              <p className="mt-1 text-xs text-olive-600 dark:text-sand-300">
+                ★ {product.averageRating?.toFixed(1)} · {product.reviewCount} review
+                {(product.reviewCount ?? 0) === 1 ? '' : 's'}
+              </p>
+            )}
           </div>
           <Popover
             label="More options"
@@ -77,9 +127,18 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
         {(product.sizes ?? []).length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {(product.sizes ?? []).map((size) => (
-              <span key={size} className="chip-size">
+              <button
+                key={size}
+                type="button"
+                onClick={() => setSelectedSize(size)}
+                className={`chip-size transition ${
+                  selectedSize === size
+                    ? 'bg-olive-700 text-sand-100 dark:bg-sand-100 dark:text-olive-800'
+                    : ''
+                }`}
+              >
                 {size}
-              </span>
+              </button>
             ))}
           </div>
         )}
@@ -105,17 +164,43 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
           );
         })}
 
-        <div className="mt-auto grid grid-cols-[1fr_auto] items-center gap-3">
-          <span className="text-right text-lg font-semibold tabular-nums text-olive-600 dark:text-sand-200">
-            ${product.price.toFixed(2)}
-          </span>
-          <Tooltip content={tryOnTooltip}>
-            <span className={`action-reveal ${tryOnDisabled ? 'sm:opacity-40' : ''}`}>
-              <GlassButton onClick={() => onTryOn(product)} disabled={tryOnDisabled}>
-                Try On
-              </GlassButton>
+        <div className="mt-auto space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-lg font-semibold tabular-nums text-olive-600 dark:text-sand-200">
+              ${product.price.toFixed(2)}
             </span>
-          </Tooltip>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Tooltip content={tryOnTooltip}>
+              <span className={tryOnDisabled ? 'opacity-40' : ''}>
+                <GlassButton
+                  className="w-full text-sm"
+                  onClick={() => onTryOn(product)}
+                  disabled={tryOnDisabled}
+                >
+                  Try On
+                </GlassButton>
+              </span>
+            </Tooltip>
+            {isAuthenticated ? (
+              <GlassButton
+                className="w-full text-sm"
+                onClick={handleAddToCart}
+                disabled={cartDisabled}
+              >
+                {adding ? 'Adding…' : 'Add to cart'}
+              </GlassButton>
+            ) : (
+              <Link href={`/login?callbackUrl=${encodeURIComponent('/')}`}>
+                <GlassButton className="w-full text-sm" disabled={isUnavailable}>
+                  Add to cart
+                </GlassButton>
+              </Link>
+            )}
+          </div>
+          {cartMessage && (
+            <p className="text-xs text-olive-600 dark:text-sand-300">{cartMessage}</p>
+          )}
         </div>
       </div>
     </GlassCard>

@@ -11,6 +11,7 @@ import { Checkbox } from '@/shared/components/Checkbox';
 import { ImageUrlField } from '@/shared/components/ImageUrlField';
 import { TagListField } from '@/shared/components/TagListField';
 import { CustomFieldsEditor } from '@/shared/components/CustomFieldsEditor';
+import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { apiClient } from '@/shared/lib/api-client';
 import type { Merchant, Product, ProductCategory, ProductCustomField } from '@/shared/types';
@@ -19,6 +20,9 @@ interface MerchantStats {
   productCount: number;
   tryOnCount: number;
   inStockCount: number;
+  lowStockCount: number;
+  orderCount: number;
+  unitsSold: number;
   products: Product[];
   perProduct: Record<string, number>;
 }
@@ -33,6 +37,7 @@ const emptyProduct = {
   imageUrl: '',
   sizes: [] as string[],
   customFields: [] as ProductCustomField[],
+  stockQuantity: 10,
   inStock: true,
 };
 
@@ -160,6 +165,7 @@ export default function MerchantDashboardPage() {
       imageUrl: product.imageUrl,
       sizes: product.sizes ?? [],
       customFields: product.customFields ?? [],
+      stockQuantity: product.stockQuantity ?? (product.inStock ? 10 : 0),
       inStock: product.inStock,
     });
   }
@@ -207,19 +213,28 @@ export default function MerchantDashboardPage() {
   return (
     <DashboardShell
       title="Merchant Dashboard"
-      description="Manage your product catalog and view try-on analytics"
+      description="Manage products, fulfill orders, and view analytics"
     >
       {message && <p className="mb-4 text-sm text-success">{message}</p>}
 
       <RoleGate permission="manage_products">
         <div id="analytics" className="scroll-mt-24">
           {stats && (
-            <div className="mb-8 grid gap-4 sm:grid-cols-3">
+            <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
               <StatCard label="Products" value={stats.productCount} />
               <StatCard label="Try-ons" value={stats.tryOnCount} />
               <StatCard label="In stock" value={stats.inStockCount} />
+              <StatCard label="Low stock" value={stats.lowStockCount ?? 0} />
+              <StatCard label="Orders" value={stats.orderCount ?? 0} />
+              <StatCard label="Units sold" value={stats.unitsSold ?? 0} />
             </div>
           )}
+        </div>
+      </RoleGate>
+
+      <RoleGate permission="fulfill_orders">
+        <div className="mb-10">
+          <OrdersPanel mode="merchant" allowAdvance allowMarkPaid />
         </div>
       </RoleGate>
 
@@ -316,11 +331,38 @@ export default function MerchantDashboardPage() {
                 onChange={(customFields) => setForm({ ...form, customFields })}
                 disabled={saving}
               />
-              <Checkbox
-                checked={form.inStock}
-                onChange={(inStock) => setForm({ ...form, inStock })}
-                label="In stock"
-              />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs">Stock quantity</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.stockQuantity}
+                    onChange={(e) => {
+                      const stockQuantity = Math.max(0, Number(e.target.value));
+                      setForm({
+                        ...form,
+                        stockQuantity,
+                        inStock: stockQuantity > 0,
+                      });
+                    }}
+                    className="input-glass w-full rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div className="flex items-end pb-1">
+                  <Checkbox
+                    checked={form.stockQuantity > 0}
+                    onChange={(inStock) =>
+                      setForm({
+                        ...form,
+                        stockQuantity: inStock ? Math.max(form.stockQuantity, 1) : 0,
+                        inStock,
+                      })
+                    }
+                    label="In stock"
+                  />
+                </div>
+              </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex gap-2">
                 <GlassButton type="submit" disabled={saving}>
@@ -348,7 +390,8 @@ export default function MerchantDashboardPage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">{product.name}</p>
                     <p className="text-sm text-muted-subtle">
-                      ${product.price.toFixed(2)} · {product.inStock ? 'In stock' : 'Out of stock'} ·{' '}
+                      ${product.price.toFixed(2)} · qty {product.stockQuantity ?? 0} ·{' '}
+                      {product.inStock ? 'In stock' : 'Out of stock'} ·{' '}
                       {stats.perProduct[product._id] ?? 0} try-ons
                     </p>
                   </div>

@@ -8,6 +8,7 @@ import { RoleGate } from '@/shared/components/RoleGate';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS } from '@/shared/auth/roles';
+import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import type { DashboardStats, TryOnHistory, User } from '@/shared/types';
 
 interface UserDetail {
@@ -71,11 +72,17 @@ export default function SupportDashboardPage() {
               <>
                 <StatCard label="Total users" value={stats.totalUsers} />
                 <StatCard label="Total try-ons" value={stats.totalTryOns} />
-                <StatCard label="Total products" value={stats.totalProducts} />
+                <StatCard label="Orders" value={stats.totalOrders ?? 0} />
               </>
             )}
           </div>
         </section>
+      </RoleGate>
+
+      <RoleGate permission="view_all_orders">
+        <div className="mb-10">
+          <OrdersPanel mode="all" showSearch allowAdvance />
+        </div>
       </RoleGate>
 
       <RoleGate permission="view_users">

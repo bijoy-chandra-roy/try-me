@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import type { ProductCategory } from '@/shared/types';
 import { ensureDbConnection } from '@/server/db/connection';
+import { productRepository } from '@/server/features/products/product.repository';
 import { productService } from '@/server/features/products/product.service';
 import { requirePermission } from '@/server/lib/auth-guard';
 import { jsonError, jsonSuccess } from '@/server/lib/api-response';
@@ -8,6 +9,7 @@ import { jsonError, jsonSuccess } from '@/server/lib/api-response';
 export async function GET(request: NextRequest) {
   try {
     await ensureDbConnection();
+    await productRepository.migrateStockQuantities();
 
     const { searchParams } = request.nextUrl;
     const category = searchParams.get('category') as ProductCategory | null;
