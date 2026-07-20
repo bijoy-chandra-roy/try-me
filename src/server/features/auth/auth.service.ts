@@ -44,12 +44,32 @@ class AuthService {
       throw new AppError('Account is inactive', 403);
     }
 
+    if (!user.passwordHash) {
+      throw new AppError('Sign in with Google for this account', 401);
+    }
+
     const valid = await this.verifyPassword(password, user.passwordHash);
     if (!valid) {
       throw new AppError('Invalid email or password', 401);
     }
 
     return userRepository.findById(String(user._id));
+  }
+
+  async findOrCreateOAuthUser(data: { email: string; name: string }) {
+    const existing = await userRepository.findByEmail(data.email);
+    if (existing) {
+      if (existing.status === 'inactive') {
+        throw new AppError('Account is inactive', 403);
+      }
+      return userRepository.findById(String(existing._id));
+    }
+
+    return userRepository.create({
+      email: data.email,
+      name: data.name,
+      role: 'customer',
+    });
   }
 
   async updateProfile(

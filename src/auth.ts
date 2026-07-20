@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import Google from 'next-auth/providers/google';
 import type { UserRole } from '@/shared/auth/roles';
 
 declare module 'next-auth' {
@@ -29,6 +30,10 @@ declare module 'next-auth/jwt' {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
     Credentials({
       name: 'credentials',
       credentials: {
@@ -71,6 +76,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: '/login',
   },
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider !== 'google') {
+        return true;
+      }
+
+      if (!user.email) {
+        return false;
+      }
+
+      const { ensureDbConnection } = await import('@/server/db/connection');
+      const { authService } = await import('@/server/features/auth/auth.service');
+
+      await ensureDbConnection();
+
+      try {
+        const dbUser = await authService.findOrCreateOAuthUser({
+          email: user.email,
+          name: user.name || user.email,
+        });
+
+        if (!dbUser) {
+          return false;
+        }
+
+        user.id = dbUser._id;
+        user.role = dbUser.role;
+        user.merchantId = dbUser.merchantId ?? null;
+        return true;
+      } catch {
+        return false;
+      }
+    },
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id!;

@@ -5,7 +5,7 @@ import type { UserStatus } from '@/shared/types';
 export interface UserDocument {
   _id: mongoose.Types.ObjectId;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   name: string;
   role: UserRole;
   merchantId?: mongoose.Types.ObjectId | null;
@@ -17,7 +17,7 @@ export interface UserDocument {
 const userSchema = new Schema<UserDocument>(
   {
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String },
     name: { type: String, required: true, trim: true },
     role: {
       type: String,

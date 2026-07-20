@@ -53,7 +53,7 @@ class UserRepository {
 
   async create(data: {
     email: string;
-    passwordHash: string;
+    passwordHash?: string;
     name: string;
     role?: UserRole;
     merchantId?: string | null;

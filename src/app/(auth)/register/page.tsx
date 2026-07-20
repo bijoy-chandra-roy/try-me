@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { GlassButton } from '@/shared/components/GlassButton';
+import { AuthOrDivider, GoogleSignInButton } from '@/shared/components/GoogleSignInButton';
 import { apiClient } from '@/shared/lib/api-client';
 import type { User } from '@/shared/types';
 
@@ -15,6 +17,18 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function handleGoogleSignIn() {
+    setError('');
+    setGoogleLoading(true);
+
+    try {
+      await signIn('google', { callbackUrl: '/dashboard' });
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -92,10 +106,20 @@ export default function RegisterPage() {
             <p className="text-sm font-medium text-red-600 dark:text-red-400">{error}</p>
           )}
 
-          <GlassButton type="submit" disabled={loading} className="w-full">
+          <GlassButton type="submit" disabled={loading || googleLoading} className="w-full">
             {loading ? 'Creating account...' : 'Register'}
           </GlassButton>
         </form>
+
+        <div className="mt-5 space-y-5">
+          <AuthOrDivider />
+          <GoogleSignInButton
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            loading={googleLoading}
+            label="Continue with Google"
+          />
+        </div>
 
         <p className="mt-6 text-center text-sm text-sand-600 dark:text-sand-300">
           Already have an account?{' '}
