@@ -60,4 +60,4 @@ graph TB
     TryOnSvc -->|"composite image URL"| Result
 ```
 
-[← Diagram index](README.md)
+[← Diagram index](diagrams.md)

@@ -68,4 +68,4 @@ flowchart TB
 - **Include** — *Request Virtual Try-On* requires uploading a photo and resolving the selected product.
 - **Extend** — *Filter by Category* and *View Product Details* extend catalog browsing; *Identify Live vs Fallback* extends result viewing.
 
-[← Diagram index](README.md)
+[← Diagram index](diagrams.md)

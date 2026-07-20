@@ -76,4 +76,4 @@ flowchart LR
 
 Red nodes in the diagram mark activities on the **critical path** — any delay on these tasks delays the entire Spiral 1 delivery.
 
-[← Diagram index](README.md)
+[← Diagram index](diagrams.md)

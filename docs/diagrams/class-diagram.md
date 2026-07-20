@@ -125,4 +125,4 @@ classDiagram
 | **Controller** | `ProductController`, `TryOnController` | HTTP request handling |
 | **Presentation** | `useProducts`, `useTryOn` | Frontend state and API integration |
 
-[← Diagram index](README.md)
+[← Diagram index](diagrams.md)

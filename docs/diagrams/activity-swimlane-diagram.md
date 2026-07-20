@@ -84,4 +84,4 @@ flowchart TB
 2. **Circuit Breaker (Backend → External)** — On VTO timeout (>10 s) or HTTP error, serves pre-cached fallback image instead of failing the request.
 3. **User acceptance** — Shopper may retry with a different product or restart the session.
 
-[← Diagram index](README.md)
+[← Diagram index](diagrams.md)

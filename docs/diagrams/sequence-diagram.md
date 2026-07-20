@@ -52,4 +52,4 @@ sequenceDiagram
     FE-->>User: Display try-on result
 ```
 
-[← Diagram index](README.md)
+[← Diagram index](diagrams.md)
