@@ -1,3 +1,4 @@
+import { config } from '@/server/config';
 import { productService } from '@/server/features/products/product.service';
 import { uploadService, type UploadedFile } from '@/server/features/upload/upload.service';
 import { createVtoCircuitBreaker } from './circuit-breaker';
@@ -14,8 +15,14 @@ class TryOnService {
       vtoApiClient.generateTryOn(userImageUrl, product.imageUrl)
     );
 
+    const compositeImageUrl = await uploadService.uploadImageFromSource(
+      data.imageUrl,
+      'try-on-result.jpg',
+      config.hfToken ? { Authorization: `Bearer ${config.hfToken}` } : undefined
+    );
+
     return {
-      compositeImageUrl: data.imageUrl,
+      compositeImageUrl,
       userImageUrl,
       productImageUrl: product.imageUrl,
       productName: product.name,
