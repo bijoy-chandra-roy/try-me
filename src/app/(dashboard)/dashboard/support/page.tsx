@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell';
 import { GlassCard } from '@/shared/components/GlassCard';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
+import { DataList, ListRow } from '@/shared/components/DataList';
+import { StatusChip } from '@/shared/components/StatusChip';
 import { RoleGate } from '@/shared/components/RoleGate';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { apiClient } from '@/shared/lib/api-client';
@@ -86,17 +88,17 @@ export default function SupportDashboardPage() {
       </RoleGate>
 
       <RoleGate permission="view_users">
-        <GlassCard className="mb-6 p-6">
+        <GlassCard className="mb-6 p-6" elastic={false}>
           <form onSubmit={handleSearch} className="flex gap-3">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or email..."
-              className="input-glass min-w-0 flex-1 rounded-xl px-4 py-2"
+              className="input-glass input-glass-lg min-w-0 flex-1"
             />
-            <GlassButton type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading}>
               {loading ? 'Searching...' : 'Search'}
-            </GlassButton>
+            </Button>
           </form>
           {error && <p className="mt-3 text-sm text-error">{error}</p>}
         </GlassCard>
@@ -104,34 +106,35 @@ export default function SupportDashboardPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <div>
             <h2 className="mb-3 font-serif text-lg font-semibold">Results</h2>
-            <div className="space-y-2">
+            <DataList>
               {users.map((user) => (
-                <GlassCard
-                  key={user._id}
-                  className="flex cursor-pointer items-center justify-between p-4 hover:bg-sand-100/30 dark:hover:bg-olive-600/10"
-                  hover
-                >
-                  <div onClick={() => viewUser(user._id)}>
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-muted-subtle">{user.email}</p>
-                  </div>
+                <ListRow key={user._id}>
+                  <button
+                    type="button"
+                    onClick={() => viewUser(user._id)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <p className="truncate font-medium">{user.name}</p>
+                    <p className="truncate text-sm text-muted-subtle">{user.email}</p>
+                  </button>
                   <span className="chip-category">{ROLE_LABELS[user.role]}</span>
-                </GlassCard>
+                </ListRow>
               ))}
-              {!loading && users.length === 0 && (
-                <p className="text-sm text-muted-subtle">Search for a user to begin.</p>
-              )}
-            </div>
+            </DataList>
+            {!loading && users.length === 0 && (
+              <p className="mt-2 text-sm text-muted-subtle">Search for a user to begin.</p>
+            )}
           </div>
 
           <div>
             <h2 className="mb-3 font-serif text-lg font-semibold">User detail</h2>
             {selected ? (
-              <GlassCard className="p-6">
+              <GlassCard className="p-6" elastic={false}>
                 <p className="font-medium">{selected.user.name}</p>
                 <p className="text-sm text-muted-subtle">{selected.user.email}</p>
-                <p className="mt-1 text-sm">
-                  Status: {selected.user.status} · Role: {ROLE_LABELS[selected.user.role]}
+                <p className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                  <StatusChip status={selected.user.status} />
+                  <span className="chip-category">{ROLE_LABELS[selected.user.role]}</span>
                 </p>
                 <RoleGate permission="view_all_try_on_history">
                   <h3 className="mt-6 mb-3 text-sm font-medium uppercase tracking-wider text-muted-subtle">
@@ -139,7 +142,7 @@ export default function SupportDashboardPage() {
                   </h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {selected.history.map((item) => (
-                      <div key={item._id} className="overflow-hidden rounded-xl border border-subtle">
+                      <div key={item._id} className="overflow-hidden rounded-element border border-subtle">
                         <img src={item.compositeImageUrl} alt={item.productName} className="aspect-square object-cover" />
                         <p className="p-2 text-xs">{item.productName}</p>
                       </div>
@@ -148,7 +151,7 @@ export default function SupportDashboardPage() {
                 </RoleGate>
               </GlassCard>
             ) : (
-              <GlassCard className="p-6 text-sm text-muted-subtle">
+              <GlassCard className="p-6 text-sm text-muted-subtle" elastic={false}>
                 Select a user to view their try-on history.
               </GlassCard>
             )}

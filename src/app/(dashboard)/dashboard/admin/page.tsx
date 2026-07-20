@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react';
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
+import { DataList, ListRow } from '@/shared/components/DataList';
+import { StatusChip } from '@/shared/components/StatusChip';
+import { Popover } from '@/shared/components/Popover';
 import { RoleGate } from '@/shared/components/RoleGate';
 import { Select } from '@/shared/components/Select';
 import { apiClient } from '@/shared/lib/api-client';
@@ -121,7 +124,7 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        <GlassCard className="mb-8 p-6">
+        <GlassCard className="mb-8 p-6" elastic={false}>
           <h2 className="font-serif text-xl font-semibold">System health</h2>
           <p className="mt-2 text-3xl font-semibold capitalize">{health}</p>
         </GlassCard>
@@ -134,7 +137,7 @@ export default function AdminDashboardPage() {
       </RoleGate>
 
       <RoleGate permission="manage_users">
-        <GlassCard className="mb-8 p-6">
+        <GlassCard className="mb-8 p-6" elastic={false}>
           <h2 className="font-serif text-xl font-semibold">Create user</h2>
           <form onSubmit={createUser} className="mt-4 space-y-3">
             <input
@@ -142,7 +145,7 @@ export default function AdminDashboardPage() {
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
               required
-              className="input-glass w-full rounded-lg px-3 py-2"
+              className="input-glass w-full"
             />
             <input
               placeholder="Email"
@@ -150,7 +153,7 @@ export default function AdminDashboardPage() {
               value={newUser.email}
               onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
               required
-              className="input-glass w-full rounded-lg px-3 py-2"
+              className="input-glass w-full"
             />
             <input
               placeholder="Password"
@@ -158,14 +161,14 @@ export default function AdminDashboardPage() {
               value={newUser.password}
               onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
               required
-              className="input-glass w-full rounded-lg px-3 py-2"
+              className="input-glass w-full"
             />
             <Select
               value={newUser.role}
               onChange={(role) => setNewUser({ ...newUser, role })}
               options={assignableRoles.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
               aria-label="Role"
-              className="w-full rounded-lg px-3 py-2"
+              className="w-full"
             />
             {newUser.role === 'merchant' && (
               <Select
@@ -176,11 +179,11 @@ export default function AdminDashboardPage() {
                   ...merchants.map((m) => ({ value: m._id, label: m.name })),
                 ]}
                 aria-label="Merchant"
-                className="w-full rounded-lg px-3 py-2"
+                className="w-full"
               />
             )}
             {message && <p className="text-sm text-success">{message}</p>}
-            <GlassButton type="submit">Create user</GlassButton>
+            <Button type="submit">Create user</Button>
           </form>
         </GlassCard>
       </RoleGate>
@@ -188,17 +191,17 @@ export default function AdminDashboardPage() {
       <RoleGate permission="manage_users">
         <section id="users" className="mb-10 scroll-mt-24">
           <h2 className="mb-4 font-serif text-xl font-semibold">Users</h2>
-          <div className="space-y-2">
+          <DataList>
             {users.map((user) => (
-              <GlassCard key={user._id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <div>
-                  <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-muted-subtle">{user.email} · {ROLE_LABELS[user.role]}</p>
+              <ListRow key={user._id} dimmed={user.status === 'inactive'}>
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{user.name}</p>
+                  <p className="truncate text-sm text-muted-subtle">
+                    {user.email} · {ROLE_LABELS[user.role]}
+                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={`chip-category ${user.status === 'inactive' ? 'opacity-50' : ''}`}>
-                    {user.status}
-                  </span>
+                  <StatusChip status={user.status} />
                   <RoleGate permission="assign_roles">
                     {user.role !== 'super_admin' && (
                       <Select
@@ -206,48 +209,66 @@ export default function AdminDashboardPage() {
                         onChange={(role) => changeRole(user._id, role)}
                         options={assignableRoles.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
                         aria-label={`Change role for ${user.name}`}
-                        className="rounded-lg px-2 py-1 text-sm"
+                        className="text-sm"
                       />
                     )}
                   </RoleGate>
                   {user.role !== 'super_admin' && (
-                    <GlassButton onClick={() => toggleUserStatus(user)}>
-                      {user.status === 'active' ? 'Deactivate' : 'Activate'}
-                    </GlassButton>
+                    <Popover
+                      label={`Actions for ${user.name}`}
+                      items={[
+                        {
+                          label: user.status === 'active' ? 'Deactivate' : 'Activate',
+                          onClick: () => toggleUserStatus(user),
+                          destructive: user.status === 'active',
+                        },
+                      ]}
+                    />
                   )}
                 </div>
-              </GlassCard>
+              </ListRow>
             ))}
-          </div>
+          </DataList>
         </section>
       </RoleGate>
 
       <RoleGate permission="manage_merchants">
         <section id="merchants" className="scroll-mt-24">
           <h2 className="mb-4 font-serif text-xl font-semibold">Merchants</h2>
-          <div className="space-y-2">
-            {merchants.map((merchant) => (
-              <GlassCard key={merchant._id} className="flex items-center justify-between p-4">
-                <div>
-                  <p className="font-medium">{merchant.name}</p>
-                  <p className="text-sm text-muted-subtle">{merchant.description || 'No description'}</p>
-                </div>
-                <div className="flex gap-2">
-                  <span className="chip-category">{merchant.status}</span>
-                  {merchant.status !== 'approved' && (
-                    <GlassButton onClick={() => updateMerchantStatus(merchant, 'approved')}>
-                      Approve
-                    </GlassButton>
-                  )}
-                  {merchant.status !== 'suspended' && (
-                    <GlassButton onClick={() => updateMerchantStatus(merchant, 'suspended')}>
-                      Suspend
-                    </GlassButton>
-                  )}
-                </div>
-              </GlassCard>
-            ))}
-          </div>
+          <DataList>
+            {merchants.map((merchant) => {
+              const actions: { label: string; onClick: () => void; destructive?: boolean }[] = [];
+              if (merchant.status !== 'approved') {
+                actions.push({
+                  label: 'Approve',
+                  onClick: () => updateMerchantStatus(merchant, 'approved'),
+                });
+              }
+              if (merchant.status !== 'suspended') {
+                actions.push({
+                  label: 'Suspend',
+                  onClick: () => updateMerchantStatus(merchant, 'suspended'),
+                  destructive: true,
+                });
+              }
+              return (
+                <ListRow key={merchant._id}>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{merchant.name}</p>
+                    <p className="truncate text-sm text-muted-subtle">
+                      {merchant.description || 'No description'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StatusChip status={merchant.status} />
+                    {actions.length > 0 && (
+                      <Popover label={`Actions for ${merchant.name}`} items={actions} />
+                    )}
+                  </div>
+                </ListRow>
+              );
+            })}
+          </DataList>
         </section>
       </RoleGate>
     </DashboardShell>

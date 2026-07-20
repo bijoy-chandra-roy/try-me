@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
+import { DataList, ListRow } from '@/shared/components/DataList';
+import { Popover } from '@/shared/components/Popover';
 import { RoleGate } from '@/shared/components/RoleGate';
 import { Select } from '@/shared/components/Select';
 import { Checkbox } from '@/shared/components/Checkbox';
@@ -180,7 +182,7 @@ export default function MerchantDashboardPage() {
           <div id="store" className="scroll-mt-24">
           <GlassCard className="mx-auto max-w-lg p-8">
             <h2 className="font-serif text-xl font-semibold">Create your store</h2>
-            <p className="mt-2 text-sm text-sand-600 dark:text-sand-300">
+            <p className="mt-2 text-sm text-muted">
               You need a merchant profile before you can add products and view analytics.
             </p>
             <form onSubmit={createStore} className="mt-6 space-y-4">
@@ -198,10 +200,10 @@ export default function MerchantDashboardPage() {
                 rows={3}
                 className="input-glass w-full rounded-lg px-3 py-2"
               />
-              {error && <p className="text-sm text-red-600">{error}</p>}
-              <GlassButton type="submit" disabled={saving}>
+              {error && <p className="text-sm text-error">{error}</p>}
+              <Button type="submit" disabled={saving}>
                 {saving ? 'Creating...' : 'Create store'}
-              </GlassButton>
+              </Button>
             </form>
           </GlassCard>
           </div>
@@ -262,7 +264,7 @@ export default function MerchantDashboardPage() {
               rows={2}
               className="input-glass w-full rounded-lg px-3 py-2"
             />
-            <GlassButton type="submit" disabled={saving}>Save store profile</GlassButton>
+            <Button type="submit" disabled={saving}>Save store profile</Button>
           </form>
         </GlassCard>
         </div>
@@ -363,18 +365,19 @@ export default function MerchantDashboardPage() {
                   />
                 </div>
               </div>
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-sm text-error">{error}</p>}
               <div className="flex gap-2">
-                <GlassButton type="submit" disabled={saving}>
+                <Button type="submit" disabled={saving}>
                   {saving ? 'Saving...' : editingId ? 'Update' : 'Create'}
-                </GlassButton>
+                </Button>
                 {editingId && (
-                  <GlassButton
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={() => { setEditingId(null); setForm(emptyProduct); }}
                   >
                     Cancel
-                  </GlassButton>
+                  </Button>
                 )}
               </div>
             </form>
@@ -383,25 +386,38 @@ export default function MerchantDashboardPage() {
           <div className="lg:col-span-3">
             <h2 className="mb-4 font-serif text-xl font-semibold">Your products</h2>
             {loading && <p className="text-sm text-muted-subtle">Loading...</p>}
-            <div className="space-y-3">
+            <DataList>
               {stats?.products.map((product) => (
-                <GlassCard key={product._id} className="flex items-center gap-4 p-4">
-                  <img src={product.imageUrl} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">{product.name}</p>
-                    <p className="text-sm text-muted-subtle">
-                      ${product.price.toFixed(2)} · qty {product.stockQuantity ?? 0} ·{' '}
-                      {product.inStock ? 'In stock' : 'Out of stock'} ·{' '}
-                      {stats.perProduct[product._id] ?? 0} try-ons
-                    </p>
+                <ListRow key={product._id} dimmed={!product.inStock}>
+                  <div className="flex min-w-0 flex-1 items-center gap-4">
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="h-12 w-12 rounded-inner object-cover"
+                    />
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{product.name}</p>
+                      <p className="truncate text-sm text-muted-subtle">
+                        ${product.price.toFixed(2)} · qty {product.stockQuantity ?? 0} ·{' '}
+                        {product.inStock ? 'In stock' : 'Out of stock'} ·{' '}
+                        {stats.perProduct[product._id] ?? 0} try-ons
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <GlassButton onClick={() => startEdit(product)}>Edit</GlassButton>
-                    <GlassButton onClick={() => handleDelete(product._id)}>Delete</GlassButton>
-                  </div>
-                </GlassCard>
+                  <Popover
+                    label={`Actions for ${product.name}`}
+                    items={[
+                      { label: 'Edit', onClick: () => startEdit(product) },
+                      {
+                        label: 'Delete',
+                        onClick: () => handleDelete(product._id),
+                        destructive: true,
+                      },
+                    ]}
+                  />
+                </ListRow>
               ))}
-            </div>
+            </DataList>
           </div>
         </div>
       </RoleGate>

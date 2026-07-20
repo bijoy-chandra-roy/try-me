@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react';
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
+import { DataList, ListRow } from '@/shared/components/DataList';
+import { StatusChip } from '@/shared/components/StatusChip';
+import { Popover } from '@/shared/components/Popover';
 import { RoleGate } from '@/shared/components/RoleGate';
 import { Select } from '@/shared/components/Select';
 import { Checkbox } from '@/shared/components/Checkbox';
@@ -119,7 +122,7 @@ export default function SuperAdminDashboardPage() {
 
       <RoleGate permission="manage_system">
         <div id="flags" className="mb-10 scroll-mt-24">
-          <GlassCard className="p-6">
+          <GlassCard className="p-6" elastic={false}>
             <h2 className="font-serif text-xl font-semibold">System configuration</h2>
             <p className="mt-1 text-sm text-muted-subtle">
               Controls maintenance mode and guest try-on limits across the platform
@@ -143,19 +146,19 @@ export default function SuperAdminDashboardPage() {
                   onChange={(e) =>
                     setFlags({ ...flags, guestTryOnLimit: Number(e.target.value) })
                   }
-                  className="input-glass w-16 rounded px-2 py-1"
+                  className="input-glass w-16"
                 />
               </label>
             </div>
-            <GlassButton onClick={saveFlags} disabled={savingFlags} className="mt-4">
+            <Button onClick={saveFlags} disabled={savingFlags} className="mt-4">
               {savingFlags ? 'Saving...' : 'Save configuration'}
-            </GlassButton>
+            </Button>
           </GlassCard>
         </div>
       </RoleGate>
 
       <RoleGate permission="view_system_health">
-        <GlassCard className="mb-10 p-6">
+        <GlassCard className="mb-10 p-6" elastic={false}>
           <h2 className="font-serif text-xl font-semibold">Recent try-ons</h2>
           <div className="mt-4">
             <ScrollArea edgeInset={4} viewportClassName="max-h-48">
@@ -163,7 +166,10 @@ export default function SuperAdminDashboardPage() {
                 {stats?.recentTryOns.map((item) => (
                   <div key={item._id} className="text-sm">
                     <span className="font-medium">{item.productName}</span>
-                    <span className="text-muted-subtle"> · {new Date(item.createdAt).toLocaleString()}</span>
+                    <span className="text-muted-subtle">
+                      {' '}
+                      · {new Date(item.createdAt).toLocaleString()}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -177,60 +183,79 @@ export default function SuperAdminDashboardPage() {
       <RoleGate permission="assign_roles">
         <section id="roles" className="mb-10 scroll-mt-24">
           <h2 className="mb-4 font-serif text-xl font-semibold">Role assignment</h2>
-          <div className="space-y-2">
+          <DataList>
             {users.map((user) => (
-              <GlassCard key={user._id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <div>
-                  <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-muted-subtle">{user.email}</p>
+              <ListRow key={user._id} dimmed={user.status === 'inactive'}>
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{user.name}</p>
+                  <p className="truncate text-sm text-muted-subtle">{user.email}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusChip status={user.status} />
                   <span className="chip-category">{ROLE_LABELS[user.role]}</span>
                   <Select
                     value={user.role}
                     onChange={(role) => changeRole(user._id, role)}
                     options={USER_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
                     aria-label={`Change role for ${user.name}`}
-                    className="rounded-lg px-2 py-1 text-sm"
+                    className="text-sm"
                   />
                   {user.role !== 'super_admin' && (
-                    <GlassButton onClick={() => toggleUserStatus(user)}>
-                      {user.status === 'active' ? 'Deactivate' : 'Activate'}
-                    </GlassButton>
+                    <Popover
+                      label={`Actions for ${user.name}`}
+                      items={[
+                        {
+                          label: user.status === 'active' ? 'Deactivate' : 'Activate',
+                          onClick: () => toggleUserStatus(user),
+                          destructive: user.status === 'active',
+                        },
+                      ]}
+                    />
                   )}
                 </div>
-              </GlassCard>
+              </ListRow>
             ))}
-          </div>
+          </DataList>
         </section>
       </RoleGate>
 
       <RoleGate permission="manage_merchants">
         <section id="merchants" className="scroll-mt-24">
           <h2 className="mb-4 font-serif text-xl font-semibold">Merchants</h2>
-          <div className="space-y-2">
-            {merchants.map((merchant) => (
-              <GlassCard key={merchant._id} className="flex items-center justify-between p-4">
-                <div>
-                  <p className="font-medium">{merchant.name}</p>
-                  <p className="text-sm text-muted-subtle">{merchant.description || 'No description'}</p>
-                </div>
-                <div className="flex gap-2">
-                  <span className="chip-category">{merchant.status}</span>
-                  {merchant.status !== 'approved' && (
-                    <GlassButton onClick={() => updateMerchantStatus(merchant, 'approved')}>
-                      Approve
-                    </GlassButton>
-                  )}
-                  {merchant.status !== 'suspended' && (
-                    <GlassButton onClick={() => updateMerchantStatus(merchant, 'suspended')}>
-                      Suspend
-                    </GlassButton>
-                  )}
-                </div>
-              </GlassCard>
-            ))}
-          </div>
+          <DataList>
+            {merchants.map((merchant) => {
+              const actions: { label: string; onClick: () => void; destructive?: boolean }[] = [];
+              if (merchant.status !== 'approved') {
+                actions.push({
+                  label: 'Approve',
+                  onClick: () => updateMerchantStatus(merchant, 'approved'),
+                });
+              }
+              if (merchant.status !== 'suspended') {
+                actions.push({
+                  label: 'Suspend',
+                  onClick: () => updateMerchantStatus(merchant, 'suspended'),
+                  destructive: true,
+                });
+              }
+              return (
+                <ListRow key={merchant._id}>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{merchant.name}</p>
+                    <p className="truncate text-sm text-muted-subtle">
+                      {merchant.description || 'No description'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StatusChip status={merchant.status} />
+                    {actions.length > 0 && (
+                      <Popover label={`Actions for ${merchant.name}`} items={actions} />
+                    )}
+                  </div>
+                </ListRow>
+              );
+            })}
+          </DataList>
         </section>
       </RoleGate>
     </DashboardShell>

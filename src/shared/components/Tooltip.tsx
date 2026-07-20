@@ -55,7 +55,7 @@ export function Tooltip({ content, children, side = 'top', fullWidth = false }: 
             ref={bubbleRef}
             id={tooltipId}
             role="tooltip"
-            className={`tooltip-bubble pointer-events-none fixed z-[200] w-max max-w-[220px] rounded-lg px-2.5 py-1.5 text-center text-xs font-medium transition-opacity duration-150 ${
+            className={`tooltip-bubble pointer-events-none fixed z-tooltip w-max max-w-[220px] rounded-lg px-2.5 py-1.5 text-center text-xs font-medium transition-opacity duration-fast ${
               coords ? 'opacity-100' : 'opacity-0'
             }`}
             style={

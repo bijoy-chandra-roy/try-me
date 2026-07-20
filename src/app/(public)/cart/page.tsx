@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import {
   cartSubtotal,
@@ -71,29 +71,25 @@ export default function CartPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
-      <h1 className="font-serif text-3xl font-semibold text-olive-700 dark:text-sand-100">
-        Shopping cart
-      </h1>
-      <p className="mt-1 text-sm text-sand-600 dark:text-sand-300">
+    <div className="mx-auto max-w-form px-6 py-10">
+      <h1 className="font-serif text-3xl font-semibold text-primary">Shopping cart</h1>
+      <p className="mt-1 text-sm text-muted">
         Review items before checkout. Payment is cash on delivery.
       </p>
 
       {loading && (
         <div className="flex justify-center py-20">
-          <span className="h-8 w-8 animate-spin rounded-full border-2 border-olive-600 border-t-transparent" />
+          <span className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent-fill)] border-t-transparent" />
         </div>
       )}
 
-      {error && (
-        <p className="mt-4 text-sm text-red-600 dark:text-red-300">{error}</p>
-      )}
+      {error && <p className="mt-4 text-sm text-error">{error}</p>}
 
       {!loading && items.length === 0 && (
-        <GlassCard className="mt-8 p-8 text-center">
-          <p className="text-sand-600 dark:text-sand-300">Your cart is empty.</p>
+        <GlassCard className="mt-8 p-8 text-center" elastic={false}>
+          <p className="text-muted">Your cart is empty.</p>
           <Link href="/" className="mt-4 inline-block">
-            <GlassButton>Browse catalog</GlassButton>
+            <Button>Browse catalog</Button>
           </Link>
         </GlassCard>
       )}
@@ -104,45 +100,45 @@ export default function CartPage() {
             <GlassCard
               key={`${item.productId}-${item.size ?? ''}-${JSON.stringify(item.customSelections ?? {})}`}
               className="flex gap-4 p-4"
+              elastic={false}
             >
-              <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg">
+              <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-inner">
                 <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
               </div>
               <div className="min-w-0 flex-1">
                 <h2 className="truncate font-serif text-lg font-semibold">{item.name}</h2>
-                {item.size && (
-                  <p className="text-sm text-sand-600 dark:text-sand-300">Size: {item.size}</p>
-                )}
+                {item.size && <p className="text-sm text-muted">Size: {item.size}</p>}
                 <p className="mt-1 font-medium tabular-nums">${item.price.toFixed(2)}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <GlassButton
-                    className="text-sm"
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     disabled={busy || item.quantity <= 1}
                     onClick={() =>
                       changeQty(item.productId, item.quantity - 1, item.size, item.customSelections)
                     }
                   >
                     −
-                  </GlassButton>
+                  </Button>
                   <span className="tabular-nums">{item.quantity}</span>
-                  <GlassButton
-                    className="text-sm"
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     disabled={busy}
                     onClick={() =>
                       changeQty(item.productId, item.quantity + 1, item.size, item.customSelections)
                     }
                   >
                     +
-                  </GlassButton>
-                  <GlassButton
-                    className="text-sm"
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     disabled={busy}
-                    onClick={() =>
-                      remove(item.productId, item.size, item.customSelections)
-                    }
+                    onClick={() => remove(item.productId, item.size, item.customSelections)}
                   >
                     Remove
-                  </GlassButton>
+                  </Button>
                 </div>
               </div>
               <p className="shrink-0 font-semibold tabular-nums">
@@ -151,17 +147,17 @@ export default function CartPage() {
             </GlassCard>
           ))}
 
-          <GlassCard className="flex flex-wrap items-center justify-between gap-4 p-6">
+          <GlassCard className="flex flex-wrap items-center justify-between gap-4 p-6" elastic={false}>
             <div>
-              <p className="text-sm text-sand-600 dark:text-sand-300">Subtotal</p>
+              <p className="text-sm text-muted">Subtotal</p>
               <p className="text-2xl font-semibold tabular-nums">${subtotal.toFixed(2)}</p>
             </div>
             <div className="flex gap-2">
-              <GlassButton disabled={busy} onClick={handleClear}>
+              <Button variant="ghost" disabled={busy} onClick={handleClear}>
                 Clear cart
-              </GlassButton>
+              </Button>
               <Link href="/checkout">
-                <GlassButton disabled={busy}>Checkout</GlassButton>
+                <Button disabled={busy}>Checkout</Button>
               </Link>
             </div>
           </GlassCard>

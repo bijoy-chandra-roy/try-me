@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import {
   createAddress,
@@ -93,13 +93,13 @@ export function AddressesPanel() {
           </div>
           <div className="flex gap-2">
             {!a.isDefault && (
-              <GlassButton className="text-sm" onClick={() => makeDefault(a._id)}>
+              <Button variant="secondary" size="sm" onClick={() => makeDefault(a._id)}>
                 Set default
-              </GlassButton>
+              </Button>
             )}
-            <GlassButton className="text-sm" onClick={() => remove(a._id)}>
+            <Button variant="destructive" size="sm" onClick={() => remove(a._id)}>
               Delete
-            </GlassButton>
+            </Button>
           </div>
         </GlassCard>
       ))}
@@ -132,7 +132,7 @@ export function AddressesPanel() {
           ))}
           <div className="sm:col-span-2">
             {message && <p className="mb-2 text-sm text-success">{message}</p>}
-            <GlassButton type="submit">Save address</GlassButton>
+            <Button type="submit">Save address</Button>
           </div>
         </form>
       </GlassCard>

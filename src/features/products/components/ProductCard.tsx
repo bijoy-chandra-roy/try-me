@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { Popover } from '@/shared/components/Popover';
 import { Tooltip } from '@/shared/components/Tooltip';
@@ -81,12 +81,12 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {isUnavailable && (
-          <span className="chip absolute left-3 top-3 bg-sand-900/75 text-sand-100">
+          <span className="chip absolute left-3 top-3 bg-[var(--color-accent-fill)] text-[var(--color-on-accent)]">
             Out of stock
           </span>
         )}
         {!isUnavailable && product.stockQuantity <= 5 && (
-          <span className="chip absolute left-3 top-3 bg-olive-700/80 text-sand-100">
+          <span className="chip absolute left-3 top-3 status-chip-pending">
             Only {product.stockQuantity} left
           </span>
         )}
@@ -96,14 +96,14 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <span className="chip-category mb-1">{product.category}</span>
-            <h3 className="truncate font-serif text-lg font-semibold text-olive-700 dark:text-sand-100">
+            <h3 className="truncate font-serif text-lg font-semibold text-primary">
               {product.name}
             </h3>
-            <p className="mt-1 line-clamp-2 text-sm text-sand-600 dark:text-sand-300">
+            <p className="mt-1 line-clamp-2 text-sm text-muted">
               {product.description}
             </p>
             {(product.reviewCount ?? 0) > 0 && (
-              <p className="mt-1 text-xs text-olive-600 dark:text-sand-300">
+              <p className="mt-1 text-xs text-muted">
                 ★ {product.averageRating?.toFixed(1)} · {product.reviewCount} review
                 {(product.reviewCount ?? 0) === 1 ? '' : 's'}
               </p>
@@ -133,7 +133,7 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
                 onClick={() => setSelectedSize(size)}
                 className={`chip-size transition ${
                   selectedSize === size
-                    ? 'bg-olive-700 text-sand-100 dark:bg-sand-100 dark:text-olive-800'
+                    ? 'bg-[var(--color-accent-fill)] text-[var(--color-on-accent)]'
                     : ''
                 }`}
               >
@@ -149,7 +149,7 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
           return (
             <div key={`${field.label}-${index}`} className="space-y-1">
               {field.label ? (
-                <p className="text-xs font-medium text-olive-700 dark:text-sand-200">
+                <p className="text-xs font-medium text-primary">
                   {field.label}
                 </p>
               ) : null}
@@ -166,40 +166,43 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
 
         <div className="mt-auto space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-lg font-semibold tabular-nums text-olive-600 dark:text-sand-200">
+            <span className="text-lg font-semibold tabular-nums text-accent">
               ${product.price.toFixed(2)}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Tooltip content={tryOnTooltip}>
               <span className={tryOnDisabled ? 'opacity-40' : ''}>
-                <GlassButton
-                  className="w-full text-sm"
+                <Button
+                  className="w-full"
+                  size="sm"
                   onClick={() => onTryOn(product)}
                   disabled={tryOnDisabled}
                 >
                   Try On
-                </GlassButton>
+                </Button>
               </span>
             </Tooltip>
             {isAuthenticated ? (
-              <GlassButton
-                className="w-full text-sm"
+              <Button
+                className="w-full"
+                size="sm"
+                variant="secondary"
                 onClick={handleAddToCart}
                 disabled={cartDisabled}
               >
                 {adding ? 'Adding…' : 'Add to cart'}
-              </GlassButton>
+              </Button>
             ) : (
               <Link href={`/login?callbackUrl=${encodeURIComponent('/')}`}>
-                <GlassButton className="w-full text-sm" disabled={isUnavailable}>
+                <Button className="w-full" size="sm" variant="secondary" disabled={isUnavailable}>
                   Add to cart
-                </GlassButton>
+                </Button>
               </Link>
             )}
           </div>
           {cartMessage && (
-            <p className="text-xs text-olive-600 dark:text-sand-300">{cartMessage}</p>
+            <p className="text-xs text-muted">{cartMessage}</p>
           )}
         </div>
       </div>

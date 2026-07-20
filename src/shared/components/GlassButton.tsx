@@ -1,30 +1,36 @@
 'use client';
 
 import { type ReactNode } from 'react';
+import { Button, type ButtonProps } from '@/shared/components/Button';
 
-interface GlassButtonProps {
-  children: ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  className?: string;
-  type?: 'button' | 'submit';
-}
-
+/** @deprecated Prefer `Button`. Kept as a thin alias for existing imports. */
 export function GlassButton({
   children,
   onClick,
   disabled = false,
   className = '',
   type = 'button',
-}: GlassButtonProps) {
+  variant = 'primary',
+  size = 'md',
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+  type?: 'button' | 'submit';
+  variant?: ButtonProps['variant'];
+  size?: ButtonProps['size'];
+}) {
   return (
-    <button
+    <Button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`btn-primary ${className}`}
+      className={className}
+      variant={variant}
+      size={size}
     >
       {children}
-    </button>
+    </Button>
   );
 }

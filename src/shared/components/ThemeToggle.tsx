@@ -49,7 +49,7 @@ export function ThemeToggle() {
       type="button"
       onClick={cycleTheme}
       aria-label={`Theme: ${label}. Click to cycle.`}
-      className="rounded-full p-2 text-sand-600 transition-colors hover:bg-sand-200/60 hover:text-olive-700 dark:text-sand-300 dark:hover:bg-olive-600/40 dark:hover:text-sand-100"
+      className="btn-icon"
     >
       {theme === 'light' && (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>

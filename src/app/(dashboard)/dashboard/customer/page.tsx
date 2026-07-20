@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { RoleGate } from '@/shared/components/RoleGate';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { AddressesPanel } from '@/features/addresses/components/AddressesPanel';
@@ -108,9 +108,9 @@ export default function CustomerDashboardPage() {
                   />
                 </div>
                 {message && <p className="text-sm text-success">{message}</p>}
-                <GlassButton type="submit" disabled={saving}>
+                <Button type="submit" disabled={saving}>
                   {saving ? 'Saving...' : 'Save profile'}
-                </GlassButton>
+                </Button>
               </form>
             </GlassCard>
           </div>
@@ -118,15 +118,15 @@ export default function CustomerDashboardPage() {
 
         <GlassCard className="p-6">
           <h2 className="font-serif text-xl font-semibold">Quick actions</h2>
-          <p className="mt-2 text-sm text-sand-600 dark:text-sand-300">
+          <p className="mt-2 text-sm text-muted">
             Browse the catalog, add to cart, or try on new products.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/">
-              <GlassButton>Browse catalog</GlassButton>
+              <Button>Browse catalog</Button>
             </Link>
             <Link href="/cart">
-              <GlassButton>View cart</GlassButton>
+              <Button>View cart</Button>
             </Link>
           </div>
         </GlassCard>
@@ -137,7 +137,7 @@ export default function CustomerDashboardPage() {
           <h2 className="mb-4 font-serif text-xl font-semibold">Try-on history</h2>
           {loading && <p className="text-sm text-muted-subtle">Loading history...</p>}
           {!loading && history.length === 0 && (
-            <GlassCard className="p-6 text-sm text-sand-600 dark:text-sand-300">
+            <GlassCard className="p-6 text-sm text-muted">
               No try-ons yet. Head to the catalog to get started.
             </GlassCard>
           )}

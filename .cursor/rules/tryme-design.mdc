@@ -1,0 +1,17 @@
+---
+description: TryMe design system — liquid glass + Astryx-informed structure
+globs: src/**/*.{tsx,ts,css}
+alwaysApply: false
+---
+
+# TryMe UI Rules
+
+- Brand: sand / olive / clay + liquid glass. Urbanist + Cormorant. No Inter, no purple gradients, no colored glow shadows.
+- Do **not** install `@astryxdesign/*`. Use TryMe tokens and shared components.
+- Prefer semantic tokens (`bg-body`, `bg-card`, `text-primary`, `text-muted`, status colors) over raw `sand-*` / `olive-*` / hex in components.
+- Frame first: dashboards = AppShell (SideNav ~256); catalog = TopNav + card grid; forms = one Card group.
+- Dense data (users, merchants, orders) = `DataList` / `ListRow`, not one `GlassCard` per row. Cards = widgets, gallery, form groups only.
+- `Button`: one primary per region; use secondary / ghost / destructive for the rest. `IconButton` + Popover for overflow.
+- Controls share md height (`--size-element-md`). Status chips for enumerated states only.
+- Elevation: popovers/tooltips use popover surface + `--z-dropdown` / `--z-tooltip`; portal out of overflow.
+- Read `docs/design/design.md` for the full contract.

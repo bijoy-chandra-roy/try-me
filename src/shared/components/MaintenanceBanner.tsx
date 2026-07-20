@@ -8,7 +8,14 @@ export function MaintenanceBanner() {
   if (!loaded || !maintenanceMode) return null;
 
   return (
-    <div className="border-b border-amber-300/60 bg-amber-50 px-6 py-3 text-center text-sm text-amber-900 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-200">
+    <div
+      className="border-b px-6 py-3 text-center text-sm"
+      style={{
+        borderColor: 'var(--color-warning-muted)',
+        background: 'var(--color-warning-muted)',
+        color: 'var(--color-warning)',
+      }}
+    >
       {canBypassMaintenance
         ? 'Maintenance mode is active. You have super-admin bypass for try-on.'
         : 'Virtual try-on is temporarily unavailable for maintenance. Browse the catalog in the meantime.'}

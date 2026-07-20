@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { ThemeToggle } from '@/shared/components/ThemeToggle';
 import { Tooltip } from '@/shared/components/Tooltip';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { ROLE_LABELS, getDashboardPath, isUserRole } from '@/shared/auth/roles';
 import { usePermissions } from '@/shared/hooks/useAuth';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -42,11 +42,11 @@ export function Header() {
   );
 
   return (
-    <header className="glass-header sticky top-0 z-50">
-      <div className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    <header className="glass-header sticky top-0 z-sticky">
+      <div className="relative mx-auto flex max-w-content items-center justify-between px-6 py-4">
         <div className="flex items-baseline gap-2">
           <Link href="/">
-            <h1 className="font-serif text-2xl font-semibold tracking-tight text-olive-700 dark:text-sand-100">
+            <h1 className="font-serif text-2xl font-semibold tracking-tight text-primary">
               TryMe
             </h1>
           </Link>
@@ -58,14 +58,14 @@ export function Header() {
         <div className="flex items-center gap-3">
           {isAuthenticated && canCart && (
             <Link href="/cart" className="relative">
-              <GlassButton className="text-sm">
+              <Button variant="secondary" size="sm">
                 Cart
                 {itemCount > 0 && (
-                  <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-olive-700 px-1.5 text-xs text-sand-100 dark:bg-sand-200 dark:text-olive-800">
+                  <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-accent-fill)] px-1.5 text-xs text-[var(--color-on-accent)]">
                     {itemCount}
                   </span>
                 )}
-              </GlassButton>
+              </Button>
             </Link>
           )}
           {isAuthenticated && role ? (
@@ -82,29 +82,33 @@ export function Header() {
                 </span>
               </Tooltip>
               <Link href={getDashboardPath(role)}>
-                <GlassButton className="text-sm">Dashboard</GlassButton>
+                <Button size="sm">Dashboard</Button>
               </Link>
-              <GlassButton
-                className="text-sm"
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => signOut({ callbackUrl: '/' })}
               >
                 Sign out
-              </GlassButton>
+              </Button>
             </>
           ) : isAuthenticated ? (
-            <GlassButton
-              className="text-sm"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => signOut({ callbackUrl: '/' })}
             >
               Sign out
-            </GlassButton>
+            </Button>
           ) : status !== 'loading' ? (
             <>
               <Link href="/login">
-                <GlassButton className="text-sm">Sign in</GlassButton>
+                <Button variant="ghost" size="sm">
+                  Sign in
+                </Button>
               </Link>
               <Link href="/register" className="hidden sm:block">
-                <GlassButton className="text-sm">Register</GlassButton>
+                <Button size="sm">Register</Button>
               </Link>
             </>
           ) : null}

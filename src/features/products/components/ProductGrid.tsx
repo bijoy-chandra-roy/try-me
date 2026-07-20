@@ -11,8 +11,8 @@ interface ProductGridProps {
 export function ProductGrid({ products, onTryOn }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-sand-300 py-16 text-center dark:border-olive-600">
-        <p className="text-sand-600 dark:text-sand-300">No products found in this category.</p>
+      <div className="rounded-container border border-dashed border-border py-16 text-center">
+        <p className="text-muted">No products found in this category.</p>
       </div>
     );
   }

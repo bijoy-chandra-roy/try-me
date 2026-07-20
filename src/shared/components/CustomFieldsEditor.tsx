@@ -1,7 +1,7 @@
 'use client';
 
 import type { ProductCustomField } from '@/shared/types';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { TagListField } from '@/shared/components/TagListField';
 
 interface CustomFieldsEditorProps {
@@ -42,7 +42,7 @@ export function CustomFieldsEditor({
         {fields.map((field, index) => (
           <div
             key={index}
-            className="rounded-lg border border-sand-300/60 p-3 dark:border-olive-500/40"
+            className="rounded-inner border border-subtle p-3"
           >
             <div className="mb-2 flex items-center gap-2">
               <input
@@ -56,7 +56,7 @@ export function CustomFieldsEditor({
                 type="button"
                 disabled={disabled}
                 onClick={() => removeField(index)}
-                className="shrink-0 rounded-lg px-2 text-sm text-muted-subtle hover:text-red-600 disabled:opacity-40"
+                className="shrink-0 rounded-lg px-2 text-sm text-muted-subtle hover:text-error disabled:opacity-40"
                 aria-label={`Remove field ${field.label || index + 1}`}
               >
                 ×
@@ -72,14 +72,14 @@ export function CustomFieldsEditor({
         ))}
       </div>
 
-      <GlassButton
+      <Button
         type="button"
         disabled={disabled}
         onClick={addField}
         className="mt-2"
       >
         Add field
-      </GlassButton>
+      </Button>
     </div>
   );
 }

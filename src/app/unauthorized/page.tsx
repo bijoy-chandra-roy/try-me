@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { GlassCard } from '@/shared/components/GlassCard';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { getDashboardPath } from '@/shared/auth/roles';
 
@@ -13,7 +13,7 @@ export default function UnauthorizedPage() {
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-lg items-center px-6 py-16">
       <GlassCard className="w-full p-8 text-center">
-        <h1 className="font-serif text-3xl font-semibold text-olive-700 dark:text-sand-100">
+        <h1 className="font-serif text-3xl font-semibold text-primary">
           Access denied
         </h1>
         <p className="mt-3 text-muted">
@@ -22,10 +22,10 @@ export default function UnauthorizedPage() {
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <Link href={dashboardHref}>
-            <GlassButton>My dashboard</GlassButton>
+            <Button>My dashboard</Button>
           </Link>
           <Link href="/">
-            <GlassButton>Catalog</GlassButton>
+            <Button>Catalog</Button>
           </Link>
         </div>
       </GlassCard>

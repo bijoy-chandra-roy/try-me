@@ -23,12 +23,12 @@ export default function HomePage() {
   return (
     <>
       <MaintenanceBanner />
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mx-auto max-w-content px-6 py-10">
         <section className="mb-10">
-          <h2 className="font-serif text-4xl font-semibold tracking-tight text-olive-700 dark:text-sand-100">
+          <h2 className="font-serif text-4xl font-semibold tracking-tight text-primary">
             Curated Essentials
           </h2>
-          <p className="mt-2 max-w-xl text-sand-600 dark:text-sand-300">
+          <p className="mt-2 max-w-xl text-muted">
             Upload a photo and preview any piece on yourself with our virtual try-on.
             Resilient by design — always returns a result.
             {!tryOnBlocked && (
@@ -45,12 +45,19 @@ export default function HomePage() {
 
         {loading && (
           <div className="flex items-center justify-center py-24">
-            <span className="h-8 w-8 animate-spin rounded-full border-2 border-olive-600 border-t-transparent" />
+            <span className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent-fill)] border-t-transparent" />
           </div>
         )}
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-900/20 dark:text-red-300">
+          <div
+            className="rounded-element border px-4 py-3 text-sm font-medium"
+            style={{
+              borderColor: 'var(--color-error-muted)',
+              background: 'var(--color-error-muted)',
+              color: 'var(--color-error)',
+            }}
+          >
             {error}. Make sure the development server is running.
           </div>
         )}

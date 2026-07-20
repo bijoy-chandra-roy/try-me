@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { fetchOrder, updateOrderStatus } from '@/features/orders/api/orders.api';
 import { createReview } from '@/features/reviews/api/reviews.api';
@@ -92,7 +92,7 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-24">
-        <span className="h-8 w-8 animate-spin rounded-full border-2 border-olive-600 border-t-transparent" />
+        <span className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent-fill)] border-t-transparent" />
       </div>
     );
   }
@@ -100,9 +100,9 @@ export default function OrderDetailPage() {
   if (error || !order) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-16 text-center">
-        <p className="text-red-600">{error || 'Order not found'}</p>
+        <p className="text-error">{error || 'Order not found'}</p>
         <Link href="/" className="mt-4 inline-block">
-          <GlassButton>Home</GlassButton>
+          <Button>Home</Button>
         </Link>
       </div>
     );
@@ -112,10 +112,10 @@ export default function OrderDetailPage() {
     <div className="mx-auto max-w-3xl px-6 py-10">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-olive-700 dark:text-sand-100">
+          <h1 className="font-serif text-3xl font-semibold text-primary">
             Order {order.orderNumber}
           </h1>
-          <p className="mt-1 text-sm text-sand-600 dark:text-sand-300">
+          <p className="mt-1 text-sm text-muted">
             Placed {new Date(order.createdAt).toLocaleString()}
           </p>
         </div>
@@ -123,29 +123,29 @@ export default function OrderDetailPage() {
       </div>
 
       {message && (
-        <p className="mt-4 text-sm text-olive-600 dark:text-sand-300">{message}</p>
+        <p className="mt-4 text-sm text-muted">{message}</p>
       )}
 
       <GlassCard className="mt-6 space-y-4 p-6">
         {order.items.map((item) => (
           <div
             key={`${item.productId}-${item.size}`}
-            className="flex gap-4 border-b border-sand-200/50 pb-4 last:border-0 dark:border-sand-700/40"
+            className="flex gap-4 border-b border-subtle pb-4 last:border-0"
           >
             <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-lg">
               <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-medium">{item.name}</p>
-              <p className="text-sm text-sand-600 dark:text-sand-300">
+              <p className="text-sm text-muted">
                 {item.size ? `Size ${item.size} · ` : ''}
                 Qty {item.quantity} · ${item.price.toFixed(2)}
               </p>
-              <p className="text-xs capitalize text-olive-600">Item: {item.merchantStatus}</p>
+              <p className="text-xs capitalize text-accent">Item: {item.merchantStatus}</p>
               {order.status === 'delivered' && isOwner && (
                 <div className="mt-2">
                   {reviewing === item.productId ? (
-                    <div className="space-y-2 rounded-xl bg-sand-100/50 p-3 dark:bg-sand-900/30">
+                    <div className="space-y-2 rounded-element bg-[var(--color-overlay-hover)] p-3">
                       <label className="block text-sm">
                         Rating
                         <select
@@ -168,24 +168,24 @@ export default function OrderDetailPage() {
                         rows={2}
                       />
                       <div className="flex gap-2">
-                        <GlassButton
+                        <Button
                           className="text-sm"
                           onClick={() => submitReview(item.productId)}
                         >
                           Submit
-                        </GlassButton>
-                        <GlassButton className="text-sm" onClick={() => setReviewing(null)}>
+                        </Button>
+                        <Button className="text-sm" onClick={() => setReviewing(null)}>
                           Cancel
-                        </GlassButton>
+                        </Button>
                       </div>
                     </div>
                   ) : (
-                    <GlassButton
+                    <Button
                       className="text-sm"
                       onClick={() => setReviewing(item.productId)}
                     >
                       Write review
-                    </GlassButton>
+                    </Button>
                   )}
                 </div>
               )}
@@ -215,16 +215,16 @@ export default function OrderDetailPage() {
 
       <div className="mt-6 flex flex-wrap gap-2">
         {canCancel && (
-          <GlassButton onClick={cancel}>Cancel order</GlassButton>
+          <Button onClick={cancel}>Cancel order</Button>
         )}
         {canAdvance && order.status !== 'delivered' && order.status !== 'cancelled' && (
-          <GlassButton onClick={advance}>Advance status</GlassButton>
+          <Button onClick={advance}>Advance status</Button>
         )}
         {(canFulfill || canViewAll) && order.paymentStatus === 'pending' && (
-          <GlassButton onClick={markPaid}>Mark COD paid</GlassButton>
+          <Button onClick={markPaid}>Mark COD paid</Button>
         )}
         <Link href="/">
-          <GlassButton>Continue shopping</GlassButton>
+          <Button>Continue shopping</Button>
         </Link>
       </div>
     </div>

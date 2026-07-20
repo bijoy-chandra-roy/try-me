@@ -44,8 +44,8 @@ export function ImageUpload({ onSelect, disabled }: ImageUploadProps) {
         onDrop={onDrop}
         className={`relative flex min-h-[200px] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors ${
           dragOver
-            ? 'border-olive-500 bg-olive-500/5'
-            : 'border-sand-300 bg-sand-100/50 dark:border-olive-500/50 dark:bg-olive-800/40'
+            ? 'border-[var(--color-accent-fill)] bg-[var(--color-overlay-hover)]'
+            : 'border-[var(--color-border-emphasized)] bg-[var(--color-background-surface)]'
         } ${disabled ? 'pointer-events-none opacity-50' : ''}`}
       >
         <input
@@ -70,7 +70,7 @@ export function ImageUpload({ onSelect, disabled }: ImageUploadProps) {
         ) : (
           <>
             <svg
-              className="mb-3 h-10 w-10 text-clay-500 dark:text-clay-400"
+              className="mb-3 h-10 w-10 text-[var(--color-text-disabled)]"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -80,7 +80,7 @@ export function ImageUpload({ onSelect, disabled }: ImageUploadProps) {
               <circle cx="8.5" cy="10" r="1.5" fill="currentColor" stroke="none" />
               <path d="M21 16l-5.5-5.5a1.5 1.5 0 00-2.12 0L9 15" />
             </svg>
-            <p className="text-sm font-medium text-sand-700 dark:text-sand-200">
+            <p className="text-sm font-medium text-primary">
               Upload your photo
             </p>
             <p className="mt-1 text-xs text-muted-subtle">

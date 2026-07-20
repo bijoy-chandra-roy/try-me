@@ -113,7 +113,7 @@ export function Select<T extends string = string>({
             id={listboxId}
             role="listbox"
             aria-label={ariaLabel}
-            className={`fixed z-[200] overflow-hidden rounded-xl border border-sand-200/80 bg-sand-50/95 shadow-lg backdrop-blur-md transition-opacity duration-150 dark:border-olive-500/50 dark:bg-olive-800/95 ${
+            className={`surface-popover fixed z-dropdown overflow-hidden transition-opacity duration-fast ${
               coords ? 'opacity-100' : 'opacity-0'
             }`}
             style={
@@ -141,8 +141,8 @@ export function Select<T extends string = string>({
                     }}
                     className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                       isSelected
-                        ? 'bg-olive-600/12 font-medium text-olive-700 dark:bg-sand-100/10 dark:text-sand-50'
-                        : 'text-olive-700 hover:bg-sand-200/60 dark:text-sand-100 dark:hover:bg-olive-600/40'
+                        ? 'bg-[var(--color-overlay-pressed)] font-medium text-primary'
+                        : 'text-primary hover:bg-[var(--color-overlay-hover)]'
                     }`}
                   >
                     {option.label}

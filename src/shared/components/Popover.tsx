@@ -7,6 +7,7 @@ import { useFloatingPosition } from '@/shared/hooks/useFloatingPosition';
 interface PopoverItem {
   label: string;
   onClick: () => void;
+  destructive?: boolean;
 }
 
 interface PopoverProps {
@@ -69,7 +70,7 @@ export function Popover({ label, items, children }: PopoverProps) {
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen((prev) => !prev)}
-        className="action-reveal rounded-full p-1.5 text-muted-subtle transition-colors hover:bg-sand-200/60 hover:text-olive-700 dark:hover:bg-olive-600/40 dark:hover:text-sand-100"
+        className="btn-icon action-reveal"
       >
         {children ?? (
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
@@ -86,7 +87,7 @@ export function Popover({ label, items, children }: PopoverProps) {
           <div
             ref={menuRef}
             role="menu"
-            className={`fixed z-[200] min-w-[160px] overflow-hidden rounded-xl border border-sand-200/80 bg-sand-50/95 py-1 shadow-lg backdrop-blur-md transition-opacity duration-150 dark:border-olive-500/50 dark:bg-olive-800/95 ${
+            className={`surface-popover fixed z-dropdown min-w-[160px] overflow-hidden py-1 transition-opacity duration-fast ${
               coords ? 'opacity-100' : 'opacity-0'
             }`}
             style={
@@ -104,7 +105,11 @@ export function Popover({ label, items, children }: PopoverProps) {
                   item.onClick();
                   setOpen(false);
                 }}
-                className="block w-full px-3 py-2 text-left text-sm text-olive-700 transition-colors hover:bg-sand-200/60 dark:text-sand-100 dark:hover:bg-olive-600/40"
+                className={`block w-full px-3 py-2 text-left text-sm transition-colors ${
+                  item.destructive
+                    ? 'text-error hover:bg-error-muted'
+                    : 'text-primary hover:bg-[var(--color-overlay-hover)]'
+                }`}
               >
                 {item.label}
               </button>

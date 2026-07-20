@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useTryOn } from '@/features/try-on/hooks/useTryOn';
 import { ImageUpload } from '@/features/try-on/components/ImageUpload';
 import { TryOnResultView } from '@/features/try-on/components/TryOnResult';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import type { Product } from '@/shared/types';
 
@@ -42,9 +42,10 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-overlay flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-olive-900/60 backdrop-blur-sm dark:bg-black/50"
+        className="absolute inset-0 backdrop-blur-sm"
+        style={{ background: 'var(--color-overlay)' }}
         onClick={handleClose}
         role="presentation"
       />
@@ -57,10 +58,10 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
         <div className="p-6">
         <div className="mb-5 flex shrink-0 items-start justify-between">
           <div className="min-w-0 pr-4">
-            <h2 className="font-serif text-xl font-semibold text-olive-700 dark:text-sand-100">
+            <h2 className="font-serif text-xl font-semibold text-primary">
               Virtual Try-On
             </h2>
-            <p className="mt-1 truncate text-sm text-sand-600 dark:text-sand-300">{product.name}</p>
+            <p className="mt-1 truncate text-sm text-muted">{product.name}</p>
           </div>
           <button
             type="button"
@@ -75,7 +76,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
         </div>
 
         <div className="mb-5 flex shrink-0 gap-4">
-          <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg ring-1 ring-sand-200/80 dark:ring-olive-600/60">
+          <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-inner ring-1 ring-[var(--color-border)]">
             <Image
               src={product.imageUrl}
               alt={product.name}
@@ -84,7 +85,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               sizes="80px"
             />
           </div>
-          <p className="line-clamp-4 text-sm text-sand-600 dark:text-sand-300">{product.description}</p>
+          <p className="line-clamp-4 text-sm text-muted">{product.description}</p>
         </div>
 
         {result ? (
@@ -94,23 +95,23 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
             <ImageUpload onSelect={setSelectedFile} disabled={loading} />
 
             {error && (
-              <p className="mt-3 text-sm font-medium text-red-600 dark:text-red-400">{error}</p>
+              <p className="mt-3 text-sm font-medium text-error">{error}</p>
             )}
 
-            <GlassButton
+            <Button
               onClick={handleSubmit}
               disabled={!selectedFile || loading}
               className="mt-5 w-full shrink-0 py-3"
             >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-sand-50 border-t-transparent" />
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--color-on-accent)] border-t-transparent" />
                   Processing try-on…
                 </span>
               ) : (
                 'Generate Try-On'
               )}
-            </GlassButton>
+            </Button>
           </>
         )}
 
@@ -121,7 +122,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               reset();
               setSelectedFile(null);
             }}
-            className="mt-4 w-full shrink-0 rounded-full border border-subtle py-2.5 text-sm font-medium text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-200 dark:hover:bg-olive-800/60"
+            className="mt-4 w-full shrink-0 btn-secondary btn-md"
           >
             Try another photo
           </button>

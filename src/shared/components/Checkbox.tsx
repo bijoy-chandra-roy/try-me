@@ -25,13 +25,13 @@ export function Checkbox({
       aria-label={ariaLabel ?? label}
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
-      className={`inline-flex items-center gap-2 text-sm text-olive-700 transition-colors disabled:cursor-not-allowed disabled:opacity-40 dark:text-sand-100 ${className}`}
+      className={`inline-flex items-center gap-2 text-sm text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${className}`}
     >
       <span
         className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
           checked
-            ? 'border-olive-600 bg-olive-600 text-sand-50 dark:border-sand-200 dark:bg-sand-200 dark:text-olive-800'
-            : 'border-sand-300/80 bg-white/80 text-transparent hover:border-olive-500 dark:border-olive-500/50 dark:bg-olive-800/70 dark:hover:border-sand-400'
+            ? 'border-[var(--color-accent-fill)] bg-[var(--color-accent-fill)] text-[var(--color-on-accent)]'
+            : 'border-[var(--color-border-emphasized)] bg-[var(--color-background-surface)] text-transparent hover:border-[var(--color-accent-fill)]'
         }`}
       >
         <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" aria-hidden>

@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { GlassCard } from '@/shared/components/GlassCard';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { AuthOrDivider, GoogleSignInButton } from '@/shared/components/GoogleSignInButton';
 import { apiClient } from '@/shared/lib/api-client';
 import type { User } from '@/shared/types';
@@ -50,12 +50,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md items-center px-6 py-12">
+    <div className="mx-auto flex min-h-[70vh] max-w-narrow items-center px-6 py-12">
       <GlassCard className="w-full p-8">
-        <h1 className="font-serif text-3xl font-semibold text-olive-700 dark:text-sand-100">
+        <h1 className="font-serif text-3xl font-semibold text-primary">
           Create account
         </h1>
-        <p className="mt-2 text-sm text-sand-600 dark:text-sand-300">
+        <p className="mt-2 text-sm text-muted">
           Register as a customer to save try-on history
         </p>
 
@@ -103,12 +103,12 @@ export default function RegisterPage() {
           </div>
 
           {error && (
-            <p className="text-sm font-medium text-red-600 dark:text-red-400">{error}</p>
+            <p className="text-sm font-medium text-error">{error}</p>
           )}
 
-          <GlassButton type="submit" disabled={loading || googleLoading} className="w-full">
+          <Button type="submit" disabled={loading || googleLoading} className="w-full">
             {loading ? 'Creating account...' : 'Register'}
-          </GlassButton>
+          </Button>
         </form>
 
         <div className="mt-5 space-y-5">
@@ -121,7 +121,7 @@ export default function RegisterPage() {
           />
         </div>
 
-        <p className="mt-6 text-center text-sm text-sand-600 dark:text-sand-300">
+        <p className="mt-6 text-center text-sm text-muted">
           Already have an account?{' '}
           <Link href="/login" className="text-link">
             Sign in

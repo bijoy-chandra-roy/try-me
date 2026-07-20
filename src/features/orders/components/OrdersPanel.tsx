@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { fetchOrders, updateOrderStatus } from '@/features/orders/api/orders.api';
 import { ApiError } from '@/shared/lib/api-client';
@@ -93,9 +93,9 @@ export function OrdersPanel({
         <h2 className="font-serif text-xl font-semibold">
           {mode === 'merchant' ? 'Store orders' : mode === 'all' ? 'All orders' : 'My orders'}
         </h2>
-        <GlassButton className="text-sm" onClick={() => void load()}>
+        <Button variant="secondary" size="sm" onClick={() => void load()}>
           Refresh
-        </GlassButton>
+        </Button>
       </div>
 
       {showSearch && (
@@ -112,22 +112,22 @@ export function OrdersPanel({
             onChange={(e) => setEmail(e.target.value)}
             className="input-glass rounded-xl px-3 py-2 text-sm"
           />
-          <GlassButton className="text-sm" onClick={() => void load()}>
+          <Button variant="secondary" size="sm" onClick={() => void load()}>
             Search
-          </GlassButton>
+          </Button>
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600 dark:text-red-300">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
 
       {loading && (
         <div className="flex justify-center py-8">
-          <span className="h-6 w-6 animate-spin rounded-full border-2 border-olive-600 border-t-transparent" />
+          <span className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-accent-fill)] border-t-transparent" />
         </div>
       )}
 
       {!loading && orders.length === 0 && (
-        <GlassCard className="p-6 text-sm text-sand-600 dark:text-sand-300">
+        <GlassCard className="p-6 text-sm text-muted">
           No orders found.
         </GlassCard>
       )}
@@ -143,7 +143,7 @@ export function OrdersPanel({
                 >
                   {order.orderNumber}
                 </Link>
-                <p className="text-sm text-sand-600 dark:text-sand-300">
+                <p className="text-sm text-muted">
                   {new Date(order.createdAt).toLocaleString()} · {order.items.length} item(s) · $
                   {order.total.toFixed(2)}
                 </p>
@@ -159,44 +159,48 @@ export function OrdersPanel({
                   {item.name}
                   {item.size ? ` (${item.size})` : ''} × {item.quantity}
                   {mode === 'merchant' || mode === 'all' ? (
-                    <span className="ml-2 capitalize text-olive-600">· {item.merchantStatus}</span>
+                    <span className="ml-2 capitalize text-accent">· {item.merchantStatus}</span>
                   ) : null}
                 </li>
               ))}
             </ul>
             <div className="mt-3 flex flex-wrap gap-2">
               <Link href={`/orders/${order._id}`}>
-                <GlassButton className="text-sm">View</GlassButton>
+                <Button variant="secondary" size="sm">
+                  View
+                </Button>
               </Link>
               {allowAdvance &&
                 order.status !== 'delivered' &&
                 order.status !== 'cancelled' && (
-                  <GlassButton
-                    className="text-sm"
+                  <Button
+                    size="sm"
                     disabled={busyId === order._id}
                     onClick={() => advance(order._id)}
                   >
                     Advance
-                  </GlassButton>
+                  </Button>
                 )}
               {allowCancel &&
                 (order.status === 'pending' || order.status === 'confirmed') && (
-                  <GlassButton
-                    className="text-sm"
+                  <Button
+                    variant="destructive"
+                    size="sm"
                     disabled={busyId === order._id}
                     onClick={() => cancel(order._id)}
                   >
                     Cancel
-                  </GlassButton>
+                  </Button>
                 )}
               {allowMarkPaid && order.paymentStatus === 'pending' && (
-                <GlassButton
-                  className="text-sm"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   disabled={busyId === order._id}
                   onClick={() => markPaid(order._id)}
                 >
                   Mark paid
-                </GlassButton>
+                </Button>
               )}
             </div>
           </GlassCard>

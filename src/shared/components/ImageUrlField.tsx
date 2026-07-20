@@ -76,8 +76,8 @@ export function ImageUrlField({
         onDrop={onDrop}
         className={`relative flex min-h-[140px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 transition-colors ${
           dragOver
-            ? 'border-olive-500 bg-olive-500/5'
-            : 'border-sand-300 bg-sand-100/50 dark:border-olive-500/50 dark:bg-olive-800/40'
+            ? 'border-[var(--color-accent-fill)] bg-[var(--color-overlay-hover)]'
+            : 'border-[var(--color-border-emphasized)] bg-[var(--color-background-surface)]'
         } ${disabled || uploading ? 'pointer-events-none opacity-60' : 'cursor-pointer'}`}
       >
         <input
@@ -103,7 +103,7 @@ export function ImageUrlField({
         ) : (
           <>
             <svg
-              className="mb-2 h-8 w-8 text-clay-500 dark:text-clay-400"
+              className="mb-2 h-8 w-8 text-[var(--color-text-disabled)]"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -113,7 +113,7 @@ export function ImageUrlField({
               <circle cx="8.5" cy="10" r="1.5" fill="currentColor" stroke="none" />
               <path d="M21 16l-5.5-5.5a1.5 1.5 0 00-2.12 0L9 15" />
             </svg>
-            <p className="text-sm font-medium text-sand-700 dark:text-sand-200">
+            <p className="text-sm font-medium text-primary">
               {uploading ? 'Uploading…' : 'Drop an image here'}
             </p>
             <p className="mt-1 text-xs text-muted-subtle">or click to browse</p>
@@ -141,7 +141,7 @@ export function ImageUrlField({
         className="input-glass mt-2 w-full rounded-lg px-3 py-2 text-sm"
       />
 
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-sm text-error">{error}</p>}
     </div>
   );
 }

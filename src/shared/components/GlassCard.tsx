@@ -28,7 +28,7 @@ export function GlassCard({
         ref={elastic ? ref : undefined}
         onMouseMove={elastic ? handleMouseMove : undefined}
         onMouseLeave={elastic ? handleMouseLeave : undefined}
-        className={`glass-card relative flex min-h-0 flex-col overflow-hidden rounded-2xl ${
+      className={`glass-card relative flex min-h-0 flex-col overflow-hidden ${
           hover ? 'glass-card-hover' : ''
         } ${className}`}
       >
@@ -51,7 +51,7 @@ export function GlassCard({
       ref={elastic ? ref : undefined}
       onMouseMove={elastic ? handleMouseMove : undefined}
       onMouseLeave={elastic ? handleMouseLeave : undefined}
-      className={`glass-card relative rounded-2xl ${overflowClass} ${hover ? 'glass-card-hover' : ''} ${className}`}
+      className={`glass-card relative ${overflowClass} ${hover ? 'glass-card-hover' : ''} ${className}`}
     >
       {children}
     </div>

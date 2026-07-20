@@ -12,7 +12,7 @@ export function AuthOrDivider() {
   return (
     <div className="relative">
       <div className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-sand-300/60 dark:border-olive-500/40" />
+        <div className="w-full border-t border-subtle" />
       </div>
       <div className="relative flex justify-center text-xs uppercase">
         <span className="bg-transparent px-2 text-muted-subtle">or</span>
@@ -33,7 +33,7 @@ export function GoogleSignInButton({
       type="button"
       onClick={onClick}
       disabled={disabled || loading}
-      className="input-glass flex w-full items-center justify-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-sand-700 transition-colors hover:bg-white dark:text-sand-100 dark:hover:bg-olive-700/80 disabled:cursor-not-allowed disabled:opacity-40"
+      className="input-glass flex w-full items-center justify-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-[var(--color-overlay-hover)] disabled:cursor-not-allowed disabled:opacity-40"
     >
       <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
         <path

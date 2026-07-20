@@ -10,7 +10,7 @@ interface TryOnResultProps {
 export function TryOnResultView({ result }: TryOnResultProps) {
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-xl ring-1 ring-sand-200/60 dark:ring-olive-600/50">
+      <div className="relative overflow-hidden rounded-element ring-1 ring-[var(--color-border)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={result.compositeImageUrl}
@@ -19,9 +19,9 @@ export function TryOnResultView({ result }: TryOnResultProps) {
         />
       </div>
 
-      <div className="flex items-center justify-between rounded-lg bg-sand-100/80 px-4 py-3 dark:bg-olive-700/30">
+      <div className="flex items-center justify-between rounded-inner bg-[var(--color-overlay-hover)] px-4 py-3">
         <div className="min-w-0 pr-3">
-          <p className="truncate text-sm font-medium text-olive-700 dark:text-sand-100">
+          <p className="truncate text-sm font-medium text-primary">
             {result.productName}
           </p>
           <p className="truncate text-xs text-muted-subtle">

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { GlassButton } from '@/shared/components/GlassButton';
+import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { cartSubtotal } from '@/features/cart/api/cart.api';
 import { useCart, setCartStore } from '@/features/cart/hooks/useCart';
@@ -86,7 +86,7 @@ export default function CheckoutPage() {
       <div className="mx-auto max-w-2xl px-6 py-16 text-center">
         <h1 className="font-serif text-3xl font-semibold">Nothing to checkout</h1>
         <Link href="/cart" className="mt-6 inline-block">
-          <GlassButton>Back to cart</GlassButton>
+          <Button>Back to cart</Button>
         </Link>
       </div>
     );
@@ -94,16 +94,16 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="font-serif text-3xl font-semibold text-olive-700 dark:text-sand-100">
+      <h1 className="font-serif text-3xl font-semibold text-primary">
         Checkout
       </h1>
-      <p className="mt-1 text-sm text-sand-600 dark:text-sand-300">
+      <p className="mt-1 text-sm text-muted">
         Cash on delivery — pay when your order arrives. Total: ${subtotal.toFixed(2)}
       </p>
 
       {(loading || cartLoading) && (
         <div className="flex justify-center py-20">
-          <span className="h-8 w-8 animate-spin rounded-full border-2 border-olive-600 border-t-transparent" />
+          <span className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent-fill)] border-t-transparent" />
         </div>
       )}
 
@@ -117,10 +117,10 @@ export default function CheckoutPage() {
                 {addresses.map((a) => (
                   <label
                     key={a._id}
-                    className={`flex cursor-pointer gap-3 rounded-xl border px-3 py-3 ${
+                    className={`flex cursor-pointer gap-3 rounded-element border px-3 py-3 ${
                       !useNew && selectedId === a._id
-                        ? 'border-olive-600 bg-olive-50/50 dark:border-sand-400 dark:bg-sand-900/40'
-                        : 'border-transparent bg-sand-100/40 dark:bg-sand-900/20'
+                        ? 'border-[var(--color-accent-fill)] bg-[var(--color-overlay-pressed)]'
+                        : 'border-transparent bg-[var(--color-overlay-hover)]'
                     }`}
                   >
                     <input
@@ -181,7 +181,7 @@ export default function CheckoutPage() {
 
           <GlassCard className="p-6">
             <h2 className="font-serif text-xl font-semibold">Payment</h2>
-            <p className="mt-2 text-sm text-sand-600 dark:text-sand-300">
+            <p className="mt-2 text-sm text-muted">
               Cash on Delivery (COD). No card charge now — pay when the order is delivered.
             </p>
             <ul className="mt-4 space-y-1 text-sm">
@@ -203,15 +203,17 @@ export default function CheckoutPage() {
             </p>
           </GlassCard>
 
-          {error && <p className="text-sm text-red-600 dark:text-red-300">{error}</p>}
+          {error && <p className="text-sm text-error">{error}</p>}
 
           <div className="flex gap-3">
             <Link href="/cart">
-              <GlassButton type="button">Back</GlassButton>
+              <Button type="button" variant="ghost">
+                Back
+              </Button>
             </Link>
-            <GlassButton type="submit" disabled={submitting}>
+            <Button type="submit" disabled={submitting}>
               {submitting ? 'Placing order…' : 'Place order (COD)'}
-            </GlassButton>
+            </Button>
           </div>
         </form>
       )}
