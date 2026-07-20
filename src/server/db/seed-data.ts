@@ -16,7 +16,7 @@ export const SEED_PRODUCTS: {
     price: 68,
     category: 'tops',
     imageUrl:
-      'https://images.unsplash.com/photo-1602810318383-e386cc2a658c?w=600&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=800&fit=crop',
     sizes: ['S', 'M', 'L', 'XL'],
     inStock: true,
   },
@@ -70,7 +70,7 @@ export const SEED_PRODUCTS: {
     price: 54,
     category: 'accessories',
     imageUrl:
-      'https://images.unsplash.com/photo-1591561950697-f9e2d37d16fe?w=600&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=800&fit=crop',
     sizes: ['One Size'],
     inStock: true,
   },

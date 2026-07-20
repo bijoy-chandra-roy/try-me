@@ -5,7 +5,7 @@ export const config = {
   mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/tryme',
   imgbbApiKey: process.env.IMGBB_API_KEY || '',
   vtoApiUrl:
-    process.env.VTO_API_URL || 'https://yisol-idm-vton.hf.space/api/predict',
+    process.env.VTO_API_URL || 'https://yisol-idm-vton.hf.space/call/tryon',
   vtoTimeoutMs: parseInt(process.env.VTO_TIMEOUT_MS || '50000', 10),
   hfToken: process.env.HF_TOKEN || '',
   fallbackImagePath: path.join(process.cwd(), 'cache/fallback-vto-result.jpg'),
