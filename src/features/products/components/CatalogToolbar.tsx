@@ -73,7 +73,7 @@ export function CatalogToolbar({
             value={filters.query}
             onChange={(e) => patch({ query: e.target.value })}
             placeholder="Search by name, description…"
-            className="input-glass input-glass-lg w-full pl-10 pr-10"
+            className="input-glass input-glass-lg w-full pl-10 pr-10 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
             autoComplete="off"
           />
           {filters.query ? (
