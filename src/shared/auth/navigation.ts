@@ -7,6 +7,16 @@ export interface DashboardNavItem {
   label: string;
   permission?: Permission;
   hash?: string;
+  /** When true, active if pathname equals or starts with href */
+  matchPrefix?: boolean;
+}
+
+export interface SettingsNavItem {
+  href: string;
+  label: string;
+  /** Extra role gate beyond manage_own_profile */
+  roles?: UserRole[];
+  permission?: Permission;
 }
 
 export const DASHBOARD_NAV: Record<UserRole, DashboardNavItem[]> = {
@@ -15,24 +25,46 @@ export const DASHBOARD_NAV: Record<UserRole, DashboardNavItem[]> = {
     { href: '/dashboard/customer', label: 'Orders', permission: 'view_own_orders', hash: 'orders' },
     { href: '/dashboard/customer', label: 'Addresses', permission: 'manage_cart', hash: 'addresses' },
     { href: '/dashboard/customer', label: 'Try-on History', permission: 'view_own_try_on_history', hash: 'history' },
-    { href: '/dashboard/customer', label: 'Profile', permission: 'manage_own_profile', hash: 'profile' },
+    {
+      href: '/dashboard/settings',
+      label: 'Settings',
+      permission: 'manage_own_profile',
+      matchPrefix: true,
+    },
   ],
   merchant: [
     { href: '/dashboard/merchant', label: 'Products', permission: 'manage_products' },
     { href: '/dashboard/merchant', label: 'Orders', permission: 'fulfill_orders', hash: 'orders' },
-    { href: '/dashboard/merchant', label: 'Store Profile', permission: 'manage_merchants', hash: 'store' },
     { href: '/dashboard/merchant', label: 'Analytics', permission: 'manage_products', hash: 'analytics' },
+    {
+      href: '/dashboard/settings',
+      label: 'Settings',
+      permission: 'manage_own_profile',
+      matchPrefix: true,
+    },
   ],
   support: [
     { href: '/dashboard/support', label: 'Orders', permission: 'view_all_orders', hash: 'orders' },
     { href: '/dashboard/support', label: 'User Lookup', permission: 'view_users' },
     { href: '/dashboard/support', label: 'System Health', permission: 'view_system_health', hash: 'health' },
+    {
+      href: '/dashboard/settings',
+      label: 'Settings',
+      permission: 'manage_own_profile',
+      matchPrefix: true,
+    },
   ],
   admin: [
     { href: '/dashboard/admin', label: 'Overview', permission: 'view_system_health' },
     { href: '/dashboard/admin', label: 'Orders', permission: 'view_all_orders', hash: 'orders' },
     { href: '/dashboard/admin', label: 'Users', permission: 'manage_users', hash: 'users' },
     { href: '/dashboard/admin', label: 'Merchants', permission: 'manage_merchants', hash: 'merchants' },
+    {
+      href: '/dashboard/settings',
+      label: 'Settings',
+      permission: 'manage_own_profile',
+      matchPrefix: true,
+    },
   ],
   super_admin: [
     { href: '/dashboard/super-admin', label: 'Overview', permission: 'view_system_health' },
@@ -40,13 +72,38 @@ export const DASHBOARD_NAV: Record<UserRole, DashboardNavItem[]> = {
     { href: '/dashboard/super-admin', label: 'Feature Flags', permission: 'manage_system', hash: 'flags' },
     { href: '/dashboard/super-admin', label: 'Users & Roles', permission: 'assign_roles', hash: 'roles' },
     { href: '/dashboard/super-admin', label: 'Merchants', permission: 'manage_merchants', hash: 'merchants' },
+    {
+      href: '/dashboard/settings',
+      label: 'Settings',
+      permission: 'manage_own_profile',
+      matchPrefix: true,
+    },
   ],
 };
+
+export const SETTINGS_NAV: SettingsNavItem[] = [
+  { href: '/dashboard/settings/profile', label: 'Profile', permission: 'manage_own_profile' },
+  { href: '/dashboard/settings/account', label: 'Account', permission: 'manage_own_profile' },
+  {
+    href: '/dashboard/settings/store',
+    label: 'Store',
+    roles: ['merchant'],
+    permission: 'manage_merchants',
+  },
+];
 
 export function getDashboardNavItems(role: UserRole): DashboardNavItem[] {
   return DASHBOARD_NAV[role].filter(
     (item) => !item.permission || hasPermission(role, item.permission)
   );
+}
+
+export function getSettingsNavItems(role: UserRole): SettingsNavItem[] {
+  return SETTINGS_NAV.filter((item) => {
+    if (item.roles && !item.roles.includes(role)) return false;
+    if (item.permission && !hasPermission(role, item.permission)) return false;
+    return true;
+  });
 }
 
 export const ROLE_CAPABILITIES: Record<UserRole, string[]> = {

@@ -39,11 +39,17 @@ function NavLinks({
       <nav className="flex flex-col gap-1">
         {navItems.map((item) => {
           const href = item.hash ? `${item.href}#${item.hash}` : item.href;
-          const isActive =
-            pathname === item.href &&
-            (typeof window !== 'undefined'
-              ? !item.hash || window.location.hash === `#${item.hash}`
-              : !item.hash);
+          const onSettings = pathname.startsWith('/dashboard/settings');
+          let isActive = false;
+          if (item.matchPrefix) {
+            isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          } else if (!onSettings) {
+            isActive =
+              pathname === item.href &&
+              (typeof window !== 'undefined'
+                ? !item.hash || window.location.hash === `#${item.hash}`
+                : !item.hash);
+          }
 
           return (
             <Link

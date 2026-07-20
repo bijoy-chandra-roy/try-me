@@ -84,6 +84,11 @@ export function Header() {
               <Link href={getDashboardPath(role)}>
                 <Button size="sm">Dashboard</Button>
               </Link>
+              <Link href="/dashboard/settings/profile" className="hidden sm:block">
+                <Button variant="secondary" size="sm">
+                  Settings
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"

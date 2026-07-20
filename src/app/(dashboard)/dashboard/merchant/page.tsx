@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
@@ -16,7 +17,7 @@ import { CustomFieldsEditor } from '@/shared/components/CustomFieldsEditor';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { apiClient } from '@/shared/lib/api-client';
-import type { Merchant, Product, ProductCategory, ProductCustomField } from '@/shared/types';
+import type { Product, ProductCategory, ProductCustomField } from '@/shared/types';
 
 interface MerchantStats {
   productCount: number;
@@ -44,29 +45,14 @@ const emptyProduct = {
 };
 
 export default function MerchantDashboardPage() {
-  const { user, update } = useAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState<MerchantStats | null>(null);
-  const [store, setStore] = useState<Merchant | null>(null);
-  const [storeForm, setStoreForm] = useState({ name: '', description: '' });
   const [form, setForm] = useState(emptyProduct);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const needsOnboarding = !user?.merchantId && !store;
-
-  async function loadStore() {
-    try {
-      const data = await apiClient<Merchant | null>('/merchants/me');
-      setStore(data);
-      if (data) {
-        setStoreForm({ name: data.name, description: data.description });
-      }
-    } catch {
-      setStore(null);
-    }
-  }
+  const needsOnboarding = !user?.merchantId;
 
   async function loadStats() {
     setLoading(true);
@@ -81,47 +67,12 @@ export default function MerchantDashboardPage() {
   }
 
   useEffect(() => {
-    loadStore().then(() => loadStats());
+    if (!user?.merchantId) {
+      setLoading(false);
+      return;
+    }
+    loadStats();
   }, [user?.merchantId]);
-
-  async function createStore(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    setError('');
-    try {
-      const merchant = await apiClient<Merchant>('/merchants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(storeForm),
-      });
-      setStore(merchant);
-      setMessage('Store created. Awaiting admin approval if required.');
-      await update();
-      await loadStats();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create store');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function updateStore(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const updated = await apiClient<Merchant>('/merchants/me', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(storeForm),
-      });
-      setStore(updated);
-      setMessage('Store profile updated');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed');
-    } finally {
-      setSaving(false);
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -178,36 +129,15 @@ export default function MerchantDashboardPage() {
         title="Merchant Dashboard"
         description="Set up your store before managing products"
       >
-        <RoleGate permission="manage_merchants">
-          <div id="store" className="scroll-mt-24">
-          <GlassCard className="mx-auto max-w-lg p-8">
-            <h2 className="font-serif text-xl font-semibold">Create your store</h2>
-            <p className="mt-2 text-sm text-muted">
-              You need a merchant profile before you can add products and view analytics.
-            </p>
-            <form onSubmit={createStore} className="mt-6 space-y-4">
-              <input
-                placeholder="Store name"
-                value={storeForm.name}
-                onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })}
-                required
-                className="input-glass w-full rounded-lg px-3 py-2"
-              />
-              <textarea
-                placeholder="Store description"
-                value={storeForm.description}
-                onChange={(e) => setStoreForm({ ...storeForm, description: e.target.value })}
-                rows={3}
-                className="input-glass w-full rounded-lg px-3 py-2"
-              />
-              {error && <p className="text-sm text-error">{error}</p>}
-              <Button type="submit" disabled={saving}>
-                {saving ? 'Creating...' : 'Create store'}
-              </Button>
-            </form>
-          </GlassCard>
-          </div>
-        </RoleGate>
+        <GlassCard className="mx-auto max-w-lg p-8">
+          <h2 className="font-serif text-xl font-semibold">Create your store</h2>
+          <p className="mt-2 text-sm text-muted">
+            Finish store setup in Settings before you can add products and view analytics.
+          </p>
+          <Link href="/dashboard/settings/store" className="mt-6 inline-block">
+            <Button>Go to store settings</Button>
+          </Link>
+        </GlassCard>
       </DashboardShell>
     );
   }
@@ -217,8 +147,6 @@ export default function MerchantDashboardPage() {
       title="Merchant Dashboard"
       description="Manage products, fulfill orders, and view analytics"
     >
-      {message && <p className="mb-4 text-sm text-success">{message}</p>}
-
       <RoleGate permission="manage_products">
         <div id="analytics" className="scroll-mt-24">
           {stats && (
@@ -237,36 +165,6 @@ export default function MerchantDashboardPage() {
       <RoleGate permission="fulfill_orders">
         <div className="mb-10">
           <OrdersPanel mode="merchant" allowAdvance allowMarkPaid />
-        </div>
-      </RoleGate>
-
-      <RoleGate permission="manage_merchants">
-        <div id="store" className="mb-8 scroll-mt-24">
-        <GlassCard className="p-6">
-          <h2 className="font-serif text-xl font-semibold">Store profile</h2>
-          {store && (
-            <p className="mt-1 text-sm text-muted-subtle">
-              Status: <span className="chip-category">{store.status}</span>
-            </p>
-          )}
-          <form onSubmit={updateStore} className="mt-4 space-y-3">
-            <input
-              placeholder="Store name"
-              value={storeForm.name}
-              onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })}
-              required
-              className="input-glass w-full rounded-lg px-3 py-2"
-            />
-            <textarea
-              placeholder="Store description"
-              value={storeForm.description}
-              onChange={(e) => setStoreForm({ ...storeForm, description: e.target.value })}
-              rows={2}
-              className="input-glass w-full rounded-lg px-3 py-2"
-            />
-            <Button type="submit" disabled={saving}>Save store profile</Button>
-          </form>
-        </GlassCard>
         </div>
       </RoleGate>
 

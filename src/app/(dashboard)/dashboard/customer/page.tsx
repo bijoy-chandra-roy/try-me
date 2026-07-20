@@ -15,14 +15,10 @@ import { fetchOrders } from '@/features/orders/api/orders.api';
 import type { TryOnHistory } from '@/shared/types';
 
 export default function CustomerDashboardPage() {
-  const { user, update } = useAuth();
+  const { user } = useAuth();
   const [history, setHistory] = useState<TryOnHistory[]>([]);
   const [orderCount, setOrderCount] = useState(0);
-  const [name, setName] = useState(user?.name ?? '');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -36,35 +32,10 @@ export default function CustomerDashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    if (user?.name) setName(user.name);
-  }, [user?.name]);
-
-  async function saveProfile(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user?.id) return;
-    setSaving(true);
-    setMessage('');
-    try {
-      await apiClient(`/users/${user.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, password: password || undefined }),
-      });
-      setPassword('');
-      setMessage('Profile updated');
-      await update();
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Update failed');
-    } finally {
-      setSaving(false);
-    }
-  }
-
   return (
     <DashboardShell
       title="Customer Dashboard"
-      description="Orders, addresses, try-on history, and account settings"
+      description="Orders, addresses, and try-on history"
     >
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <StatCard label="Orders" value={orderCount} />
@@ -84,49 +55,21 @@ export default function CustomerDashboardPage() {
         </RoleGate>
       </div>
 
-      <div className="mb-10 grid gap-6 lg:grid-cols-2">
-        <RoleGate permission="manage_own_profile">
-          <div id="profile" className="scroll-mt-24">
-            <GlassCard className="p-6">
-              <h2 className="font-serif text-xl font-semibold">Profile</h2>
-              <form onSubmit={saveProfile} className="mt-4 space-y-4">
-                <div>
-                  <label className="mb-1 block text-sm">Display name</label>
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="input-glass w-full rounded-xl px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm">New password (optional)</label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="input-glass w-full rounded-xl px-3 py-2"
-                  />
-                </div>
-                {message && <p className="text-sm text-success">{message}</p>}
-                <Button type="submit" disabled={saving}>
-                  {saving ? 'Saving...' : 'Save profile'}
-                </Button>
-              </form>
-            </GlassCard>
-          </div>
-        </RoleGate>
-
+      <div className="mb-10">
         <GlassCard className="p-6">
           <h2 className="font-serif text-xl font-semibold">Quick actions</h2>
           <p className="mt-2 text-sm text-muted">
-            Browse the catalog, add to cart, or try on new products.
+            Browse the catalog, manage your cart, or update account settings.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/">
               <Button>Browse catalog</Button>
             </Link>
             <Link href="/cart">
-              <Button>View cart</Button>
+              <Button variant="secondary">View cart</Button>
+            </Link>
+            <Link href="/dashboard/settings/profile">
+              <Button variant="ghost">Settings</Button>
             </Link>
           </div>
         </GlassCard>
