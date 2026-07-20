@@ -38,11 +38,13 @@ export async function apiClient<T>(
 
 export async function apiClientFormData<T>(
   endpoint: string,
-  formData: FormData
+  formData: FormData,
+  options: { signal?: AbortSignal } = {}
 ): Promise<T> {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: 'POST',
     body: formData,
+    signal: options.signal,
   });
 
   const payload: ApiResponse<T> = await response.json();

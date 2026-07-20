@@ -3,11 +3,12 @@ import type { TryOnResult } from '@/shared/types';
 
 export async function submitTryOn(
   userImage: File,
-  productId: string
+  productId: string,
+  signal?: AbortSignal
 ): Promise<TryOnResult> {
   const formData = new FormData();
   formData.append('userImage', userImage);
   formData.append('productId', productId);
 
-  return apiClientFormData<TryOnResult>('/try-on', formData);
+  return apiClientFormData<TryOnResult>('/try-on', formData, { signal });
 }

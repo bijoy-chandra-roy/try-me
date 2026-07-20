@@ -141,7 +141,7 @@ All configuration lives in `.env.local`:
 | `IMGBB_API_KEY` | ImgBB API key |
 | `HF_TOKEN` | Hugging Face token (better rate limits / ZeroGPU quota) |
 | `VTO_API_URL` | Hugging Face Gradio `/call/tryon` endpoint |
-| `VTO_TIMEOUT_MS` | Circuit breaker timeout (default 50000) |
+| `VTO_TIMEOUT_MS` | Circuit breaker timeout before fallback (default 300000 = 5 min) |
 | `AUTH_SECRET` | Auth.js session secret (required) |
 | `AUTH_URL` | App URL for Auth.js (default `http://localhost:3000`) |
 

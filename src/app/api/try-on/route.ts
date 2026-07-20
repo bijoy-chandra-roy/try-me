@@ -9,7 +9,7 @@ import { hasPermission } from '@/shared/auth/permissions';
 import { jsonError, jsonSuccess } from '@/server/lib/api-response';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
