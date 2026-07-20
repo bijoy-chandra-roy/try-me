@@ -5,12 +5,12 @@ import { useSession, signOut } from 'next-auth/react';
 import { ThemeToggle } from '@/shared/components/ThemeToggle';
 import { Tooltip } from '@/shared/components/Tooltip';
 import { GlassButton } from '@/shared/components/GlassButton';
-import { ROLE_LABELS, getDashboardPath } from '@/shared/auth/roles';
-import type { UserRole } from '@/shared/auth/roles';
+import { ROLE_LABELS, getDashboardPath, isUserRole } from '@/shared/auth/roles';
 
 export function Header() {
   const { data: session, status } = useSession();
-  const role = session?.user?.role as UserRole | undefined;
+  const rawRole = session?.user?.role;
+  const role = rawRole && isUserRole(rawRole) ? rawRole : undefined;
   const isAuthenticated = status === 'authenticated';
 
   return (
@@ -41,6 +41,13 @@ export function Header() {
                 Sign out
               </GlassButton>
             </>
+          ) : isAuthenticated ? (
+            <GlassButton
+              className="text-sm"
+              onClick={() => signOut({ callbackUrl: '/' })}
+            >
+              Sign out
+            </GlassButton>
           ) : status !== 'loading' ? (
             <>
               <Link href="/login">
