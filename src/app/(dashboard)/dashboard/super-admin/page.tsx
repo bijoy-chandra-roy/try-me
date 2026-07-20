@@ -109,7 +109,7 @@ export default function SuperAdminDashboardPage() {
         <div id="flags" className="mb-10 scroll-mt-24">
           <GlassCard className="p-6">
             <h2 className="font-serif text-xl font-semibold">System configuration</h2>
-            <p className="mt-1 text-sm text-sand-500">
+            <p className="mt-1 text-sm text-muted-subtle">
               Controls maintenance mode and guest try-on limits across the platform
             </p>
             <div className="mt-4 space-y-3">
@@ -131,7 +131,7 @@ export default function SuperAdminDashboardPage() {
                   onChange={(e) =>
                     setFlags({ ...flags, guestTryOnLimit: Number(e.target.value) })
                   }
-                  className="w-16 rounded border border-sand-300/60 bg-white/50 px-2 py-1 dark:border-olive-500/40 dark:bg-olive-800/30"
+                  className="input-glass w-16 rounded px-2 py-1"
                 />
               </label>
             </div>
@@ -149,14 +149,14 @@ export default function SuperAdminDashboardPage() {
             {stats?.recentTryOns.map((item) => (
               <div key={item._id} className="text-sm">
                 <span className="font-medium">{item.productName}</span>
-                <span className="text-sand-500"> · {new Date(item.createdAt).toLocaleString()}</span>
+                <span className="text-muted-subtle"> · {new Date(item.createdAt).toLocaleString()}</span>
               </div>
             ))}
           </div>
         </GlassCard>
       </RoleGate>
 
-      {message && <p className="mb-4 text-sm text-olive-600">{message}</p>}
+      {message && <p className="mb-4 text-sm text-success">{message}</p>}
 
       <RoleGate permission="assign_roles">
         <section id="roles" className="mb-10 scroll-mt-24">
@@ -166,14 +166,14 @@ export default function SuperAdminDashboardPage() {
               <GlassCard key={user._id} className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <div>
                   <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-sand-500">{user.email}</p>
+                  <p className="text-sm text-muted-subtle">{user.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="chip-category">{ROLE_LABELS[user.role]}</span>
                   <select
                     value={user.role}
                     onChange={(e) => changeRole(user._id, e.target.value as UserRole)}
-                    className="rounded-lg border border-sand-300/60 bg-white/50 px-2 py-1 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                    className="input-glass rounded-lg px-2 py-1 text-sm"
                   >
                     {USER_ROLES.map((r) => (
                       <option key={r} value={r}>{ROLE_LABELS[r]}</option>
@@ -199,7 +199,7 @@ export default function SuperAdminDashboardPage() {
               <GlassCard key={merchant._id} className="flex items-center justify-between p-4">
                 <div>
                   <p className="font-medium">{merchant.name}</p>
-                  <p className="text-sm text-sand-500">{merchant.description || 'No description'}</p>
+                  <p className="text-sm text-muted-subtle">{merchant.description || 'No description'}</p>
                 </div>
                 <div className="flex gap-2">
                   <span className="chip-category">{merchant.status}</span>

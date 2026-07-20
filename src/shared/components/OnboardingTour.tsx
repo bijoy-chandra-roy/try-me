@@ -46,7 +46,7 @@ export function OnboardingTour() {
     <div className="fixed bottom-6 right-6 z-40 max-w-xs rounded-xl border border-sand-200/80 bg-sand-50/95 p-4 shadow-xl backdrop-blur-md dark:border-olive-600/60 dark:bg-olive-700/95">
       <p className="text-sm text-olive-700 dark:text-sand-100">{step.message}</p>
       <div className="mt-3 flex items-center justify-between gap-3">
-        <span className="text-xs text-sand-500 dark:text-sand-400">
+        <span className="text-xs text-muted-subtle">
           {stepIndex + 1} of {STEPS.length}
         </span>
         <div className="flex gap-2">

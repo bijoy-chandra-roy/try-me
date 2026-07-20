@@ -24,7 +24,7 @@ export function TryOnResultView({ result }: TryOnResultProps) {
           <p className="truncate text-sm font-medium text-olive-700 dark:text-sand-100">
             {result.productName}
           </p>
-          <p className="truncate text-xs text-sand-500 dark:text-sand-400">
+          <p className="truncate text-xs text-muted-subtle">
             {result.fromFallback
               ? 'Served from resilient fallback cache'
               : 'Generated via VTO API'}

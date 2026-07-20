@@ -129,7 +129,7 @@ export default function AdminDashboardPage() {
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
               required
-              className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass w-full rounded-lg px-3 py-2"
             />
             <input
               placeholder="Email"
@@ -137,7 +137,7 @@ export default function AdminDashboardPage() {
               value={newUser.email}
               onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
               required
-              className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass w-full rounded-lg px-3 py-2"
             />
             <input
               placeholder="Password"
@@ -145,12 +145,12 @@ export default function AdminDashboardPage() {
               value={newUser.password}
               onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
               required
-              className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass w-full rounded-lg px-3 py-2"
             />
             <select
               value={newUser.role}
               onChange={(e) => setNewUser({ ...newUser, role: e.target.value as UserRole })}
-              className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass w-full rounded-lg px-3 py-2"
             >
               {assignableRoles.map((r) => (
                 <option key={r} value={r}>{ROLE_LABELS[r]}</option>
@@ -160,7 +160,7 @@ export default function AdminDashboardPage() {
               <select
                 value={newUser.merchantId}
                 onChange={(e) => setNewUser({ ...newUser, merchantId: e.target.value })}
-                className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                className="input-glass w-full rounded-lg px-3 py-2"
               >
                 <option value="">No merchant linked (onboard later)</option>
                 {merchants.map((m) => (
@@ -168,7 +168,7 @@ export default function AdminDashboardPage() {
                 ))}
               </select>
             )}
-            {message && <p className="text-sm text-olive-600">{message}</p>}
+            {message && <p className="text-sm text-success">{message}</p>}
             <GlassButton type="submit">Create user</GlassButton>
           </form>
         </GlassCard>
@@ -182,7 +182,7 @@ export default function AdminDashboardPage() {
               <GlassCard key={user._id} className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <div>
                   <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-sand-500">{user.email} · {ROLE_LABELS[user.role]}</p>
+                  <p className="text-sm text-muted-subtle">{user.email} · {ROLE_LABELS[user.role]}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`chip-category ${user.status === 'inactive' ? 'opacity-50' : ''}`}>
@@ -193,7 +193,7 @@ export default function AdminDashboardPage() {
                       <select
                         value={user.role}
                         onChange={(e) => changeRole(user._id, e.target.value as UserRole)}
-                        className="rounded-lg border border-sand-300/60 bg-white/50 px-2 py-1 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                        className="input-glass rounded-lg px-2 py-1 text-sm"
                       >
                         {assignableRoles.map((r) => (
                           <option key={r} value={r}>{ROLE_LABELS[r]}</option>
@@ -221,7 +221,7 @@ export default function AdminDashboardPage() {
               <GlassCard key={merchant._id} className="flex items-center justify-between p-4">
                 <div>
                   <p className="font-medium">{merchant.name}</p>
-                  <p className="text-sm text-sand-500">{merchant.description || 'No description'}</p>
+                  <p className="text-sm text-muted-subtle">{merchant.description || 'No description'}</p>
                 </div>
                 <div className="flex gap-2">
                   <span className="chip-category">{merchant.status}</span>

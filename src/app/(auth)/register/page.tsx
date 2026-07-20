@@ -70,7 +70,7 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full rounded-xl border border-sand-300/60 bg-white/50 px-4 py-2.5 text-sm outline-none focus:border-olive-500 dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass input-glass-lg w-full"
             />
           </div>
           <div>
@@ -83,7 +83,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-sand-300/60 bg-white/50 px-4 py-2.5 text-sm outline-none focus:border-olive-500 dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass input-glass-lg w-full"
             />
           </div>
           <div>
@@ -97,9 +97,9 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full rounded-xl border border-sand-300/60 bg-white/50 px-4 py-2.5 text-sm outline-none focus:border-olive-500 dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass input-glass-lg w-full"
             />
-            <p className="mt-1 text-xs text-sand-500">At least 8 characters</p>
+            <p className="mt-1 text-xs text-muted-subtle">At least 8 characters</p>
           </div>
 
           {error && (
@@ -123,7 +123,7 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-sand-600 dark:text-sand-300">
           Already have an account?{' '}
-          <Link href="/login" className="font-medium text-olive-600 hover:underline dark:text-sand-100">
+          <Link href="/login" className="text-link">
             Sign in
           </Link>
         </p>

@@ -85,13 +85,13 @@ export default function SupportDashboardPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or email..."
-              className="min-w-0 flex-1 rounded-xl border border-sand-300/60 bg-white/50 px-4 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass min-w-0 flex-1 rounded-xl px-4 py-2"
             />
             <GlassButton type="submit" disabled={loading}>
               {loading ? 'Searching...' : 'Search'}
             </GlassButton>
           </form>
-          {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+          {error && <p className="mt-3 text-sm text-error">{error}</p>}
         </GlassCard>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -106,13 +106,13 @@ export default function SupportDashboardPage() {
                 >
                   <div onClick={() => viewUser(user._id)}>
                     <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-sand-500">{user.email}</p>
+                    <p className="text-sm text-muted-subtle">{user.email}</p>
                   </div>
                   <span className="chip-category">{ROLE_LABELS[user.role]}</span>
                 </GlassCard>
               ))}
               {!loading && users.length === 0 && (
-                <p className="text-sm text-sand-500">Search for a user to begin.</p>
+                <p className="text-sm text-muted-subtle">Search for a user to begin.</p>
               )}
             </div>
           </div>
@@ -122,17 +122,17 @@ export default function SupportDashboardPage() {
             {selected ? (
               <GlassCard className="p-6">
                 <p className="font-medium">{selected.user.name}</p>
-                <p className="text-sm text-sand-500">{selected.user.email}</p>
+                <p className="text-sm text-muted-subtle">{selected.user.email}</p>
                 <p className="mt-1 text-sm">
                   Status: {selected.user.status} · Role: {ROLE_LABELS[selected.user.role]}
                 </p>
                 <RoleGate permission="view_all_try_on_history">
-                  <h3 className="mt-6 mb-3 text-sm font-medium uppercase tracking-wider text-sand-500">
+                  <h3 className="mt-6 mb-3 text-sm font-medium uppercase tracking-wider text-muted-subtle">
                     Try-on history ({selected.history.length})
                   </h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {selected.history.map((item) => (
-                      <div key={item._id} className="overflow-hidden rounded-xl border border-sand-300/40">
+                      <div key={item._id} className="overflow-hidden rounded-xl border border-subtle">
                         <img src={item.compositeImageUrl} alt={item.productName} className="aspect-square object-cover" />
                         <p className="p-2 text-xs">{item.productName}</p>
                       </div>
@@ -141,7 +141,7 @@ export default function SupportDashboardPage() {
                 </RoleGate>
               </GlassCard>
             ) : (
-              <GlassCard className="p-6 text-sm text-sand-500">
+              <GlassCard className="p-6 text-sm text-muted-subtle">
                 Select a user to view their try-on history.
               </GlassCard>
             )}

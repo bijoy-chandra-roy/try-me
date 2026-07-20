@@ -25,17 +25,17 @@ export function DashboardShell({
   const capabilities = role ? ROLE_CAPABILITIES[role] : [];
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl gap-6 px-6 py-8">
-      <aside className="glass-card hidden w-60 shrink-0 flex-col rounded-2xl p-5 md:flex">
+    <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl items-start gap-6 px-6 py-8">
+      <aside className="glass-card sticky top-24 hidden w-60 shrink-0 flex-col rounded-2xl p-5 md:flex">
         <div className="mb-6">
-          <p className="text-xs uppercase tracking-wider text-sand-500">Dashboard</p>
+          <p className="text-xs uppercase tracking-wider text-muted-subtle">Dashboard</p>
           <p className="mt-1 font-medium">{user?.name}</p>
           {role && (
             <span className="chip-category mt-2 inline-block">{ROLE_LABELS[role]}</span>
           )}
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1">
+        <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
             const href = item.hash ? `${item.href}#${item.hash}` : item.href;
             const isActive =
@@ -67,11 +67,11 @@ export function DashboardShell({
         </nav>
 
         {capabilities.length > 0 && (
-          <div className="mt-4 border-t border-sand-300/40 pt-4 dark:border-olive-500/30">
-            <p className="text-xs uppercase tracking-wider text-sand-500">Your access</p>
+          <div className="mt-4 border-t border-subtle pt-4">
+            <p className="text-xs uppercase tracking-wider text-muted-subtle">Your access</p>
             <ul className="mt-2 space-y-1">
               {capabilities.map((cap) => (
-                <li key={cap} className="text-xs text-sand-600 dark:text-sand-400">
+                <li key={cap} className="text-xs text-muted">
                   {cap}
                 </li>
               ))}
@@ -93,7 +93,7 @@ export function DashboardShell({
             {title}
           </h1>
           {description && (
-            <p className="mt-2 text-sand-600 dark:text-sand-300">{description}</p>
+            <p className="mt-2 text-muted">{description}</p>
           )}
         </header>
         {children}

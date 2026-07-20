@@ -34,7 +34,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-olive-900/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-olive-900/60 backdrop-blur-sm dark:bg-black/50"
         onClick={handleClose}
         role="presentation"
       />
@@ -106,7 +106,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               reset();
               setSelectedFile(null);
             }}
-            className="mt-4 w-full rounded-full border border-sand-300 py-2.5 text-sm font-medium text-sand-700 transition-colors hover:bg-sand-100 dark:border-olive-600 dark:text-sand-200 dark:hover:bg-olive-700/30"
+            className="mt-4 w-full rounded-full border border-subtle py-2.5 text-sm font-medium text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-200 dark:hover:bg-olive-800/60"
           >
             Try another photo
           </button>

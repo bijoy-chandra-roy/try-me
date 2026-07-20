@@ -32,7 +32,7 @@ export default function HomePage() {
             Upload a photo and preview any piece on yourself with our virtual try-on.
             Resilient by design — always returns a result.
             {!tryOnBlocked && (
-              <span className="block mt-1 text-sm text-sand-500">
+              <span className="block mt-1 text-sm text-muted-subtle">
                 Guests: {guestTryOnLimit} try-ons per hour. Sign in for unlimited access.
               </span>
             )}

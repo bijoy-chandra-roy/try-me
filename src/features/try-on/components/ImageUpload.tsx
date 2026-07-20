@@ -45,7 +45,7 @@ export function ImageUpload({ onSelect, disabled }: ImageUploadProps) {
         className={`relative flex min-h-[200px] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors ${
           dragOver
             ? 'border-olive-500 bg-olive-500/5'
-            : 'border-sand-300 bg-sand-100/50 dark:border-olive-600 dark:bg-olive-700/20'
+            : 'border-sand-300 bg-sand-100/50 dark:border-olive-500/50 dark:bg-olive-800/40'
         } ${disabled ? 'pointer-events-none opacity-50' : ''}`}
       >
         <input
@@ -70,7 +70,7 @@ export function ImageUpload({ onSelect, disabled }: ImageUploadProps) {
         ) : (
           <>
             <svg
-              className="mb-3 h-10 w-10 text-clay-500"
+              className="mb-3 h-10 w-10 text-clay-500 dark:text-clay-400"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -83,7 +83,7 @@ export function ImageUpload({ onSelect, disabled }: ImageUploadProps) {
             <p className="text-sm font-medium text-sand-700 dark:text-sand-200">
               Upload your photo
             </p>
-            <p className="mt-1 text-xs text-sand-500 dark:text-sand-400">
+            <p className="mt-1 text-xs text-muted-subtle">
               Drag & drop or click to browse
             </p>
           </>

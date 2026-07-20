@@ -176,14 +176,14 @@ export default function MerchantDashboardPage() {
                 value={storeForm.name}
                 onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })}
                 required
-                className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                className="input-glass w-full rounded-lg px-3 py-2"
               />
               <textarea
                 placeholder="Store description"
                 value={storeForm.description}
                 onChange={(e) => setStoreForm({ ...storeForm, description: e.target.value })}
                 rows={3}
-                className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                className="input-glass w-full rounded-lg px-3 py-2"
               />
               {error && <p className="text-sm text-red-600">{error}</p>}
               <GlassButton type="submit" disabled={saving}>
@@ -202,7 +202,7 @@ export default function MerchantDashboardPage() {
       title="Merchant Dashboard"
       description="Manage your product catalog and view try-on analytics"
     >
-      {message && <p className="mb-4 text-sm text-olive-600">{message}</p>}
+      {message && <p className="mb-4 text-sm text-success">{message}</p>}
 
       <RoleGate permission="manage_products">
         <div id="analytics" className="scroll-mt-24">
@@ -221,7 +221,7 @@ export default function MerchantDashboardPage() {
         <GlassCard className="p-6">
           <h2 className="font-serif text-xl font-semibold">Store profile</h2>
           {store && (
-            <p className="mt-1 text-sm text-sand-500">
+            <p className="mt-1 text-sm text-muted-subtle">
               Status: <span className="chip-category">{store.status}</span>
             </p>
           )}
@@ -231,14 +231,14 @@ export default function MerchantDashboardPage() {
               value={storeForm.name}
               onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })}
               required
-              className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass w-full rounded-lg px-3 py-2"
             />
             <textarea
               placeholder="Store description"
               value={storeForm.description}
               onChange={(e) => setStoreForm({ ...storeForm, description: e.target.value })}
               rows={2}
-              className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+              className="input-glass w-full rounded-lg px-3 py-2"
             />
             <GlassButton type="submit" disabled={saving}>Save store profile</GlassButton>
           </form>
@@ -260,7 +260,7 @@ export default function MerchantDashboardPage() {
                     value={form[field]}
                     onChange={(e) => setForm({ ...form, [field]: e.target.value })}
                     required={field !== 'description'}
-                    className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                    className="input-glass w-full rounded-lg px-3 py-2"
                   />
                 </div>
               ))}
@@ -272,7 +272,7 @@ export default function MerchantDashboardPage() {
                     min={0}
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-                    className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                    className="input-glass w-full rounded-lg px-3 py-2"
                   />
                 </div>
                 <div>
@@ -280,7 +280,7 @@ export default function MerchantDashboardPage() {
                   <select
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value as ProductCategory })}
-                    className="w-full rounded-lg border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                    className="input-glass w-full rounded-lg px-3 py-2"
                   >
                     {CATEGORIES.map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -315,14 +315,14 @@ export default function MerchantDashboardPage() {
 
           <div className="lg:col-span-3">
             <h2 className="mb-4 font-serif text-xl font-semibold">Your products</h2>
-            {loading && <p className="text-sm text-sand-500">Loading...</p>}
+            {loading && <p className="text-sm text-muted-subtle">Loading...</p>}
             <div className="space-y-3">
               {stats?.products.map((product) => (
                 <GlassCard key={product._id} className="flex items-center gap-4 p-4">
                   <img src={product.imageUrl} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">{product.name}</p>
-                    <p className="text-sm text-sand-500">
+                    <p className="text-sm text-muted-subtle">
                       ${product.price.toFixed(2)} · {product.inStock ? 'In stock' : 'Out of stock'} ·{' '}
                       {stats.perProduct[product._id] ?? 0} try-ons
                     </p>

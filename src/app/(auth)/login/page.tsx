@@ -72,7 +72,7 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-xl border border-sand-300/60 bg-white/50 px-4 py-2.5 text-sm outline-none focus:border-olive-500 dark:border-olive-500/40 dark:bg-olive-800/30"
+            className="input-glass input-glass-lg w-full"
           />
         </div>
         <div>
@@ -85,7 +85,7 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-xl border border-sand-300/60 bg-white/50 px-4 py-2.5 text-sm outline-none focus:border-olive-500 dark:border-olive-500/40 dark:bg-olive-800/30"
+            className="input-glass input-glass-lg w-full"
           />
         </div>
 
@@ -109,7 +109,7 @@ function LoginForm() {
 
       <p className="mt-6 text-center text-sm text-sand-600 dark:text-sand-300">
         No account?{' '}
-        <Link href="/register" className="font-medium text-olive-600 hover:underline dark:text-sand-100">
+        <Link href="/register" className="text-link">
           Register
         </Link>
       </p>
@@ -120,7 +120,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md items-center px-6 py-12">
-      <Suspense fallback={<p className="text-sm text-sand-500">Loading...</p>}>
+      <Suspense fallback={<p className="text-sm text-muted-subtle">Loading...</p>}>
         <LoginForm />
       </Suspense>
     </div>

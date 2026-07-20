@@ -73,7 +73,7 @@ export default function CustomerDashboardPage() {
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                  className="input-glass w-full rounded-xl px-3 py-2"
                 />
               </div>
               <div>
@@ -82,10 +82,10 @@ export default function CustomerDashboardPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-sand-300/60 bg-white/50 px-3 py-2 text-sm dark:border-olive-500/40 dark:bg-olive-800/30"
+                  className="input-glass w-full rounded-xl px-3 py-2"
                 />
               </div>
-              {message && <p className="text-sm text-olive-600 dark:text-sand-200">{message}</p>}
+              {message && <p className="text-sm text-success">{message}</p>}
               <GlassButton type="submit" disabled={saving}>
                 {saving ? 'Saving...' : 'Save profile'}
               </GlassButton>
@@ -108,7 +108,7 @@ export default function CustomerDashboardPage() {
       <RoleGate permission="view_own_try_on_history">
         <section id="history" className="scroll-mt-24">
           <h2 className="mb-4 font-serif text-xl font-semibold">Try-on history</h2>
-          {loading && <p className="text-sm text-sand-500">Loading history...</p>}
+          {loading && <p className="text-sm text-muted-subtle">Loading history...</p>}
           {!loading && history.length === 0 && (
             <GlassCard className="p-6 text-sm text-sand-600 dark:text-sand-300">
               No try-ons yet. Head to the catalog to get started.
@@ -124,7 +124,7 @@ export default function CustomerDashboardPage() {
                 />
                 <div className="p-4">
                   <p className="font-medium">{item.productName}</p>
-                  <p className="mt-1 text-xs text-sand-500">
+                  <p className="mt-1 text-xs text-muted-subtle">
                     {new Date(item.createdAt).toLocaleString()} ·{' '}
                     {item.fromFallback ? 'Fallback' : 'Live'}
                   </p>

@@ -15,7 +15,7 @@ export function AuthOrDivider() {
         <div className="w-full border-t border-sand-300/60 dark:border-olive-500/40" />
       </div>
       <div className="relative flex justify-center text-xs uppercase">
-        <span className="bg-transparent px-2 text-sand-500 dark:text-sand-400">or</span>
+        <span className="bg-transparent px-2 text-muted-subtle">or</span>
       </div>
     </div>
   );
@@ -33,7 +33,7 @@ export function GoogleSignInButton({
       type="button"
       onClick={onClick}
       disabled={disabled || loading}
-      className="flex w-full items-center justify-center gap-3 rounded-full border border-sand-300/60 bg-white/50 px-4 py-2.5 text-sm font-medium text-sand-700 transition-colors hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-40 dark:border-olive-500/40 dark:bg-olive-800/30 dark:text-sand-100 dark:hover:bg-olive-800/50"
+      className="input-glass flex w-full items-center justify-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-sand-700 transition-colors hover:bg-white dark:text-sand-100 dark:hover:bg-olive-700/80 disabled:cursor-not-allowed disabled:opacity-40"
     >
       <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
         <path
