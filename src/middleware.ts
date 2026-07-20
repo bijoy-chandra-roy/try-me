@@ -26,6 +26,15 @@ export async function middleware(request: NextRequest) {
 
   const role = token.role;
 
+  if (pathname === '/settings/store' || pathname === '/dashboard/settings/store') {
+    return NextResponse.redirect(new URL('/dashboard/merchant#store', request.url));
+  }
+
+  if (pathname === '/dashboard/settings' || pathname.startsWith('/dashboard/settings/')) {
+    const suffix = pathname.slice('/dashboard/settings'.length);
+    return NextResponse.redirect(new URL(`/settings${suffix || '/profile'}`, request.url));
+  }
+
   if (pathname === '/dashboard') {
     return NextResponse.redirect(new URL(getDashboardPath(role), request.url));
   }
@@ -41,6 +50,8 @@ export const config = {
   matcher: [
     '/dashboard',
     '/dashboard/:path*',
+    '/settings',
+    '/settings/:path*',
     '/cart',
     '/checkout',
     '/orders/:path*',

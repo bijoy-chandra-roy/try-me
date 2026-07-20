@@ -68,7 +68,7 @@ export default function CustomerDashboardPage() {
             <Link href="/cart">
               <Button variant="secondary">View cart</Button>
             </Link>
-            <Link href="/dashboard/settings/profile">
+            <Link href="/settings/profile">
               <Button variant="ghost">Settings</Button>
             </Link>
           </div>

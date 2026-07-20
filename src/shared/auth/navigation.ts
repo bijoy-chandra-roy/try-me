@@ -1,10 +1,12 @@
 import type { Permission } from './permissions';
 import { hasPermission } from './permissions';
 import type { UserRole } from './roles';
+import type { NavIconKey } from '@/shared/ui/nav-icons';
 
 export interface DashboardNavItem {
   href: string;
   label: string;
+  icon: NavIconKey;
   permission?: Permission;
   hash?: string;
   /** When true, active if pathname equals or starts with href */
@@ -14,6 +16,7 @@ export interface DashboardNavItem {
 export interface SettingsNavItem {
   href: string;
   label: string;
+  icon: NavIconKey;
   /** Extra role gate beyond manage_own_profile */
   roles?: UserRole[];
   permission?: Permission;
@@ -21,74 +24,139 @@ export interface SettingsNavItem {
 
 export const DASHBOARD_NAV: Record<UserRole, DashboardNavItem[]> = {
   customer: [
-    { href: '/dashboard/customer', label: 'Overview' },
-    { href: '/dashboard/customer', label: 'Orders', permission: 'view_own_orders', hash: 'orders' },
-    { href: '/dashboard/customer', label: 'Addresses', permission: 'manage_cart', hash: 'addresses' },
-    { href: '/dashboard/customer', label: 'Try-on History', permission: 'view_own_try_on_history', hash: 'history' },
+    { href: '/dashboard/customer', label: 'Overview', icon: 'overview' },
     {
-      href: '/dashboard/settings',
-      label: 'Settings',
-      permission: 'manage_own_profile',
-      matchPrefix: true,
+      href: '/dashboard/customer',
+      label: 'Orders',
+      icon: 'orders',
+      permission: 'view_own_orders',
+      hash: 'orders',
+    },
+    {
+      href: '/dashboard/customer',
+      label: 'Addresses',
+      icon: 'addresses',
+      permission: 'manage_cart',
+      hash: 'addresses',
+    },
+    {
+      href: '/dashboard/customer',
+      label: 'Try-on History',
+      icon: 'history',
+      permission: 'view_own_try_on_history',
+      hash: 'history',
     },
   ],
   merchant: [
-    { href: '/dashboard/merchant', label: 'Products', permission: 'manage_products' },
-    { href: '/dashboard/merchant', label: 'Orders', permission: 'fulfill_orders', hash: 'orders' },
-    { href: '/dashboard/merchant', label: 'Analytics', permission: 'manage_products', hash: 'analytics' },
+    { href: '/dashboard/merchant', label: 'Products', icon: 'products', permission: 'manage_products' },
     {
-      href: '/dashboard/settings',
-      label: 'Settings',
-      permission: 'manage_own_profile',
-      matchPrefix: true,
+      href: '/dashboard/merchant',
+      label: 'Orders',
+      icon: 'orders',
+      permission: 'fulfill_orders',
+      hash: 'orders',
+    },
+    {
+      href: '/dashboard/merchant',
+      label: 'Analytics',
+      icon: 'analytics',
+      permission: 'manage_products',
+      hash: 'analytics',
+    },
+    {
+      href: '/dashboard/merchant',
+      label: 'Store',
+      icon: 'store',
+      permission: 'manage_merchants',
+      hash: 'store',
     },
   ],
   support: [
-    { href: '/dashboard/support', label: 'Orders', permission: 'view_all_orders', hash: 'orders' },
-    { href: '/dashboard/support', label: 'User Lookup', permission: 'view_users' },
-    { href: '/dashboard/support', label: 'System Health', permission: 'view_system_health', hash: 'health' },
     {
-      href: '/dashboard/settings',
-      label: 'Settings',
-      permission: 'manage_own_profile',
-      matchPrefix: true,
+      href: '/dashboard/support',
+      label: 'Orders',
+      icon: 'orders',
+      permission: 'view_all_orders',
+      hash: 'orders',
+    },
+    { href: '/dashboard/support', label: 'User Lookup', icon: 'userLookup', permission: 'view_users' },
+    {
+      href: '/dashboard/support',
+      label: 'System Health',
+      icon: 'health',
+      permission: 'view_system_health',
+      hash: 'health',
     },
   ],
   admin: [
-    { href: '/dashboard/admin', label: 'Overview', permission: 'view_system_health' },
-    { href: '/dashboard/admin', label: 'Orders', permission: 'view_all_orders', hash: 'orders' },
-    { href: '/dashboard/admin', label: 'Users', permission: 'manage_users', hash: 'users' },
-    { href: '/dashboard/admin', label: 'Merchants', permission: 'manage_merchants', hash: 'merchants' },
     {
-      href: '/dashboard/settings',
-      label: 'Settings',
-      permission: 'manage_own_profile',
-      matchPrefix: true,
+      href: '/dashboard/admin',
+      label: 'Overview',
+      icon: 'overview',
+      permission: 'view_system_health',
+    },
+    {
+      href: '/dashboard/admin',
+      label: 'Orders',
+      icon: 'orders',
+      permission: 'view_all_orders',
+      hash: 'orders',
+    },
+    { href: '/dashboard/admin', label: 'Users', icon: 'users', permission: 'manage_users', hash: 'users' },
+    {
+      href: '/dashboard/admin',
+      label: 'Merchants',
+      icon: 'merchants',
+      permission: 'manage_merchants',
+      hash: 'merchants',
     },
   ],
   super_admin: [
-    { href: '/dashboard/super-admin', label: 'Overview', permission: 'view_system_health' },
-    { href: '/dashboard/super-admin', label: 'Orders', permission: 'view_all_orders', hash: 'orders' },
-    { href: '/dashboard/super-admin', label: 'Feature Flags', permission: 'manage_system', hash: 'flags' },
-    { href: '/dashboard/super-admin', label: 'Users & Roles', permission: 'assign_roles', hash: 'roles' },
-    { href: '/dashboard/super-admin', label: 'Merchants', permission: 'manage_merchants', hash: 'merchants' },
     {
-      href: '/dashboard/settings',
-      label: 'Settings',
-      permission: 'manage_own_profile',
-      matchPrefix: true,
+      href: '/dashboard/super-admin',
+      label: 'Overview',
+      icon: 'overview',
+      permission: 'view_system_health',
+    },
+    {
+      href: '/dashboard/super-admin',
+      label: 'Orders',
+      icon: 'orders',
+      permission: 'view_all_orders',
+      hash: 'orders',
+    },
+    {
+      href: '/dashboard/super-admin',
+      label: 'Feature Flags',
+      icon: 'flags',
+      permission: 'manage_system',
+      hash: 'flags',
+    },
+    {
+      href: '/dashboard/super-admin',
+      label: 'Users & Roles',
+      icon: 'roles',
+      permission: 'assign_roles',
+      hash: 'roles',
+    },
+    {
+      href: '/dashboard/super-admin',
+      label: 'Merchants',
+      icon: 'merchants',
+      permission: 'manage_merchants',
+      hash: 'merchants',
     },
   ],
 };
 
 export const SETTINGS_NAV: SettingsNavItem[] = [
-  { href: '/dashboard/settings/profile', label: 'Profile', permission: 'manage_own_profile' },
-  { href: '/dashboard/settings/account', label: 'Account', permission: 'manage_own_profile' },
+  { href: '/settings/profile', label: 'Profile', icon: 'profile', permission: 'manage_own_profile' },
+  { href: '/settings/account', label: 'Account', icon: 'account', permission: 'manage_own_profile' },
   {
-    href: '/dashboard/settings/store',
-    label: 'Store',
-    roles: ['merchant'],
-    permission: 'manage_merchants',
+    href: '/settings/appearance',
+    label: 'Appearance',
+    icon: 'appearance',
+    permission: 'manage_own_profile',
   },
 ];
 

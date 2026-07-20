@@ -2,101 +2,79 @@
 
 /**
  * Responsive contract:
- *   > 768px   nav 256 | content
- *   <= 768px  nav → MobileNav drawer; global Header remains
+ *   > 768px   expandable SideNav | content (height hugs nav content)
+ *   <= 768px  hamburger drawer; global Header remains
  */
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import {
+  ChevronsLeft,
+  ChevronsRight,
+  Home,
+  LogOut,
+  Menu,
+} from 'lucide-react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { ROLE_LABELS } from '@/shared/auth/roles';
-import { getDashboardNavItems, ROLE_CAPABILITIES } from '@/shared/auth/navigation';
-import { Button } from '@/shared/components/Button';
+import { getDashboardNavItems } from '@/shared/auth/navigation';
 import { IconButton } from '@/shared/components/IconButton';
+import { IconLink } from '@/shared/components/IconLink';
+import { Drawer } from '@/shared/components/Drawer';
+import { DrawerNavItem } from '@/shared/components/DrawerNavItem';
+import { getNavIcon } from '@/shared/ui/nav-icons';
 
-function NavLinks({
-  onNavigate,
-}: {
-  onNavigate?: () => void;
-}) {
+const COLLAPSE_KEY = 'dashboard-nav-collapsed';
+
+function useDashboardNavActive() {
   const pathname = usePathname();
-  const { user, role } = useAuth();
-  const navItems = role ? getDashboardNavItems(role) : [];
-  const capabilities = role ? ROLE_CAPABILITIES[role] : [];
+  const [hash, setHash] = useState('');
 
-  return (
-    <>
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-wider text-muted-subtle">Dashboard</p>
-        <p className="mt-1 font-medium text-primary">{user?.name}</p>
-        {role && (
-          <span className="chip-category mt-2 inline-block">{ROLE_LABELS[role]}</span>
-        )}
-      </div>
+  useEffect(() => {
+    function sync() {
+      setHash(window.location.hash);
+    }
+    sync();
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
+  }, [pathname]);
 
-      <nav className="flex flex-col gap-1">
-        {navItems.map((item) => {
-          const href = item.hash ? `${item.href}#${item.hash}` : item.href;
-          const onSettings = pathname.startsWith('/dashboard/settings');
-          let isActive = false;
-          if (item.matchPrefix) {
-            isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          } else if (!onSettings) {
-            isActive =
-              pathname === item.href &&
-              (typeof window !== 'undefined'
-                ? !item.hash || window.location.hash === `#${item.hash}`
-                : !item.hash);
-          }
+  return function isActive(item: { href: string; hash?: string; matchPrefix?: boolean }) {
+    if (item.matchPrefix) {
+      return pathname === item.href || pathname.startsWith(`${item.href}/`);
+    }
+    if (pathname !== item.href) return false;
+    if (!item.hash) return !hash || hash === '#';
+    return hash === `#${item.hash}`;
+  };
+}
 
-          return (
-            <Link
-              key={`${item.href}-${item.label}`}
-              href={href}
-              onClick={onNavigate}
-              className={`rounded-inner px-3 py-2 text-sm transition-colors ${
-                isActive
-                  ? 'bg-[var(--color-overlay-pressed)] font-medium text-primary'
-                  : 'text-muted hover:bg-[var(--color-overlay-hover)]'
-              }`}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-        <Link
-          href="/"
-          onClick={onNavigate}
-          className="mt-2 rounded-inner px-3 py-2 text-sm text-muted hover:bg-[var(--color-overlay-hover)]"
-        >
-          Back to Catalog
-        </Link>
-      </nav>
+function useCollapsedNav() {
+  const [collapsed, setCollapsed] = useState(false);
 
-      {capabilities.length > 0 && (
-        <div className="mt-4 border-t border-subtle pt-4">
-          <p className="text-xs uppercase tracking-wider text-muted-subtle">Your access</p>
-          <ul className="mt-2 space-y-1">
-            {capabilities.map((cap) => (
-              <li key={cap} className="text-xs text-muted">
-                {cap}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem(COLLAPSE_KEY) === '1');
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
-      <Button
-        variant="ghost"
-        onClick={() => signOut({ callbackUrl: '/' })}
-        className="mt-4 w-full"
-      >
-        Sign out
-      </Button>
-    </>
-  );
+  function toggle() {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(COLLAPSE_KEY, next ? '1' : '0');
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }
+
+  return { collapsed, toggle };
 }
 
 export function DashboardShell({
@@ -108,68 +86,204 @@ export function DashboardShell({
   description?: string;
   children: React.ReactNode;
 }) {
+  const { user, role } = useAuth();
+  const navItems = role ? getDashboardNavItems(role) : [];
+  const isActive = useDashboardNavActive();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    if (!mobileOpen) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setMobileOpen(false);
-    }
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [mobileOpen]);
+  const { collapsed, toggle } = useCollapsedNav();
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-content items-start gap-6 px-6 py-8">
-      {/* SideNav — desktop */}
+    <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-content items-start gap-4 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8">
+      {/* Desktop sidenav — height follows content, not page height */}
       <aside
-        className="glass-card sticky top-24 hidden w-[var(--layout-sidenav-width)] shrink-0 flex-col p-5 md:flex"
-        style={{ width: 'var(--layout-sidenav-width)' }}
+        className={`glass-card sticky top-24 hidden shrink-0 flex-col md:flex ${
+          collapsed ? 'w-14 items-center gap-1 p-2' : 'w-[var(--layout-sidenav-width)] gap-1 p-4'
+        }`}
       >
-        <NavLinks />
+        <div
+          className={`mb-3 flex w-full items-center ${
+            collapsed ? 'flex-col gap-2' : 'justify-between gap-2'
+          }`}
+        >
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="text-xs uppercase tracking-wider text-muted-subtle">Dashboard</p>
+              <p className="mt-0.5 truncate font-medium text-primary">{user?.name}</p>
+              {role && (
+                <span className="chip-category mt-1.5 inline-block">{ROLE_LABELS[role]}</span>
+              )}
+            </div>
+          )}
+          {collapsed && (
+            <span
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-overlay-hover)] text-xs font-semibold text-primary"
+              title={user?.name ?? 'Account'}
+            >
+              {(user?.name ?? '?').slice(0, 1).toUpperCase()}
+            </span>
+          )}
+          <IconButton
+            label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            tooltipSide="right"
+            size="sm"
+            onClick={toggle}
+          >
+            {collapsed ? (
+              <ChevronsRight className="h-4 w-4" strokeWidth={1.75} />
+            ) : (
+              <ChevronsLeft className="h-4 w-4" strokeWidth={1.75} />
+            )}
+          </IconButton>
+        </div>
+
+        <nav
+          className={`flex flex-col gap-1 ${collapsed ? 'items-center' : ''}`}
+          aria-label="Dashboard"
+        >
+          {navItems.map((item) => {
+            const href = item.hash ? `${item.href}#${item.hash}` : item.href;
+            const Icon = getNavIcon(item.icon);
+            const active = isActive(item);
+
+            if (collapsed) {
+              return (
+                <IconLink
+                  key={`${item.href}-${item.label}`}
+                  href={href}
+                  label={item.label}
+                  active={active}
+                  tooltipSide="right"
+                >
+                  <Icon className="h-5 w-5" strokeWidth={1.75} />
+                </IconLink>
+              );
+            }
+
+            return (
+              <Link
+                key={`${item.href}-${item.label}`}
+                href={href}
+                aria-current={active ? 'page' : undefined}
+                className={`flex items-center gap-3 rounded-inner px-3 py-2 text-sm transition-colors ${
+                  active
+                    ? 'bg-[var(--color-overlay-pressed)] font-medium text-primary'
+                    : 'text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary'
+                }`}
+              >
+                <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                <span className="truncate">{item.label}</span>
+              </Link>
+            );
+          })}
+
+          {collapsed ? (
+            <IconLink href="/" label="Back to Catalog" tooltipSide="right" className="mt-2">
+              <Home className="h-5 w-5" strokeWidth={1.75} />
+            </IconLink>
+          ) : (
+            <Link
+              href="/"
+              className="mt-2 flex items-center gap-3 rounded-inner px-3 py-2 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
+            >
+              <Home className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+              <span>Back to Catalog</span>
+            </Link>
+          )}
+        </nav>
+
+        <div className={`mt-3 border-t border-subtle pt-3 ${collapsed ? '' : 'w-full'}`}>
+          {collapsed ? (
+            <IconButton
+              label="Sign out"
+              tooltipSide="right"
+              onClick={() => signOut({ callbackUrl: '/' })}
+            >
+              <LogOut className="h-5 w-5" strokeWidth={1.75} />
+            </IconButton>
+          ) : (
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="flex w-full items-center gap-3 rounded-inner px-3 py-2 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
+            >
+              <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+              Sign out
+            </button>
+          )}
+        </div>
       </aside>
 
-      {/* Mobile nav trigger */}
-      <div className="fixed bottom-6 right-6 z-sticky md:hidden">
-        <IconButton
-          label={mobileOpen ? 'Close navigation' : 'Open navigation'}
-          onClick={() => setMobileOpen((o) => !o)}
-          className="h-12 w-12 bg-[var(--color-accent-fill)] text-[var(--color-on-accent)] shadow-med"
-        >
-          {mobileOpen ? (
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          ) : (
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          )}
-        </IconButton>
-      </div>
-
-      {/* MobileNav drawer */}
-      {mobileOpen && (
-        <>
-          <button
-            type="button"
-            aria-label="Dismiss navigation"
-            className="fixed inset-0 z-overlay bg-[var(--color-overlay)] md:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
-          <aside className="glass-card fixed bottom-0 left-0 top-16 z-overlay flex w-[min(100%,var(--layout-sidenav-width))] flex-col overflow-y-auto p-5 md:hidden">
-            <NavLinks onNavigate={() => setMobileOpen(false)} />
-          </aside>
-        </>
-      )}
-
       <div className="min-w-0 flex-1">
-        <header className="mb-8">
-          <h1 className="font-serif text-3xl font-semibold text-primary">{title}</h1>
-          {description && <p className="mt-2 text-muted">{description}</p>}
+        <header className="mb-6 flex items-start justify-between gap-3 sm:mb-8">
+          <div className="min-w-0">
+            <h1 className="font-serif text-2xl font-semibold text-primary sm:text-3xl">{title}</h1>
+            {description && (
+              <p className="mt-1 text-sm text-muted sm:mt-2 sm:text-base">{description}</p>
+            )}
+            {role && (
+              <p className="mt-2 text-xs text-muted-subtle md:hidden">
+                {user?.name} · {ROLE_LABELS[role]}
+              </p>
+            )}
+          </div>
+          <IconButton
+            label="Open dashboard menu"
+            className="shrink-0 md:hidden"
+            showTooltip={false}
+            onClick={() => setMobileOpen(true)}
+          >
+            <Menu className="h-5 w-5" strokeWidth={1.75} />
+          </IconButton>
         </header>
+
         {children}
       </div>
+
+      <Drawer
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        title="Dashboard"
+        side="left"
+      >
+        <div className="mb-4">
+          <p className="font-medium text-primary">{user?.name}</p>
+          {role && (
+            <span className="chip-category mt-2 inline-block">{ROLE_LABELS[role]}</span>
+          )}
+        </div>
+        <nav className="flex flex-col gap-1" aria-label="Dashboard">
+          {navItems.map((item) => {
+            const href = item.hash ? `${item.href}#${item.hash}` : item.href;
+            return (
+              <DrawerNavItem
+                key={`${item.href}-${item.label}`}
+                href={href}
+                label={item.label}
+                icon={getNavIcon(item.icon)}
+                active={isActive(item)}
+                onClick={() => setMobileOpen(false)}
+              />
+            );
+          })}
+          <DrawerNavItem
+            href="/"
+            label="Back to Catalog"
+            icon={Home}
+            onClick={() => setMobileOpen(false)}
+          />
+        </nav>
+        <button
+          type="button"
+          onClick={() => {
+            setMobileOpen(false);
+            void signOut({ callbackUrl: '/' });
+          }}
+          className="mt-4 flex w-full items-center gap-3 rounded-inner px-3 py-2.5 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
+        >
+          <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+          Sign out
+        </button>
+      </Drawer>
     </div>
   );
 }

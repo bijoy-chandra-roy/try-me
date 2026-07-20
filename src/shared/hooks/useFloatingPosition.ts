@@ -2,7 +2,7 @@
 
 import { useCallback, useLayoutEffect, useState, type RefObject } from 'react';
 
-export type FloatingSide = 'top' | 'bottom';
+export type FloatingSide = 'top' | 'bottom' | 'left' | 'right';
 export type FloatingAlign = 'center' | 'start' | 'end';
 
 interface UseFloatingPositionOptions {
@@ -24,9 +24,13 @@ interface FloatingCoords {
   width?: number;
 }
 
+function isVertical(side: FloatingSide): boolean {
+  return side === 'top' || side === 'bottom';
+}
+
 /**
- * Positions a floating element relative to a trigger, flipping vertically
- * and shifting horizontally so it stays within the viewport.
+ * Positions a floating element relative to a trigger, flipping along the
+ * preferred axis and clamping so it stays within the viewport.
  */
 export function useFloatingPosition({
   open,
@@ -58,31 +62,61 @@ export function useFloatingPosition({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    const spaceAbove = triggerRect.top - padding;
-    const spaceBelow = vh - triggerRect.bottom - padding;
-    const needsFlip =
-      preferredSide === 'top'
-        ? spaceAbove < floatingRect.height + gap && spaceBelow > spaceAbove
-        : spaceBelow < floatingRect.height + gap && spaceAbove > spaceBelow;
+    let side = preferredSide;
 
-    const side: FloatingSide = needsFlip
-      ? preferredSide === 'top'
-        ? 'bottom'
-        : 'top'
-      : preferredSide;
-
-    let top =
-      side === 'top'
-        ? triggerRect.top - floatingRect.height - gap
-        : triggerRect.bottom + gap;
-
-    let left: number;
-    if (align === 'end') {
-      left = triggerRect.right - floatingRect.width;
-    } else if (align === 'start') {
-      left = triggerRect.left;
+    if (isVertical(preferredSide)) {
+      const spaceAbove = triggerRect.top - padding;
+      const spaceBelow = vh - triggerRect.bottom - padding;
+      const needsFlip =
+        preferredSide === 'top'
+          ? spaceAbove < floatingRect.height + gap && spaceBelow > spaceAbove
+          : spaceBelow < floatingRect.height + gap && spaceAbove > spaceBelow;
+      if (needsFlip) side = preferredSide === 'top' ? 'bottom' : 'top';
     } else {
-      left = triggerRect.left + triggerRect.width / 2 - floatingRect.width / 2;
+      const spaceLeft = triggerRect.left - padding;
+      const spaceRight = vw - triggerRect.right - padding;
+      const needsFlip =
+        preferredSide === 'left'
+          ? spaceLeft < floatingRect.width + gap && spaceRight > spaceLeft
+          : spaceRight < floatingRect.width + gap && spaceLeft > spaceRight;
+      if (needsFlip) side = preferredSide === 'left' ? 'right' : 'left';
+    }
+
+    let top: number;
+    let left: number;
+
+    if (side === 'top') {
+      top = triggerRect.top - floatingRect.height - gap;
+      left =
+        align === 'end'
+          ? triggerRect.right - floatingRect.width
+          : align === 'start'
+            ? triggerRect.left
+            : triggerRect.left + triggerRect.width / 2 - floatingRect.width / 2;
+    } else if (side === 'bottom') {
+      top = triggerRect.bottom + gap;
+      left =
+        align === 'end'
+          ? triggerRect.right - floatingRect.width
+          : align === 'start'
+            ? triggerRect.left
+            : triggerRect.left + triggerRect.width / 2 - floatingRect.width / 2;
+    } else if (side === 'left') {
+      left = triggerRect.left - floatingRect.width - gap;
+      top =
+        align === 'end'
+          ? triggerRect.bottom - floatingRect.height
+          : align === 'start'
+            ? triggerRect.top
+            : triggerRect.top + triggerRect.height / 2 - floatingRect.height / 2;
+    } else {
+      left = triggerRect.right + gap;
+      top =
+        align === 'end'
+          ? triggerRect.bottom - floatingRect.height
+          : align === 'start'
+            ? triggerRect.top
+            : triggerRect.top + triggerRect.height / 2 - floatingRect.height / 2;
     }
 
     left = Math.max(padding, Math.min(left, vw - floatingRect.width - padding));

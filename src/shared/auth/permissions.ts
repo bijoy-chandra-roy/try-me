@@ -97,11 +97,10 @@ export const DASHBOARD_ROLE_ACCESS: Record<string, UserRole[]> = {
   '/dashboard/support': ['support'],
   '/dashboard/admin': ['admin'],
   '/dashboard/super-admin': ['super_admin'],
-  '/dashboard/settings': ['customer', 'merchant', 'support', 'admin', 'super_admin'],
 };
 
 export function canAccessDashboardPath(role: UserRole, pathname: string): boolean {
-  // Longer paths first so /dashboard/settings wins over /dashboard
+  // Longer paths first so /dashboard/super-admin wins over /dashboard
   const entries = Object.entries(DASHBOARD_ROLE_ACCESS).sort(
     ([a], [b]) => b.length - a.length
   );

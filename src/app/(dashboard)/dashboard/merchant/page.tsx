@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell';
+import { StoreSettingsForm } from '@/features/dashboard/components/StoreSettingsForm';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { Button } from '@/shared/components/Button';
@@ -129,15 +129,9 @@ export default function MerchantDashboardPage() {
         title="Merchant Dashboard"
         description="Set up your store before managing products"
       >
-        <GlassCard className="mx-auto max-w-lg p-8">
-          <h2 className="font-serif text-xl font-semibold">Create your store</h2>
-          <p className="mt-2 text-sm text-muted">
-            Finish store setup in Settings before you can add products and view analytics.
-          </p>
-          <Link href="/dashboard/settings/store" className="mt-6 inline-block">
-            <Button>Go to store settings</Button>
-          </Link>
-        </GlassCard>
+        <div id="store" className="scroll-mt-24">
+          <StoreSettingsForm />
+        </div>
       </DashboardShell>
     );
   }
@@ -318,6 +312,12 @@ export default function MerchantDashboardPage() {
             </DataList>
           </div>
         </div>
+      </RoleGate>
+
+      <RoleGate permission="manage_merchants">
+        <section id="store" className="mt-10 scroll-mt-24">
+          <StoreSettingsForm />
+        </section>
       </RoleGate>
     </DashboardShell>
   );

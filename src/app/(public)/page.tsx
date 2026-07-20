@@ -23,16 +23,16 @@ export default function HomePage() {
   return (
     <>
       <MaintenanceBanner />
-      <div className="mx-auto max-w-content px-6 py-10">
-        <section className="mb-10">
-          <h2 className="font-serif text-4xl font-semibold tracking-tight text-primary">
+      <div className="mx-auto max-w-content px-4 py-8 sm:px-6 sm:py-10">
+        <section className="mb-8 sm:mb-10">
+          <h2 className="font-serif text-3xl font-semibold tracking-tight text-primary sm:text-4xl">
             Curated Essentials
           </h2>
-          <p className="mt-2 max-w-xl text-muted">
+          <p className="mt-2 max-w-xl text-sm text-muted sm:text-base">
             Upload a photo and preview any piece on yourself with our virtual try-on.
             Resilient by design — always returns a result.
             {!tryOnBlocked && (
-              <span className="block mt-1 text-sm text-muted-subtle">
+              <span className="mt-1 block text-sm text-muted-subtle">
                 Guests: {guestTryOnLimit} try-ons per hour. Sign in for unlimited access.
               </span>
             )}

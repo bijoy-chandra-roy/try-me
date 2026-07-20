@@ -7,6 +7,7 @@ import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { Popover } from '@/shared/components/Popover';
 import { Tooltip } from '@/shared/components/Tooltip';
+import { ShoppingCart, Sparkles } from 'lucide-react';
 import { useAuth, usePermission } from '@/shared/hooks/useAuth';
 import { useSystemStatus } from '@/shared/hooks/useSystemStatus';
 import { addToCart } from '@/features/cart/api/cart.api';
@@ -178,27 +179,48 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
                   size="sm"
                   onClick={() => onTryOn(product)}
                   disabled={tryOnDisabled}
+                  aria-label="Try on"
                 >
-                  Try On
+                    <span className="inline-flex items-center justify-center gap-1.5">
+                    <Sparkles className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                    <span className="hidden sm:inline">Try On</span>
+                  </span>
                 </Button>
               </span>
             </Tooltip>
             {isAuthenticated ? (
-              <Button
-                className="w-full"
-                size="sm"
-                variant="secondary"
-                onClick={handleAddToCart}
-                disabled={cartDisabled}
-              >
-                {adding ? 'Adding…' : 'Add to cart'}
-              </Button>
-            ) : (
-              <Link href={`/login?callbackUrl=${encodeURIComponent('/')}`}>
-                <Button className="w-full" size="sm" variant="secondary" disabled={isUnavailable}>
-                  Add to cart
+              <Tooltip content={adding ? 'Adding…' : 'Add to cart'}>
+                <Button
+                  className="w-full"
+                  size="sm"
+                  variant="secondary"
+                  onClick={handleAddToCart}
+                  disabled={cartDisabled}
+                  aria-label="Add to cart"
+                >
+                  <span className="inline-flex items-center justify-center gap-1.5">
+                    <ShoppingCart className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                    <span className="hidden sm:inline">{adding ? 'Adding…' : 'Cart'}</span>
+                  </span>
                 </Button>
-              </Link>
+              </Tooltip>
+            ) : (
+              <Tooltip content="Sign in to add to cart">
+                <Link href={`/login?callbackUrl=${encodeURIComponent('/')}`}>
+                  <Button
+                    className="w-full"
+                    size="sm"
+                    variant="secondary"
+                    disabled={isUnavailable}
+                    aria-label="Add to cart"
+                  >
+                    <span className="inline-flex items-center justify-center gap-1.5">
+                      <ShoppingCart className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                      <span className="hidden sm:inline">Cart</span>
+                    </span>
+                  </Button>
+                </Link>
+              </Tooltip>
             )}
           </div>
           {cartMessage && (
