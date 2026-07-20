@@ -1,7 +1,6 @@
 'use client';
 
 import type { ProductCategory } from '@/shared/types';
-import { Tooltip } from '@/shared/components/Tooltip';
 import { CATEGORY_ICONS } from '@/features/products/components/CategoryIcons';
 
 const CATEGORIES: {
@@ -25,7 +24,7 @@ interface CategoryFilterProps {
 export function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
   return (
     <div
-      className="flex flex-wrap gap-2"
+      className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       role="group"
       aria-label="Filter by category"
     >
@@ -33,20 +32,18 @@ export function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
         const isActive = selected === value;
         const Icon = CATEGORY_ICONS[iconKey];
         return (
-          <Tooltip key={label} content={label}>
-            <button
-              type="button"
-              aria-label={label}
-              aria-pressed={isActive}
-              onClick={() => onChange(value)}
-              className={`filter-chip inline-flex h-10 w-10 items-center justify-center !px-0 ${
-                isActive ? 'filter-chip-active' : 'filter-chip-inactive'
-              }`}
-            >
-              <Icon className="h-4 w-4" strokeWidth={1.75} />
-              <span className="sr-only">{label}</span>
-            </button>
-          </Tooltip>
+          <button
+            key={label}
+            type="button"
+            aria-pressed={isActive}
+            onClick={() => onChange(value)}
+            className={`filter-chip inline-flex shrink-0 items-center gap-1.5 !px-3 !py-2 ${
+              isActive ? 'filter-chip-active' : 'filter-chip-inactive'
+            }`}
+          >
+            <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+            <span>{label}</span>
+          </button>
         );
       })}
     </div>

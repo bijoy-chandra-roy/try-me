@@ -13,16 +13,25 @@ import { useSystemStatus } from '@/shared/hooks/useSystemStatus';
 import { addToCart } from '@/features/cart/api/cart.api';
 import { setCartStore } from '@/features/cart/hooks/useCart';
 import { ApiError } from '@/shared/lib/api-client';
+import type { CatalogLayout } from '@/features/products/lib/catalog-filters';
 import type { Product } from '@/shared/types';
 
 interface ProductCardProps {
   product: Product;
   onTryOn: (product: Product) => void;
+  layout?: CatalogLayout;
   /** Prefer eager load for above-the-fold cards (first ~6). */
   priority?: boolean;
 }
 
-export function ProductCard({ product, onTryOn, priority = false }: ProductCardProps) {
+export function ProductCard({
+  product,
+  onTryOn,
+  layout = 'grid',
+  priority = false,
+}: ProductCardProps) {
+  const isList = layout === 'list';
+  const isCompact = layout === 'compact';
   const isUnavailable = !product.inStock || product.stockQuantity <= 0;
   const { isAuthenticated } = useAuth();
   const hasTryOnPermission = usePermission('try_on');
@@ -82,12 +91,37 @@ export function ProductCard({ product, onTryOn, priority = false }: ProductCardP
     }
   }
 
+  const imageSizes = isList
+    ? '(max-width: 640px) 112px, 144px'
+    : isCompact
+      ? '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
+      : '(max-width: 640px) 50vw, (max-width: 1200px) 50vw, 33vw';
+
+  const bodyPadding = isList
+    ? 'gap-2 p-3 sm:gap-3 sm:p-4'
+    : isCompact
+      ? 'gap-2 p-2.5 sm:gap-2.5 sm:p-3'
+      : 'gap-2.5 p-3 sm:gap-3 sm:p-5';
+
+  const titleClass = isCompact
+    ? 'truncate font-serif text-sm font-semibold leading-snug text-primary sm:text-base'
+    : 'truncate font-serif text-base font-semibold leading-snug text-primary sm:text-lg';
+
   return (
     <GlassCard
       hover
-      className={`group flex flex-col ${isUnavailable ? 'row-dimmed' : ''}`}
+      elastic={!isList}
+      className={`group flex ${isList ? 'flex-row' : 'flex-col'} ${
+        isUnavailable ? 'row-dimmed' : ''
+      }`}
     >
-      <div className="relative aspect-[3/4] overflow-hidden">
+      <div
+        className={`relative shrink-0 overflow-hidden ${
+          isList
+            ? 'aspect-[3/4] w-28 sm:w-36'
+            : 'aspect-[3/4] w-full'
+        }`}
+      >
         <Image
           src={product.imageUrl}
           alt={product.name}
@@ -95,30 +129,34 @@ export function ProductCard({ product, onTryOn, priority = false }: ProductCardP
           priority={priority}
           loading={priority ? 'eager' : 'lazy'}
           className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          sizes={imageSizes}
         />
         {isUnavailable && (
-          <span className="chip absolute left-3 top-3 bg-[var(--color-accent-fill)] text-[var(--color-on-accent)]">
+          <span className="chip absolute left-2 top-2 bg-[var(--color-accent-fill)] text-[var(--color-on-accent)] sm:left-3 sm:top-3">
             Out of stock
           </span>
         )}
         {!isUnavailable && product.stockQuantity <= 5 && (
-          <span className="chip absolute left-3 top-3 status-chip-pending">
+          <span className="chip absolute left-2 top-2 status-chip-pending sm:left-3 sm:top-3">
             Only {product.stockQuantity} left
           </span>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      <div className={`flex min-w-0 flex-1 flex-col ${bodyPadding}`}>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <span className="chip-category mb-1">{product.category}</span>
-            <h3 className="truncate font-serif text-lg font-semibold text-primary">
-              {product.name}
-            </h3>
-            <p className="mt-1 line-clamp-2 text-sm text-muted">
-              {product.description}
-            </p>
+            <h3 className={titleClass}>{product.name}</h3>
+            {!isCompact && (
+              <p
+                className={`mt-1 text-sm text-muted ${
+                  isList ? 'line-clamp-2 sm:line-clamp-3' : 'line-clamp-2'
+                }`}
+              >
+                {product.description}
+              </p>
+            )}
             {(product.reviewCount ?? 0) > 0 && (
               <p className="mt-1 text-xs text-muted">
                 ★ {product.averageRating?.toFixed(1)} · {product.reviewCount} review
@@ -126,29 +164,34 @@ export function ProductCard({ product, onTryOn, priority = false }: ProductCardP
               </p>
             )}
           </div>
-          <Popover
-            label="More options"
-            items={[
-              {
-                label: 'Copy product name',
-                onClick: () => navigator.clipboard.writeText(product.name),
-              },
-              {
-                label: 'Copy price',
-                onClick: () => navigator.clipboard.writeText(`$${product.price.toFixed(2)}`),
-              },
-            ]}
-          />
+          {!isCompact && (
+            <Popover
+              label="More options"
+              items={[
+                {
+                  label: 'Copy product name',
+                  onClick: () => navigator.clipboard.writeText(product.name),
+                },
+                {
+                  label: 'Copy price',
+                  onClick: () =>
+                    navigator.clipboard.writeText(`$${product.price.toFixed(2)}`),
+                },
+              ]}
+            />
+          )}
         </div>
 
         {(product.sizes ?? []).length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className={`flex flex-wrap gap-1 ${isCompact ? 'gap-1' : 'gap-1.5'}`}>
             {(product.sizes ?? []).map((size) => (
               <button
                 key={size}
                 type="button"
                 onClick={() => setSelectedSize(size)}
                 className={`chip-size transition ${
+                  isCompact ? '!px-1.5 !py-0.5 text-[0.65rem]' : ''
+                } ${
                   selectedSize === size
                     ? 'bg-[var(--color-accent-fill)] text-[var(--color-on-accent)]'
                     : ''
@@ -160,34 +203,41 @@ export function ProductCard({ product, onTryOn, priority = false }: ProductCardP
           </div>
         )}
 
-        {(product.customFields ?? []).map((field, index) => {
-          const options = field.options ?? [];
-          if (options.length === 0) return null;
-          return (
-            <div key={`${field.label}-${index}`} className="space-y-1">
-              {field.label ? (
-                <p className="text-xs font-medium text-primary">
-                  {field.label}
-                </p>
-              ) : null}
-              <div className="flex flex-wrap gap-1.5">
-                {options.map((option) => (
-                  <span key={option} className="chip-size">
-                    {option}
-                  </span>
-                ))}
+        {!isCompact &&
+          (product.customFields ?? []).map((field, index) => {
+            const options = field.options ?? [];
+            if (options.length === 0) return null;
+            return (
+              <div key={`${field.label}-${index}`} className="space-y-1">
+                {field.label ? (
+                  <p className="text-xs font-medium text-primary">{field.label}</p>
+                ) : null}
+                <div className="flex flex-wrap gap-1.5">
+                  {options.map((option) => (
+                    <span key={option} className="chip-size">
+                      {option}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
 
-        <div className="mt-auto space-y-2">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-lg font-semibold tabular-nums text-accent">
+        <div className={`mt-auto ${isList ? 'pt-1' : 'space-y-2'}`}>
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`font-semibold tabular-nums text-accent ${
+                isCompact ? 'text-sm sm:text-base' : 'text-base sm:text-lg'
+              }`}
+            >
               ${product.price.toFixed(2)}
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div
+            className={`grid gap-1.5 sm:gap-2 ${
+              isList ? 'grid-cols-2 sm:max-w-xs' : 'grid-cols-2'
+            }`}
+          >
             <Tooltip content={tryOnTooltip}>
               <span className={tryOnDisabled ? 'opacity-40' : ''}>
                 <Button
@@ -197,9 +247,11 @@ export function ProductCard({ product, onTryOn, priority = false }: ProductCardP
                   disabled={tryOnDisabled}
                   aria-label="Try on"
                 >
-                    <span className="inline-flex items-center justify-center gap-1.5">
-                    <Sparkles className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                    <span className="hidden sm:inline">Try On</span>
+                  <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={1.75} aria-hidden />
+                    <span className={isCompact ? 'text-xs' : 'text-xs sm:text-sm'}>
+                      Try On
+                    </span>
                   </span>
                 </Button>
               </span>
@@ -214,9 +266,15 @@ export function ProductCard({ product, onTryOn, priority = false }: ProductCardP
                   disabled={cartDisabled}
                   aria-label="Add to cart"
                 >
-                  <span className="inline-flex items-center justify-center gap-1.5">
-                    <ShoppingCart className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                    <span className="hidden sm:inline">{adding ? 'Adding…' : 'Cart'}</span>
+                  <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5">
+                    <ShoppingCart
+                      className="h-3.5 w-3.5 sm:h-4 sm:w-4"
+                      strokeWidth={1.75}
+                      aria-hidden
+                    />
+                    <span className={isCompact ? 'text-xs' : 'text-xs sm:text-sm'}>
+                      {adding ? '…' : 'Cart'}
+                    </span>
                   </span>
                 </Button>
               </Tooltip>
@@ -230,18 +288,22 @@ export function ProductCard({ product, onTryOn, priority = false }: ProductCardP
                     disabled={isUnavailable}
                     aria-label="Add to cart"
                   >
-                    <span className="inline-flex items-center justify-center gap-1.5">
-                      <ShoppingCart className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                      <span className="hidden sm:inline">Cart</span>
+                    <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5">
+                      <ShoppingCart
+                        className="h-3.5 w-3.5 sm:h-4 sm:w-4"
+                        strokeWidth={1.75}
+                        aria-hidden
+                      />
+                      <span className={isCompact ? 'text-xs' : 'text-xs sm:text-sm'}>
+                        Cart
+                      </span>
                     </span>
                   </Button>
                 </Link>
               </Tooltip>
             )}
           </div>
-          {cartMessage && (
-            <p className="text-xs text-muted">{cartMessage}</p>
-          )}
+          {cartMessage && <p className="text-xs text-muted">{cartMessage}</p>}
         </div>
       </div>
     </GlassCard>

@@ -19,24 +19,50 @@ export function PageSpinner({ className = '' }: { className?: string }) {
   );
 }
 
-export function ProductCardSkeleton() {
+export function ProductCardSkeleton({ layout = 'grid' }: { layout?: 'grid' | 'compact' | 'list' }) {
+  if (layout === 'list') {
+    return (
+      <div className="flex overflow-hidden rounded-container border border-subtle">
+        <Skeleton className="aspect-[3/4] w-28 shrink-0 rounded-none sm:w-36" />
+        <div className="flex flex-1 flex-col justify-center space-y-2 p-3 sm:p-4">
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-3 w-1/2" />
+          <Skeleton className="h-8 w-40" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-hidden rounded-container border border-subtle">
       <Skeleton className="aspect-[3/4] w-full rounded-none" />
-      <div className="space-y-3 p-4">
+      <div className={`space-y-2 ${layout === 'compact' ? 'p-2.5 sm:p-3' : 'p-3 sm:p-4'}`}>
         <Skeleton className="h-4 w-2/3" />
         <Skeleton className="h-3 w-1/2" />
-        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-8 w-full" />
       </div>
     </div>
   );
 }
 
-export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
+export function ProductGridSkeleton({
+  count = 6,
+  layout = 'grid',
+}: {
+  count?: number;
+  layout?: 'grid' | 'compact' | 'list';
+}) {
+  const gridClass =
+    layout === 'compact'
+      ? 'grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4'
+      : layout === 'list'
+        ? 'flex flex-col gap-3 sm:gap-4'
+        : 'grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3';
+
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+    <div className={gridClass} aria-busy="true">
       {Array.from({ length: count }, (_, i) => (
-        <ProductCardSkeleton key={i} />
+        <ProductCardSkeleton key={i} layout={layout} />
       ))}
     </div>
   );

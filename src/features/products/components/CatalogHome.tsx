@@ -1,10 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { CategoryFilter } from '@/features/products/components/CategoryFilter';
+import { useEffect, useMemo, useState } from 'react';
+import { CatalogToolbar } from '@/features/products/components/CatalogToolbar';
 import { ProductGrid } from '@/features/products/components/ProductGrid';
 import { useProducts } from '@/features/products/hooks/useProducts';
-import { OnboardingTour } from '@/shared/components/OnboardingTour';
+import {
+  DEFAULT_CATALOG_FILTERS,
+  filterAndSortProducts,
+  readStoredLayout,
+  storeLayout,
+  type CatalogFilterState,
+} from '@/features/products/lib/catalog-filters';
 import { MaintenanceBanner } from '@/shared/components/MaintenanceBanner';
 import { ProductGridSkeleton } from '@/shared/components/Skeleton';
 import { TryOnModal } from '@/features/try-on/components/TryOnModal';
@@ -22,15 +28,36 @@ export function CatalogHome({
   initialMaintenanceMode = false,
   initialGuestTryOnLimit = 3,
 }: CatalogHomeProps) {
-  const { products, category, setCategory, loading, error } = useProducts(
-    undefined,
-    initialProducts
-  );
+  const { products, loading, error } = useProducts(undefined, initialProducts);
+  const [filters, setFilters] = useState<CatalogFilterState>(DEFAULT_CATALOG_FILTERS);
   const [tryOnProduct, setTryOnProduct] = useState<Product | null>(null);
   const { tryOnBlocked, guestTryOnLimit } = useSystemStatus({
     maintenanceMode: initialMaintenanceMode,
     guestTryOnLimit: initialGuestTryOnLimit,
   });
+
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, layout: readStoredLayout() }));
+  }, []);
+
+  const visibleProducts = useMemo(
+    () => filterAndSortProducts(products, filters),
+    [products, filters]
+  );
+
+  function handleFiltersChange(next: CatalogFilterState) {
+    if (next.layout !== filters.layout) {
+      storeLayout(next.layout);
+    }
+    setFilters(next);
+  }
+
+  function handleResetFilters() {
+    setFilters((prev) => ({
+      ...DEFAULT_CATALOG_FILTERS,
+      layout: prev.layout,
+    }));
+  }
 
   function handleTryOn(product: Product) {
     if (tryOnBlocked) return;
@@ -58,8 +85,13 @@ export function CatalogHome({
           </p>
         </section>
 
-        <section className="mb-8" data-onboard="filter">
-          <CategoryFilter selected={category} onChange={setCategory} />
+        <section className="mb-6 sm:mb-8">
+          <CatalogToolbar
+            filters={filters}
+            resultCount={visibleProducts.length}
+            onChange={handleFiltersChange}
+            onReset={handleResetFilters}
+          />
         </section>
 
         {error && (
@@ -75,16 +107,17 @@ export function CatalogHome({
           </div>
         )}
 
-        <div data-onboard="grid">
-          {loading ? (
-            <ProductGridSkeleton />
-          ) : (
-            <ProductGrid products={products} onTryOn={handleTryOn} />
-          )}
-        </div>
+        {loading ? (
+          <ProductGridSkeleton layout={filters.layout} />
+        ) : (
+          <ProductGrid
+            products={visibleProducts}
+            onTryOn={handleTryOn}
+            layout={filters.layout}
+          />
+        )}
 
         <TryOnModal product={tryOnProduct} onClose={() => setTryOnProduct(null)} />
-        <OnboardingTour />
       </div>
     </>
   );
