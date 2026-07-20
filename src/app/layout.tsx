@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Urbanist } from 'next/font/google';
 import { Header } from '@/shared/components/Header';
+import { SessionSync } from '@/shared/components/SessionSync';
 import { SessionProvider } from '@/shared/providers/SessionProvider';
 import './globals.css';
 
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen font-sans">
         <SessionProvider>
+          <SessionSync />
           <div className="ambient-bg" aria-hidden="true" />
           <Header />
           <main>{children}</main>

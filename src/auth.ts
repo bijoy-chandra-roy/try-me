@@ -28,7 +28,39 @@ declare module 'next-auth/jwt' {
     role: UserRole;
     merchantId?: string | null;
     status?: 'active' | 'inactive';
+    roleSyncedAt?: number;
   }
+}
+
+const ROLE_SYNC_INTERVAL_MS = 15_000;
+
+async function syncUserFromDatabase(token: {
+  id?: string;
+  role?: UserRole;
+  merchantId?: string | null;
+  name?: string | null;
+  status?: 'active' | 'inactive';
+  roleSyncedAt?: number;
+}) {
+  if (!token.id) return;
+
+  const now = Date.now();
+  if (token.roleSyncedAt && now - token.roleSyncedAt < ROLE_SYNC_INTERVAL_MS) {
+    return;
+  }
+
+  const { ensureDbConnection } = await import('@/server/db/connection');
+  const { userRepository } = await import('@/server/features/auth/user.repository');
+  await ensureDbConnection();
+
+  const freshUser = await userRepository.findById(token.id);
+  if (!freshUser) return;
+
+  token.role = freshUser.role;
+  token.merchantId = freshUser.merchantId ?? null;
+  token.name = freshUser.name;
+  token.status = freshUser.status;
+  token.roleSyncedAt = now;
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -120,19 +152,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role;
         token.merchantId = user.merchantId ?? null;
         token.status = user.status ?? 'active';
+        token.roleSyncedAt = 0;
       }
 
-      if (trigger === 'update' && token.id) {
-        const { ensureDbConnection } = await import('@/server/db/connection');
-        const { userRepository } = await import('@/server/features/auth/user.repository');
-        await ensureDbConnection();
-        const freshUser = await userRepository.findById(token.id);
-        if (freshUser) {
-          token.role = freshUser.role;
-          token.merchantId = freshUser.merchantId ?? null;
-          token.name = freshUser.name;
-          token.status = freshUser.status;
+      if (token.id) {
+        if (trigger === 'update') {
+          token.roleSyncedAt = 0;
         }
+        await syncUserFromDatabase(token);
       }
 
       return token;
@@ -142,6 +169,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.role = token.role;
       session.user.merchantId = token.merchantId ?? null;
       session.user.status = token.status ?? 'active';
+      if (token.name) session.user.name = token.name;
       return session;
     },
   },
