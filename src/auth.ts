@@ -29,6 +29,7 @@ declare module 'next-auth/jwt' {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.AUTH_SECRET,
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
