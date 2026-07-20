@@ -1,6 +1,7 @@
 import { ensureDbConnection } from '@/server/db/connection';
 import { tryOnService } from '@/server/features/try-on/try-on.service';
 import { tryOnHistoryService } from '@/server/features/try-on/try-on-history.service';
+import { systemConfigService } from '@/server/features/system/system-config.service';
 import { AppError } from '@/server/lib/errors';
 import { getOptionalAuth } from '@/server/lib/auth-guard';
 import { checkGuestTryOnLimit, getGuestIdentifier } from '@/server/lib/guest-rate-limit';
@@ -16,11 +17,16 @@ export async function POST(request: Request) {
   try {
     await ensureDbConnection();
 
+    const config = await systemConfigService.getConfig();
     const user = await getOptionalAuth();
+
+    if (config.maintenanceMode && (!user || !hasPermission(user.role, 'manage_system'))) {
+      throw new AppError('Try-on is temporarily unavailable for maintenance.', 503);
+    }
 
     if (!user) {
       const guestId = getGuestIdentifier(request);
-      const { allowed } = checkGuestTryOnLimit(guestId);
+      const { allowed } = checkGuestTryOnLimit(guestId, config.guestTryOnLimit);
       if (!allowed) {
         throw new AppError('Guest try-on limit reached. Please sign in to continue.', 429);
       }
@@ -54,7 +60,7 @@ export async function POST(request: Request) {
       productId,
     });
 
-    if (user) {
+    if (user && hasPermission(user.role, 'view_own_try_on_history')) {
       await tryOnHistoryService.saveHistory(user.id, productId, result);
     }
 

@@ -36,12 +36,12 @@ class MerchantRepository {
     return this.toRecord(merchant as unknown as MerchantDocument);
   }
 
-  async create(data: { name: string; description: string; ownerId: string }) {
+  async create(data: { name: string; description: string; ownerId: string; status?: 'pending' | 'approved' | 'suspended' }) {
     const merchant = await Merchant.create({
       name: data.name,
       description: data.description,
       ownerId: data.ownerId,
-      status: 'approved',
+      status: data.status ?? 'approved',
     });
     return this.toRecord(merchant);
   }

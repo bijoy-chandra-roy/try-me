@@ -16,7 +16,12 @@ class MerchantService {
     return merchantRepository.findByOwnerId(ownerId);
   }
 
-  async createMerchant(data: { name: string; description: string; ownerId: string }) {
+  async createMerchant(data: {
+    name: string;
+    description: string;
+    ownerId: string;
+    status?: 'pending' | 'approved' | 'suspended';
+  }) {
     const existing = await merchantRepository.findByOwnerId(data.ownerId);
     if (existing) {
       throw new AppError('Merchant profile already exists for this user', 409);

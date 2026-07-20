@@ -18,6 +18,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (token.status === 'inactive') {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('error', 'AccountInactive');
+    return NextResponse.redirect(loginUrl);
+  }
+
   const role = token.role;
 
   if (pathname === '/dashboard') {

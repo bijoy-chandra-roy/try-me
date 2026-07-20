@@ -7,6 +7,7 @@ declare module 'next-auth' {
   interface User {
     role: UserRole;
     merchantId?: string | null;
+    status?: 'active' | 'inactive';
   }
 
   interface Session {
@@ -16,6 +17,7 @@ declare module 'next-auth' {
       name: string;
       role: UserRole;
       merchantId?: string | null;
+      status?: 'active' | 'inactive';
     };
   }
 }
@@ -25,6 +27,7 @@ declare module 'next-auth/jwt' {
     id: string;
     role: UserRole;
     merchantId?: string | null;
+    status?: 'active' | 'inactive';
   }
 }
 
@@ -65,6 +68,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: user.name,
             role: user.role,
             merchantId: user.merchantId ?? null,
+            status: user.status,
           };
         } catch {
           return null;
@@ -104,6 +108,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         user.id = dbUser._id;
         user.role = dbUser.role;
         user.merchantId = dbUser.merchantId ?? null;
+        user.status = dbUser.status;
         return true;
       } catch {
         return false;
@@ -114,6 +119,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id!;
         token.role = user.role;
         token.merchantId = user.merchantId ?? null;
+        token.status = user.status ?? 'active';
       }
 
       if (trigger === 'update' && token.id) {
@@ -125,6 +131,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.role = freshUser.role;
           token.merchantId = freshUser.merchantId ?? null;
           token.name = freshUser.name;
+          token.status = freshUser.status;
         }
       }
 
@@ -134,6 +141,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.id = token.id;
       session.user.role = token.role;
       session.user.merchantId = token.merchantId ?? null;
+      session.user.status = token.status ?? 'active';
       return session;
     },
   },

@@ -1,7 +1,10 @@
 import { ensureDbConnection } from '@/server/db/connection';
 import { merchantService } from '@/server/features/merchants/merchant.service';
+import { userRepository } from '@/server/features/auth/user.repository';
 import { requirePermission, requireAuth } from '@/server/lib/auth-guard';
+import { AppError } from '@/server/lib/errors';
 import { jsonError, jsonSuccess } from '@/server/lib/api-response';
+import { hasPermission } from '@/shared/auth/permissions';
 
 export async function GET() {
   try {
@@ -19,21 +22,34 @@ export async function POST(request: Request) {
     const user = await requireAuth();
     await ensureDbConnection();
 
+    if (!hasPermission(user.role, 'manage_merchants')) {
+      throw new AppError('Forbidden', 403);
+    }
+
     const body = await request.json();
     const { name, description } = body;
 
-    if (!name) return jsonError(new Error('Merchant name is required'));
+    if (!name) throw new AppError('Merchant name is required', 400);
 
-    const ownerId =
-      user.role === 'merchant' ? user.id : body.ownerId;
+    let ownerId: string;
 
-    if (!ownerId) return jsonError(new Error('ownerId is required'));
+    if (user.role === 'merchant') {
+      ownerId = user.id;
+    } else if (hasPermission(user.role, 'manage_users')) {
+      ownerId = body.ownerId;
+      if (!ownerId) throw new AppError('ownerId is required', 400);
+    } else {
+      throw new AppError('Forbidden', 403);
+    }
 
     const merchant = await merchantService.createMerchant({
       name,
       description: description ?? '',
       ownerId,
+      status: user.role === 'merchant' ? 'pending' : 'approved',
     });
+
+    await userRepository.update(ownerId, { merchantId: merchant._id });
 
     return jsonSuccess(merchant, 201);
   } catch (error) {

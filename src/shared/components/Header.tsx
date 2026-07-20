@@ -6,12 +6,27 @@ import { ThemeToggle } from '@/shared/components/ThemeToggle';
 import { Tooltip } from '@/shared/components/Tooltip';
 import { GlassButton } from '@/shared/components/GlassButton';
 import { ROLE_LABELS, getDashboardPath, isUserRole } from '@/shared/auth/roles';
+import { usePermissions } from '@/shared/hooks/useAuth';
+
+const PERMISSION_SHORT_LABELS: Record<string, string> = {
+  manage_products: 'Products',
+  manage_users: 'Users',
+  view_users: 'User lookup',
+  view_system_health: 'System health',
+  manage_system: 'System config',
+  assign_roles: 'Role management',
+};
 
 export function Header() {
   const { data: session, status } = useSession();
   const rawRole = session?.user?.role;
   const role = rawRole && isUserRole(rawRole) ? rawRole : undefined;
+  const permissions = usePermissions();
   const isAuthenticated = status === 'authenticated';
+
+  const staffPermissions = permissions.filter(
+    (p) => p !== 'browse_catalog' && p !== 'try_on' && p !== 'view_own_try_on_history' && p !== 'manage_own_profile'
+  );
 
   return (
     <header className="glass-header sticky top-0 z-50">
@@ -30,7 +45,17 @@ export function Header() {
         <div className="flex items-center gap-3">
           {isAuthenticated && role ? (
             <>
-              <span className="hidden chip-category sm:inline-block">{ROLE_LABELS[role]}</span>
+              <Tooltip
+                content={
+                  staffPermissions.length > 0
+                    ? `Access: ${staffPermissions.map((p) => PERMISSION_SHORT_LABELS[p] ?? p).join(', ')}`
+                    : ROLE_LABELS[role]
+                }
+              >
+                <span className="hidden chip-category sm:inline-block cursor-default">
+                  {ROLE_LABELS[role]}
+                </span>
+              </Tooltip>
               <Link href={getDashboardPath(role)}>
                 <GlassButton className="text-sm">Dashboard</GlassButton>
               </Link>

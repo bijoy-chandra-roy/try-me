@@ -5,15 +5,9 @@ import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { ROLE_LABELS } from '@/shared/auth/roles';
+import { getDashboardNavItems } from '@/shared/auth/navigation';
+import { ROLE_CAPABILITIES } from '@/shared/auth/navigation';
 import { GlassButton } from '@/shared/components/GlassButton';
-
-const NAV_ITEMS: Record<string, { href: string; label: string }[]> = {
-  customer: [{ href: '/dashboard/customer', label: 'Overview' }],
-  merchant: [{ href: '/dashboard/merchant', label: 'Products' }],
-  support: [{ href: '/dashboard/support', label: 'User Lookup' }],
-  admin: [{ href: '/dashboard/admin', label: 'Admin Panel' }],
-  super_admin: [{ href: '/dashboard/super-admin', label: 'System Control' }],
-};
 
 export function DashboardShell({
   title,
@@ -27,11 +21,12 @@ export function DashboardShell({
   const pathname = usePathname();
   const { user, role } = useAuth();
 
-  const navItems = role ? (NAV_ITEMS[role] ?? []) : [];
+  const navItems = role ? getDashboardNavItems(role) : [];
+  const capabilities = role ? ROLE_CAPABILITIES[role] : [];
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl gap-6 px-6 py-8">
-      <aside className="glass-card hidden w-56 shrink-0 flex-col rounded-2xl p-5 md:flex">
+      <aside className="glass-card hidden w-60 shrink-0 flex-col rounded-2xl p-5 md:flex">
         <div className="mb-6">
           <p className="text-xs uppercase tracking-wider text-sand-500">Dashboard</p>
           <p className="mt-1 font-medium">{user?.name}</p>
@@ -41,19 +36,28 @@ export function DashboardShell({
         </div>
 
         <nav className="flex flex-1 flex-col gap-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`rounded-lg px-3 py-2 text-sm transition-colors ${
-                pathname === item.href
-                  ? 'bg-olive-600/10 font-medium text-olive-700 dark:text-sand-100'
-                  : 'text-sand-600 hover:bg-sand-200/40 dark:text-sand-300 dark:hover:bg-olive-600/20'
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const href = item.hash ? `${item.href}#${item.hash}` : item.href;
+            const isActive =
+              pathname === item.href &&
+              (typeof window !== 'undefined'
+                ? !item.hash || window.location.hash === `#${item.hash}`
+                : !item.hash);
+
+            return (
+              <Link
+                key={`${item.href}-${item.label}`}
+                href={href}
+                className={`rounded-lg px-3 py-2 text-sm transition-colors ${
+                  isActive
+                    ? 'bg-olive-600/10 font-medium text-olive-700 dark:text-sand-100'
+                    : 'text-sand-600 hover:bg-sand-200/40 dark:text-sand-300 dark:hover:bg-olive-600/20'
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
           <Link
             href="/"
             className="mt-2 rounded-lg px-3 py-2 text-sm text-sand-600 hover:bg-sand-200/40 dark:text-sand-300 dark:hover:bg-olive-600/20"
@@ -61,6 +65,19 @@ export function DashboardShell({
             Back to Catalog
           </Link>
         </nav>
+
+        {capabilities.length > 0 && (
+          <div className="mt-4 border-t border-sand-300/40 pt-4 dark:border-olive-500/30">
+            <p className="text-xs uppercase tracking-wider text-sand-500">Your access</p>
+            <ul className="mt-2 space-y-1">
+              {capabilities.map((cap) => (
+                <li key={cap} className="text-xs text-sand-600 dark:text-sand-400">
+                  {cap}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <GlassButton
           onClick={() => signOut({ callbackUrl: '/' })}

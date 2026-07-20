@@ -5,6 +5,8 @@ import { GlassButton } from '@/shared/components/GlassButton';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { Popover } from '@/shared/components/Popover';
 import { Tooltip } from '@/shared/components/Tooltip';
+import { useAuth, usePermission } from '@/shared/hooks/useAuth';
+import { useSystemStatus } from '@/shared/hooks/useSystemStatus';
 import type { Product } from '@/shared/types';
 
 interface ProductCardProps {
@@ -14,6 +16,17 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onTryOn }: ProductCardProps) {
   const isUnavailable = !product.inStock;
+  const { isAuthenticated } = useAuth();
+  const hasTryOnPermission = usePermission('try_on');
+  const canTryOn = !isAuthenticated || hasTryOnPermission;
+  const { tryOnBlocked } = useSystemStatus();
+  const tryOnDisabled = isUnavailable || tryOnBlocked || !canTryOn;
+
+  const tryOnTooltip = tryOnBlocked
+    ? 'Try-on unavailable during maintenance'
+    : isUnavailable
+      ? 'This item is currently unavailable'
+      : 'Preview on your photo';
 
   return (
     <GlassCard
@@ -75,9 +88,9 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
           <span className="text-right text-lg font-semibold tabular-nums text-olive-600 dark:text-sand-200">
             ${product.price.toFixed(2)}
           </span>
-          <Tooltip content={isUnavailable ? 'This item is currently unavailable' : 'Preview on your photo'}>
-            <span className={`action-reveal ${isUnavailable ? 'sm:opacity-40' : ''}`}>
-              <GlassButton onClick={() => onTryOn(product)} disabled={isUnavailable}>
+          <Tooltip content={tryOnTooltip}>
+            <span className={`action-reveal ${tryOnDisabled ? 'sm:opacity-40' : ''}`}>
+              <GlassButton onClick={() => onTryOn(product)} disabled={tryOnDisabled}>
                 Try On
               </GlassButton>
             </span>
