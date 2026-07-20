@@ -17,6 +17,7 @@ import {
   Store,
   User,
   Users,
+  Languages,
 } from 'lucide-react';
 
 /** Stable keys used by nav config → Lucide icons. */
@@ -37,7 +38,8 @@ export type NavIconKey =
   | 'catalog'
   | 'profile'
   | 'account'
-  | 'appearance';
+  | 'appearance'
+  | 'language';
 
 export const NAV_ICONS: Record<NavIconKey, LucideIcon> = {
   overview: LayoutDashboard,
@@ -57,6 +59,7 @@ export const NAV_ICONS: Record<NavIconKey, LucideIcon> = {
   profile: User,
   account: Lock,
   appearance: Palette,
+  language: Languages,
 };
 
 export function getNavIcon(key: NavIconKey): LucideIcon {

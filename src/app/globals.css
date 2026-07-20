@@ -292,11 +292,21 @@
     backdrop-filter: blur(20px) saturate(1.15);
     -webkit-backdrop-filter: blur(20px) saturate(1.15);
     box-shadow: var(--glass-chroma);
-    transform: perspective(900px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
+  }
+
+  /* 3D tilt only when preference is on (Settings → Appearance) */
+  html[data-card-tilt='true'] .glass-card {
+    transform: perspective(900px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg));
     transform-style: preserve-3d;
     transition:
       transform var(--duration-medium) var(--ease-standard),
       box-shadow var(--duration-medium) ease;
+  }
+
+  html[data-card-tilt='true'][data-reduce-motion='true'] .glass-card {
+    transform: none;
+    transform-style: flat;
+    transition: box-shadow var(--duration-medium) ease;
   }
 
   .glass-card::before {
@@ -673,5 +683,61 @@
   .dark .scroll-thumb:hover,
   .dark .scroll-thumb:active {
     background-color: rgba(220, 224, 210, 0.55);
+  }
+}
+
+/* —— Motion (gated by data-reduce-motion + prefers-reduced-motion) —— */
+@keyframes tryme-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.motion-fade-in {
+  animation: tryme-fade-in var(--duration-medium) var(--ease-standard) both;
+}
+
+.motion-card-hover {
+  transition:
+    transform var(--duration-medium) var(--ease-standard),
+    box-shadow var(--duration-medium) var(--ease-standard);
+}
+
+.motion-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-med);
+}
+
+.motion-nav-underline {
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+html[data-reduce-motion='true'] .motion-fade-in,
+html[data-reduce-motion='true'] .motion-card-hover,
+html[data-reduce-motion='true'] .motion-card-hover:hover {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-card-tilt='true'] .glass-card {
+    transform: none;
+    transform-style: flat;
+  }
+
+  .motion-fade-in,
+  .motion-card-hover,
+  .motion-card-hover:hover {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 }

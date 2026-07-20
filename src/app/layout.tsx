@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
-import { Cormorant_Garamond, Urbanist } from 'next/font/google';
+import { Cormorant_Garamond, Noto_Sans_Bengali, Urbanist } from 'next/font/google';
 import { auth } from '@/auth';
 import { Header } from '@/shared/components/Header';
 import { SessionSync } from '@/shared/components/SessionSync';
 import { AuthRealtimeListener } from '@/shared/components/AuthRealtimeListener';
+import { PreferencesHydrator } from '@/shared/components/PreferencesHydrator';
+import { OnboardingTour } from '@/shared/components/OnboardingTour';
 import { SessionProvider } from '@/shared/providers/SessionProvider';
+import { PREFERENCES_BOOT_SCRIPT } from '@/shared/lib/preferences';
 import './globals.css';
 
 const urbanist = Urbanist({
@@ -20,6 +23,13 @@ const cormorant = Cormorant_Garamond({
   display: 'swap',
 });
 
+const notoBengali = Noto_Sans_Bengali({
+  subsets: ['bengali', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-noto-bengali',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'TryMe — Virtual Try-On Shopping',
   description: 'E-commerce with AI-powered virtual try-on. See clothes on you before you buy.',
@@ -29,11 +39,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const session = await auth();
 
   return (
-    <html lang="en" className={`${urbanist.variable} ${cormorant.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${urbanist.variable} ${cormorant.variable} ${notoBengali.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t==='system'||!t)&&matchMedia('(prefers-color-scheme:dark)').matches;if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
+            __html: PREFERENCES_BOOT_SCRIPT,
           }}
         />
       </head>
@@ -41,9 +55,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SessionProvider session={session}>
           <SessionSync />
           <AuthRealtimeListener />
+          <PreferencesHydrator />
           <div className="ambient-bg" aria-hidden="true" />
           <Header />
-          <main>{children}</main>
+          <main className="motion-fade-in">{children}</main>
+          <OnboardingTour />
         </SessionProvider>
       </body>
     </html>

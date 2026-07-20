@@ -2,12 +2,17 @@
 
 import { type ReactNode } from 'react';
 import { useGlassElasticity } from '@/shared/hooks/useGlassElasticity';
+import { usePreferences } from '@/shared/hooks/usePreferences';
 import { ScrollArea } from '@/shared/components/ScrollArea';
 
 interface GlassCardProps {
   children: ReactNode;
   className?: string;
   hover?: boolean;
+  /**
+   * Allow 3D mouse tilt on this card when the global Appearance
+   * “Card tilt” preference is on. Ignored when preference is off.
+   */
   elastic?: boolean;
   /** Defaults to hidden (clips glass/media). Use auto for scrollable panels. */
   overflow?: 'hidden' | 'auto' | 'visible';
@@ -20,15 +25,17 @@ export function GlassCard({
   elastic = true,
   overflow = 'hidden',
 }: GlassCardProps) {
+  const { prefs } = usePreferences();
+  const tiltActive = elastic && prefs.cardTilt && !prefs.reduceMotion;
   const { ref, handleMouseMove, handleMouseLeave } = useGlassElasticity<HTMLDivElement>();
 
   if (overflow === 'auto') {
     return (
       <div
-        ref={elastic ? ref : undefined}
-        onMouseMove={elastic ? handleMouseMove : undefined}
-        onMouseLeave={elastic ? handleMouseLeave : undefined}
-      className={`glass-card relative flex min-h-0 flex-col overflow-hidden ${
+        ref={tiltActive ? ref : undefined}
+        onMouseMove={tiltActive ? handleMouseMove : undefined}
+        onMouseLeave={tiltActive ? handleMouseLeave : undefined}
+        className={`glass-card relative flex min-h-0 flex-col overflow-hidden ${
           hover ? 'glass-card-hover' : ''
         } ${className}`}
       >
@@ -48,9 +55,9 @@ export function GlassCard({
 
   return (
     <div
-      ref={elastic ? ref : undefined}
-      onMouseMove={elastic ? handleMouseMove : undefined}
-      onMouseLeave={elastic ? handleMouseLeave : undefined}
+      ref={tiltActive ? ref : undefined}
+      onMouseMove={tiltActive ? handleMouseMove : undefined}
+      onMouseLeave={tiltActive ? handleMouseLeave : undefined}
       className={`glass-card relative ${overflowClass} ${hover ? 'glass-card-hover' : ''} ${className}`}
     >
       {children}

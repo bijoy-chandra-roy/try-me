@@ -8,9 +8,12 @@ import { GlassCard } from '@/shared/components/GlassCard';
 import { Button } from '@/shared/components/Button';
 import { AuthOrDivider, GoogleSignInButton } from '@/shared/components/GoogleSignInButton';
 import { apiClient } from '@/shared/lib/api-client';
+import { onLoginSuccessMarkPrefsPending } from '@/shared/hooks/usePreferences';
+import { useT } from '@/shared/hooks/useT';
 import type { User } from '@/shared/types';
 
 export default function RegisterPage() {
+  const t = useT();
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,6 +27,7 @@ export default function RegisterPage() {
     setGoogleLoading(true);
 
     try {
+      onLoginSuccessMarkPrefsPending();
       await signIn('google', { callbackUrl: '/dashboard' });
     } finally {
       setGoogleLoading(false);
@@ -43,7 +47,7 @@ export default function RegisterPage() {
       });
       router.push('/login?registered=1');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+      setError(err instanceof Error ? err.message : t('auth.register.failed'));
     } finally {
       setLoading(false);
     }
@@ -53,16 +57,16 @@ export default function RegisterPage() {
     <div className="mx-auto flex min-h-[70vh] max-w-narrow items-center px-6 py-12">
       <GlassCard className="w-full p-8">
         <h1 className="font-serif text-3xl font-semibold text-primary">
-          Create account
+          {t('auth.register.title')}
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Register as a customer to save try-on history
+          {t('auth.register.subtitle')}
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
             <label htmlFor="name" className="mb-1.5 block text-sm font-medium">
-              Name
+              {t('auth.name')}
             </label>
             <input
               id="name"
@@ -75,7 +79,7 @@ export default function RegisterPage() {
           </div>
           <div>
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-              Email
+              {t('auth.email')}
             </label>
             <input
               id="email"
@@ -88,7 +92,7 @@ export default function RegisterPage() {
           </div>
           <div>
             <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
-              Password
+              {t('auth.password')}
             </label>
             <input
               id="password"
@@ -99,7 +103,7 @@ export default function RegisterPage() {
               minLength={8}
               className="input-glass input-glass-lg w-full"
             />
-            <p className="mt-1 text-xs text-muted-subtle">At least 8 characters</p>
+            <p className="mt-1 text-xs text-muted-subtle">{t('auth.passwordHint')}</p>
           </div>
 
           {error && (
@@ -107,7 +111,7 @@ export default function RegisterPage() {
           )}
 
           <Button type="submit" disabled={loading || googleLoading} className="w-full">
-            {loading ? 'Creating account...' : 'Register'}
+            {loading ? t('auth.register.submitting') : t('auth.register.submit')}
           </Button>
         </form>
 
@@ -117,14 +121,13 @@ export default function RegisterPage() {
             onClick={handleGoogleSignIn}
             disabled={loading}
             loading={googleLoading}
-            label="Continue with Google"
           />
         </div>
 
         <p className="mt-6 text-center text-sm text-muted">
-          Already have an account?{' '}
+          {t('auth.register.hasAccount')}{' '}
           <Link href="/login" className="text-link">
-            Sign in
+            {t('auth.register.signInLink')}
           </Link>
         </p>
       </GlassCard>

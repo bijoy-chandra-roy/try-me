@@ -12,24 +12,41 @@ import {
 } from '@/features/addresses/api/addresses.api';
 import { ApiError } from '@/shared/lib/api-client';
 import { ListSkeleton } from '@/shared/components/Skeleton';
+import { useT } from '@/shared/hooks/useT';
 import type { Address } from '@/shared/types';
+import type { MessageKey } from '@/shared/i18n';
 
-const empty: AddressInput = {
-  label: 'Home',
-  fullName: '',
-  phone: '',
-  line1: '',
-  line2: '',
-  city: '',
-  state: '',
-  postalCode: '',
-  country: 'US',
-  isDefault: false,
-};
+const FIELD_KEYS: { key: keyof AddressInput; labelKey: MessageKey }[] = [
+  { key: 'label', labelKey: 'addresses.fields.label' },
+  { key: 'fullName', labelKey: 'addresses.fields.fullName' },
+  { key: 'phone', labelKey: 'addresses.fields.phone' },
+  { key: 'line1', labelKey: 'addresses.fields.line1' },
+  { key: 'line2', labelKey: 'addresses.fields.line2' },
+  { key: 'city', labelKey: 'addresses.fields.city' },
+  { key: 'state', labelKey: 'addresses.fields.state' },
+  { key: 'postalCode', labelKey: 'addresses.fields.postalCode' },
+  { key: 'country', labelKey: 'addresses.fields.country' },
+];
+
+function emptyForm(defaultLabel: string): AddressInput {
+  return {
+    label: defaultLabel,
+    fullName: '',
+    phone: '',
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'US',
+    isDefault: false,
+  };
+}
 
 export function AddressesPanel() {
+  const t = useT();
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const [form, setForm] = useState<AddressInput>(empty);
+  const [form, setForm] = useState<AddressInput>(() => emptyForm(t('addresses.defaultLabel')));
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
@@ -53,11 +70,11 @@ export function AddressesPanel() {
     setMessage('');
     try {
       await createAddress(form);
-      setForm(empty);
-      setMessage('Address saved');
+      setForm(emptyForm(t('addresses.defaultLabel')));
+      setMessage(t('addresses.saved'));
       await load();
     } catch (err) {
-      setMessage(err instanceof ApiError ? err.message : 'Save failed');
+      setMessage(err instanceof ApiError ? err.message : t('addresses.saveFailed'));
     }
   }
 
@@ -73,7 +90,7 @@ export function AddressesPanel() {
 
   return (
     <div id="addresses" className="scroll-mt-24 space-y-4">
-      <h2 className="font-serif text-xl font-semibold">Shipping addresses</h2>
+      <h2 className="font-serif text-xl font-semibold">{t('addresses.title')}</h2>
       {loading ? (
         <ListSkeleton rows={2} />
       ) : (
@@ -81,7 +98,10 @@ export function AddressesPanel() {
         <GlassCard key={a._id} className="flex flex-wrap items-start justify-between gap-3 p-4">
           <div className="text-sm">
             <p className="font-medium">
-              {a.label} {a.isDefault && <span className="chip-category ml-1">Default</span>}
+              {a.label}{' '}
+              {a.isDefault && (
+                <span className="chip-category ml-1">{t('addresses.default')}</span>
+              )}
             </p>
             <p>
               {a.fullName} · {a.phone}
@@ -97,11 +117,11 @@ export function AddressesPanel() {
           <div className="flex gap-2">
             {!a.isDefault && (
               <Button variant="secondary" size="sm" onClick={() => makeDefault(a._id)}>
-                Set default
+                {t('addresses.setDefault')}
               </Button>
             )}
             <Button variant="destructive" size="sm" onClick={() => remove(a._id)}>
-              Delete
+              {t('addresses.delete')}
             </Button>
           </div>
         </GlassCard>
@@ -109,23 +129,11 @@ export function AddressesPanel() {
       )}
 
       <GlassCard className="p-5">
-        <h3 className="font-medium">Add address</h3>
+        <h3 className="font-medium">{t('addresses.addTitle')}</h3>
         <form onSubmit={onSubmit} className="mt-3 grid gap-3 sm:grid-cols-2">
-          {(
-            [
-              ['label', 'Label'],
-              ['fullName', 'Full name'],
-              ['phone', 'Phone'],
-              ['line1', 'Line 1'],
-              ['line2', 'Line 2'],
-              ['city', 'City'],
-              ['state', 'State'],
-              ['postalCode', 'Postal code'],
-              ['country', 'Country'],
-            ] as const
-          ).map(([key, label]) => (
+          {FIELD_KEYS.map(({ key, labelKey }) => (
             <div key={key}>
-              <label className="mb-1 block text-xs">{label}</label>
+              <label className="mb-1 block text-xs">{t(labelKey)}</label>
               <input
                 required={key !== 'line2' && key !== 'label'}
                 value={String(form[key] ?? '')}
@@ -136,7 +144,7 @@ export function AddressesPanel() {
           ))}
           <div className="sm:col-span-2">
             {message && <p className="mb-2 text-sm text-success">{message}</p>}
-            <Button type="submit">Save address</Button>
+            <Button type="submit">{t('addresses.save')}</Button>
           </div>
         </form>
       </GlassCard>

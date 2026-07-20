@@ -12,6 +12,7 @@ import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS } from '@/shared/auth/roles';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { Skeleton, StatCardsSkeleton } from '@/shared/components/Skeleton';
+import { useT } from '@/shared/hooks/useT';
 import type { DashboardStats, TryOnHistory, User } from '@/shared/types';
 
 interface UserDetail {
@@ -20,6 +21,7 @@ interface UserDetail {
 }
 
 export default function SupportDashboardPage() {
+  const t = useT();
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [selected, setSelected] = useState<UserDetail | null>(null);
@@ -64,8 +66,8 @@ export default function SupportDashboardPage() {
 
   return (
     <DashboardShell
-      title="Support Dashboard"
-      description="Look up customers, assist with try-on sessions, and monitor platform health"
+      title={t('dashboard.support.title')}
+      description={t('dashboard.support.description')}
     >
       <RoleGate
         permission="view_system_health"

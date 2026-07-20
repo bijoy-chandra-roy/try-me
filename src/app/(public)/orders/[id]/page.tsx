@@ -11,9 +11,11 @@ import { createReview } from '@/features/reviews/api/reviews.api';
 import { useAuth, usePermission } from '@/shared/hooks/useAuth';
 import { ApiError } from '@/shared/lib/api-client';
 import { OrderDetailSkeleton } from '@/shared/components/Skeleton';
+import { useT } from '@/shared/hooks/useT';
 import type { Order } from '@/shared/types';
 
 export default function OrderDetailPage() {
+  const t = useT();
   const params = useParams();
   const id = String(params.id);
   const { user } = useAuth();
@@ -33,7 +35,7 @@ export default function OrderDetailPage() {
       setOrder(await fetchOrder(id));
       setError('');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to load order');
+      setError(err instanceof ApiError ? err.message : t('orders.detail.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -53,9 +55,9 @@ export default function OrderDetailPage() {
     try {
       const updated = await updateOrderStatus(id, { status: 'cancelled' });
       setOrder(updated);
-      setMessage('Order cancelled');
+      setMessage(t('orders.detail.cancelled'));
     } catch (err) {
-      setMessage(err instanceof ApiError ? err.message : 'Cancel failed');
+      setMessage(err instanceof ApiError ? err.message : t('orders.detail.cancelFailed'));
     }
   }
 
@@ -63,9 +65,9 @@ export default function OrderDetailPage() {
     try {
       const updated = await updateOrderStatus(id, { advance: true });
       setOrder(updated);
-      setMessage('Status updated');
+      setMessage(t('orders.detail.statusUpdated'));
     } catch (err) {
-      setMessage(err instanceof ApiError ? err.message : 'Update failed');
+      setMessage(err instanceof ApiError ? err.message : t('orders.detail.updateFailed'));
     }
   }
 
@@ -73,9 +75,9 @@ export default function OrderDetailPage() {
     try {
       const updated = await updateOrderStatus(id, { paymentStatus: 'paid' });
       setOrder(updated);
-      setMessage('Marked as paid');
+      setMessage(t('orders.detail.markedPaid'));
     } catch (err) {
-      setMessage(err instanceof ApiError ? err.message : 'Update failed');
+      setMessage(err instanceof ApiError ? err.message : t('orders.detail.updateFailed'));
     }
   }
 
@@ -84,9 +86,9 @@ export default function OrderDetailPage() {
       await createReview(productId, { rating, comment, orderId: id });
       setReviewing(null);
       setComment('');
-      setMessage('Review submitted');
+      setMessage(t('orders.detail.reviewSubmitted'));
     } catch (err) {
-      setMessage(err instanceof ApiError ? err.message : 'Review failed');
+      setMessage(err instanceof ApiError ? err.message : t('orders.detail.reviewFailed'));
     }
   }
 
@@ -96,9 +98,9 @@ export default function OrderDetailPage() {
         <OrderDetailSkeleton />
       ) : error || !order ? (
         <div className="py-6 text-center">
-          <p className="text-error">{error || 'Order not found'}</p>
+          <p className="text-error">{error || t('orders.detail.notFound')}</p>
           <Link href="/" className="mt-4 inline-block">
-            <Button>Home</Button>
+            <Button>{t('common.home')}</Button>
           </Link>
         </div>
       ) : (
@@ -106,10 +108,12 @@ export default function OrderDetailPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-primary">
-            Order {order.orderNumber}
+            {t('orders.detail.title', { orderNumber: order.orderNumber })}
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Placed {new Date(order.createdAt).toLocaleString()}
+            {t('orders.detail.placed', {
+              date: new Date(order.createdAt).toLocaleString(),
+            })}
           </p>
         </div>
         <span className="chip-category capitalize">{order.status}</span>
@@ -131,16 +135,21 @@ export default function OrderDetailPage() {
             <div className="min-w-0 flex-1">
               <p className="font-medium">{item.name}</p>
               <p className="text-sm text-muted">
-                {item.size ? `Size ${item.size} · ` : ''}
-                Qty {item.quantity} · ${item.price.toFixed(2)}
+                {t('orders.detail.itemMeta', {
+                  size: item.size || '—',
+                  n: item.quantity,
+                  price: item.price.toFixed(2),
+                })}
               </p>
-              <p className="text-xs capitalize text-accent">Item: {item.merchantStatus}</p>
+              <p className="text-xs capitalize text-accent">
+                {t('orders.detail.itemStatus', { status: item.merchantStatus })}
+              </p>
               {order.status === 'delivered' && isOwner && (
                 <div className="mt-2">
                   {reviewing === item.productId ? (
                     <div className="space-y-2 rounded-element bg-[var(--color-overlay-hover)] p-3">
                       <label className="block text-sm">
-                        Rating
+                        {t('orders.detail.rating')}
                         <select
                           value={rating}
                           onChange={(e) => setRating(Number(e.target.value))}
@@ -156,7 +165,7 @@ export default function OrderDetailPage() {
                       <textarea
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
-                        placeholder="Your review"
+                        placeholder={t('orders.detail.reviewPlaceholder')}
                         className="input-glass w-full rounded-xl px-3 py-2 text-sm"
                         rows={2}
                       />
@@ -165,10 +174,10 @@ export default function OrderDetailPage() {
                           className="text-sm"
                           onClick={() => submitReview(item.productId)}
                         >
-                          Submit
+                          {t('orders.detail.submitReview')}
                         </Button>
                         <Button className="text-sm" onClick={() => setReviewing(null)}>
-                          Cancel
+                          {t('common.cancel')}
                         </Button>
                       </div>
                     </div>
@@ -177,7 +186,7 @@ export default function OrderDetailPage() {
                       className="text-sm"
                       onClick={() => setReviewing(item.productId)}
                     >
-                      Write review
+                      {t('orders.detail.writeReview')}
                     </Button>
                   )}
                 </div>
@@ -188,7 +197,7 @@ export default function OrderDetailPage() {
       </GlassCard>
 
       <GlassCard className="mt-4 space-y-2 p-6 text-sm">
-        <h2 className="font-serif text-lg font-semibold">Shipping</h2>
+        <h2 className="font-serif text-lg font-semibold">{t('orders.detail.shipping')}</h2>
         <p>
           {order.shippingAddress.fullName} · {order.shippingAddress.phone}
         </p>
@@ -201,23 +210,26 @@ export default function OrderDetailPage() {
           {order.shippingAddress.postalCode}, {order.shippingAddress.country}
         </p>
         <p className="pt-2">
-          Payment: {order.paymentMethod.toUpperCase()} · {order.paymentStatus} · Total $
-          {order.total.toFixed(2)}
+          {t('orders.detail.paymentLine', {
+            method: order.paymentMethod.toUpperCase(),
+            status: order.paymentStatus,
+            total: order.total.toFixed(2),
+          })}
         </p>
       </GlassCard>
 
       <div className="mt-6 flex flex-wrap gap-2">
         {canCancel && (
-          <Button onClick={cancel}>Cancel order</Button>
+          <Button onClick={cancel}>{t('orders.detail.cancelOrder')}</Button>
         )}
         {canAdvance && order.status !== 'delivered' && order.status !== 'cancelled' && (
-          <Button onClick={advance}>Advance status</Button>
+          <Button onClick={advance}>{t('orders.detail.advanceStatus')}</Button>
         )}
         {(canFulfill || canViewAll) && order.paymentStatus === 'pending' && (
-          <Button onClick={markPaid}>Mark COD paid</Button>
+          <Button onClick={markPaid}>{t('orders.detail.markCodPaid')}</Button>
         )}
         <Link href="/">
-          <Button>Continue shopping</Button>
+          <Button>{t('orders.detail.continueShopping')}</Button>
         </Link>
       </div>
         </>

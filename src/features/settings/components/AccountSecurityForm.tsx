@@ -1,14 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { signOut } from 'next-auth/react';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { Button } from '@/shared/components/Button';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { usePreferences } from '@/shared/hooks/usePreferences';
+import { useT } from '@/shared/hooks/useT';
 import { apiClient } from '@/shared/lib/api-client';
+import {
+  confirmSignOut,
+  signOutAndClearPreferences,
+} from '@/shared/lib/auth-actions';
+import { resetOnboardingTour } from '@/shared/lib/preferences';
 
 export function AccountSecurityForm() {
   const { user } = useAuth();
+  const { resetPreferences, saving: prefsSaving } = usePreferences();
+  const t = useT();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [saving, setSaving] = useState(false);
@@ -19,11 +27,11 @@ export function AccountSecurityForm() {
     e.preventDefault();
     if (!user?.id) return;
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(t('settings.security.minLength'));
       return;
     }
     if (password !== confirm) {
-      setError('Passwords do not match');
+      setError(t('settings.security.mismatch'));
       return;
     }
     setSaving(true);
@@ -37,25 +45,47 @@ export function AccountSecurityForm() {
       });
       setPassword('');
       setConfirm('');
-      setMessage('Password updated');
+      setMessage(t('settings.security.updated'));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed');
+      setError(err instanceof Error ? err.message : t('settings.security.updateFailed'));
     } finally {
       setSaving(false);
+    }
+  }
+
+  function handleSignOut() {
+    if (!confirmSignOut(t('settings.account.signOutConfirm'))) return;
+    void signOutAndClearPreferences('/');
+  }
+
+  function handleResetTour() {
+    resetOnboardingTour();
+    setMessage(t('settings.account.resetTourDone'));
+  }
+
+  async function handleResetAll() {
+    if (!window.confirm(t('settings.account.resetAllConfirm'))) return;
+    setMessage('');
+    setError('');
+    try {
+      await resetPreferences();
+      setMessage(t('settings.account.resetAllDone'));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('settings.account.resetFailed'));
     }
   }
 
   return (
     <div className="max-w-form space-y-6">
       <GlassCard className="p-6">
-        <h2 className="font-serif text-xl font-semibold">Password</h2>
-        <p className="mt-1 text-sm text-muted">
-          Choose a strong password you do not use elsewhere. Minimum 8 characters.
-        </p>
+        <h2 className="font-serif text-xl font-semibold">
+          {t('settings.security.passwordTitle')}
+        </h2>
+        <p className="mt-1 text-sm text-muted">{t('settings.security.passwordSubtitle')}</p>
         <form onSubmit={changePassword} className="mt-6 space-y-4">
           <div>
             <label htmlFor="settings-password" className="mb-1 block text-sm">
-              New password
+              {t('settings.security.newPassword')}
             </label>
             <input
               id="settings-password"
@@ -70,7 +100,7 @@ export function AccountSecurityForm() {
           </div>
           <div>
             <label htmlFor="settings-password-confirm" className="mb-1 block text-sm">
-              Confirm password
+              {t('settings.security.confirmPassword')}
             </label>
             <input
               id="settings-password-confirm"
@@ -86,22 +116,35 @@ export function AccountSecurityForm() {
           {message && <p className="text-sm text-success">{message}</p>}
           {error && <p className="text-sm text-error">{error}</p>}
           <Button type="submit" disabled={saving}>
-            {saving ? 'Updating...' : 'Update password'}
+            {saving ? t('settings.security.updating') : t('settings.security.updatePassword')}
           </Button>
         </form>
       </GlassCard>
 
       <GlassCard className="p-6">
-        <h2 className="font-serif text-xl font-semibold">Sign out</h2>
-        <p className="mt-1 text-sm text-muted">
-          End your session on this device. You can sign back in anytime.
-        </p>
-        <Button
-          variant="secondary"
-          className="mt-4"
-          onClick={() => signOut({ callbackUrl: '/' })}
-        >
-          Sign out
+        <h2 className="font-serif text-xl font-semibold">
+          {t('settings.account.demoTitle')}
+        </h2>
+        <p className="mt-1 text-sm text-muted">{t('settings.account.demoSubtitle')}</p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Button variant="secondary" onClick={handleResetTour}>
+            {t('settings.account.resetTour')}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => void handleResetAll()}
+            disabled={prefsSaving}
+          >
+            {t('settings.account.resetAll')}
+          </Button>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6">
+        <h2 className="font-serif text-xl font-semibold">{t('settings.account.signOut')}</h2>
+        <p className="mt-1 text-sm text-muted">{t('settings.account.signOutSubtitle')}</p>
+        <Button variant="secondary" className="mt-4" onClick={handleSignOut}>
+          {t('settings.account.signOut')}
         </Button>
       </GlassCard>
     </div>

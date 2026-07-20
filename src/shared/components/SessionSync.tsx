@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { canAccessDashboardPath } from '@/shared/auth/permissions';
 import { getDashboardPath, isUserRole } from '@/shared/auth/roles';
 import { clearLastKnownAuth } from '@/shared/hooks/useAuth';
+import { signOutAndClearPreferences } from '@/shared/lib/auth-actions';
 
 export function SessionSync() {
   const { data: session, status } = useSession();
@@ -17,7 +18,7 @@ export function SessionSync() {
 
     if (session.user.status === 'inactive') {
       clearLastKnownAuth();
-      void signOut({ callbackUrl: '/login?error=AccountInactive' });
+      void signOutAndClearPreferences('/login?error=AccountInactive');
       return;
     }
 

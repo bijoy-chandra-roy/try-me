@@ -15,10 +15,11 @@ import {
 import { checkout } from '@/features/orders/api/orders.api';
 import { ApiError } from '@/shared/lib/api-client';
 import { CartLineSkeleton, Skeleton } from '@/shared/components/Skeleton';
+import { useT } from '@/shared/hooks/useT';
 import type { Address } from '@/shared/types';
+import type { MessageKey } from '@/shared/i18n';
 
-const emptyForm: AddressInput = {
-  label: 'Home',
+const emptyFormBase: Omit<AddressInput, 'label'> = {
   fullName: '',
   phone: '',
   line1: '',
@@ -30,12 +31,28 @@ const emptyForm: AddressInput = {
   isDefault: true,
 };
 
+const FIELD_KEYS: { key: keyof AddressInput; labelKey: MessageKey }[] = [
+  { key: 'label', labelKey: 'checkout.fields.label' },
+  { key: 'fullName', labelKey: 'checkout.fields.fullName' },
+  { key: 'phone', labelKey: 'checkout.fields.phone' },
+  { key: 'line1', labelKey: 'checkout.fields.line1' },
+  { key: 'line2', labelKey: 'checkout.fields.line2' },
+  { key: 'city', labelKey: 'checkout.fields.city' },
+  { key: 'state', labelKey: 'checkout.fields.state' },
+  { key: 'postalCode', labelKey: 'checkout.fields.postalCode' },
+  { key: 'country', labelKey: 'checkout.fields.country' },
+];
+
 export default function CheckoutPage() {
+  const t = useT();
   const router = useRouter();
   const { items, loading: cartLoading, refresh } = useCart();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedId, setSelectedId] = useState<string>('');
-  const [form, setForm] = useState<AddressInput>(emptyForm);
+  const [form, setForm] = useState<AddressInput>({
+    ...emptyFormBase,
+    label: t('addresses.defaultLabel'),
+  });
   const [useNew, setUseNew] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -77,7 +94,7 @@ export default function CheckoutPage() {
       setCartStore({ _id: '', userId: '', items: [] });
       router.push(`/orders/${order._id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Checkout failed');
+      setError(err instanceof ApiError ? err.message : t('checkout.failed'));
     } finally {
       setSubmitting(false);
     }
@@ -86,9 +103,9 @@ export default function CheckoutPage() {
   if (!pageLoading && items.length === 0) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-16 text-center">
-        <h1 className="font-serif text-3xl font-semibold">Nothing to checkout</h1>
+        <h1 className="font-serif text-3xl font-semibold">{t('checkout.emptyTitle')}</h1>
         <Link href="/cart" className="mt-6 inline-block">
-          <Button>Back to cart</Button>
+          <Button>{t('checkout.backToCart')}</Button>
         </Link>
       </div>
     );
@@ -97,16 +114,16 @@ export default function CheckoutPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
       <h1 className="font-serif text-3xl font-semibold text-primary">
-        Checkout
+        {t('checkout.title')}
       </h1>
       <p className="mt-1 text-sm text-muted">
-        Cash on delivery — pay when your order arrives.
+        {t('checkout.subtitle')}
         {pageLoading ? (
           <span className="ml-1 inline-block align-middle">
             <Skeleton className="inline-block h-4 w-16" />
           </span>
         ) : (
-          <> Total: ${subtotal.toFixed(2)}</>
+          <> {t('checkout.total', { amount: subtotal.toFixed(2) })}</>
         )}
       </p>
 
@@ -125,7 +142,7 @@ export default function CheckoutPage() {
       ) : (
         <form onSubmit={placeOrder} className="mt-8 space-y-6">
           <GlassCard className="space-y-4 p-6">
-            <h2 className="font-serif text-xl font-semibold">Shipping address</h2>
+            <h2 className="font-serif text-xl font-semibold">{t('checkout.shippingTitle')}</h2>
 
             {addresses.length > 0 && (
               <div className="space-y-2">
@@ -160,28 +177,16 @@ export default function CheckoutPage() {
                     checked={useNew}
                     onChange={() => setUseNew(true)}
                   />
-                  Use a new address
+                  {t('checkout.useNewAddress')}
                 </label>
               </div>
             )}
 
             {(useNew || addresses.length === 0) && (
               <div className="grid gap-3 sm:grid-cols-2">
-                {(
-                  [
-                    ['label', 'Label'],
-                    ['fullName', 'Full name'],
-                    ['phone', 'Phone'],
-                    ['line1', 'Address line 1'],
-                    ['line2', 'Address line 2'],
-                    ['city', 'City'],
-                    ['state', 'State'],
-                    ['postalCode', 'Postal code'],
-                    ['country', 'Country'],
-                  ] as const
-                ).map(([key, label]) => (
+                {FIELD_KEYS.map(({ key, labelKey }) => (
                   <div key={key} className={key === 'line1' || key === 'line2' ? 'sm:col-span-2' : ''}>
-                    <label className="mb-1 block text-sm">{label}</label>
+                    <label className="mb-1 block text-sm">{t(labelKey)}</label>
                     <input
                       required={key !== 'line2' && key !== 'label'}
                       value={String(form[key] ?? '')}
@@ -195,9 +200,9 @@ export default function CheckoutPage() {
           </GlassCard>
 
           <GlassCard className="p-6">
-            <h2 className="font-serif text-xl font-semibold">Payment</h2>
+            <h2 className="font-serif text-xl font-semibold">{t('checkout.paymentTitle')}</h2>
             <p className="mt-2 text-sm text-muted">
-              Cash on Delivery (COD). No card charge now — pay when the order is delivered.
+              {t('checkout.paymentBody')}
             </p>
             <ul className="mt-4 space-y-1 text-sm">
               {items.map((item) => (
@@ -213,7 +218,7 @@ export default function CheckoutPage() {
               ))}
             </ul>
             <p className="mt-4 flex justify-between text-lg font-semibold">
-              <span>Total</span>
+              <span>{t('checkout.totalLabel')}</span>
               <span className="tabular-nums">${subtotal.toFixed(2)}</span>
             </p>
           </GlassCard>
@@ -223,11 +228,11 @@ export default function CheckoutPage() {
           <div className="flex gap-3">
             <Link href="/cart">
               <Button type="button" variant="ghost">
-                Back
+                {t('common.back')}
               </Button>
             </Link>
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Placing order…' : 'Place order (COD)'}
+              {submitting ? t('checkout.placing') : t('checkout.placeOrder')}
             </Button>
           </div>
         </form>

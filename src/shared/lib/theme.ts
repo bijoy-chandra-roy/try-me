@@ -1,38 +1,31 @@
-export type Theme = 'light' | 'dark' | 'system';
+/** @deprecated Prefer @/shared/lib/preferences and @/shared/constants */
+import {
+  applyPreferences,
+  normalizePreferences,
+  readPreferencesCache,
+  resolveTheme,
+  writePreferencesCache,
+} from '@/shared/lib/preferences';
+import {
+  THEME_OPTIONS,
+  type ThemeMode,
+  type UserPreferences,
+} from '@/shared/constants';
 
-export const THEME_OPTIONS: { value: Theme; label: string; description: string }[] = [
-  {
-    value: 'light',
-    label: 'Light',
-    description: 'Bright background and dark text',
-  },
-  {
-    value: 'dark',
-    label: 'Dark',
-    description: 'Dim background and light text',
-  },
-  {
-    value: 'system',
-    label: 'System',
-    description: 'Match your device preference',
-  },
-];
+export type Theme = ThemeMode;
 
-export function resolveTheme(theme: Theme): 'light' | 'dark' {
-  if (theme === 'system') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  return theme;
-}
+export { THEME_OPTIONS, resolveTheme };
 
 export function applyTheme(theme: Theme) {
-  const resolved = resolveTheme(theme);
-  document.documentElement.classList.toggle('dark', resolved === 'dark');
-  localStorage.setItem('theme', theme);
+  const cached = readPreferencesCache();
+  const prefs: UserPreferences = normalizePreferences({
+    ...(cached ?? {}),
+    theme,
+  });
+  writePreferencesCache(prefs);
+  applyPreferences(prefs, { force: true });
 }
 
 export function readStoredTheme(): Theme {
-  const stored = localStorage.getItem('theme');
-  if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
-  return 'system';
+  return readPreferencesCache()?.theme ?? 'system';
 }

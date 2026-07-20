@@ -16,6 +16,7 @@ import { TagListField } from '@/shared/components/TagListField';
 import { CustomFieldsEditor } from '@/shared/components/CustomFieldsEditor';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { useT } from '@/shared/hooks/useT';
 import { apiClient } from '@/shared/lib/api-client';
 import {
   DashboardContentSkeleton,
@@ -50,6 +51,7 @@ const emptyProduct = {
 };
 
 export default function MerchantDashboardPage() {
+  const t = useT();
   const { user, isResolved } = useAuth();
   const [stats, setStats] = useState<MerchantStats | null>(null);
   const [form, setForm] = useState(emptyProduct);
@@ -132,8 +134,8 @@ export default function MerchantDashboardPage() {
   if (!isResolved) {
     return (
       <DashboardShell
-        title="Merchant Dashboard"
-        description="Manage products, fulfill orders, and view analytics"
+        title={t('dashboard.merchant.title')}
+        description={t('dashboard.merchant.description')}
       >
         <DashboardContentSkeleton />
       </DashboardShell>
@@ -143,8 +145,8 @@ export default function MerchantDashboardPage() {
   if (needsOnboarding) {
     return (
       <DashboardShell
-        title="Merchant Dashboard"
-        description="Set up your store before managing products"
+        title={t('dashboard.merchant.title')}
+        description={t('dashboard.merchant.onboardingDesc')}
       >
         <div id="store" className="scroll-mt-24">
           <StoreSettingsForm />
@@ -155,8 +157,8 @@ export default function MerchantDashboardPage() {
 
   return (
     <DashboardShell
-      title="Merchant Dashboard"
-      description="Manage products, fulfill orders, and view analytics"
+      title={t('dashboard.merchant.title')}
+      description={t('dashboard.merchant.description')}
     >
       <RoleGate
         permission="manage_products"

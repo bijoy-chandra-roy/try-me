@@ -9,7 +9,6 @@
 import Link from '@/shared/components/Link';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import {
   ChevronsLeft,
   ChevronsRight,
@@ -18,15 +17,26 @@ import {
   Menu,
 } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { ROLE_LABELS } from '@/shared/auth/roles';
+import { useT } from '@/shared/hooks/useT';
+import type { UserRole } from '@/shared/auth/roles';
 import { getDashboardNavItems } from '@/shared/auth/navigation';
 import { IconButton } from '@/shared/components/IconButton';
 import { IconLink } from '@/shared/components/IconLink';
 import { Drawer } from '@/shared/components/Drawer';
 import { DrawerNavItem } from '@/shared/components/DrawerNavItem';
 import { getNavIcon } from '@/shared/ui/nav-icons';
+import {
+  confirmSignOut,
+  signOutAndClearPreferences,
+} from '@/shared/lib/auth-actions';
+import { DASHBOARD_NAV_COLLAPSE_KEY } from '@/shared/constants';
+import type { MessageKey } from '@/shared/i18n';
 
-const COLLAPSE_KEY = 'dashboard-nav-collapsed';
+const COLLAPSE_KEY = DASHBOARD_NAV_COLLAPSE_KEY;
+
+function roleLabelKey(role: UserRole): MessageKey {
+  return `roles.${role}` as MessageKey;
+}
 
 function useDashboardNavActive() {
   const pathname = usePathname();
@@ -87,14 +97,19 @@ export function DashboardShell({
   children: React.ReactNode;
 }) {
   const { user, role, isResolved } = useAuth();
+  const t = useT();
   const navItems = role && isResolved ? getDashboardNavItems(role) : [];
   const isActive = useDashboardNavActive();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { collapsed, toggle } = useCollapsedNav();
 
+  function handleSignOut() {
+    if (!confirmSignOut(t('settings.account.signOutConfirm'))) return;
+    void signOutAndClearPreferences('/');
+  }
+
   return (
     <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-content items-start gap-4 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8">
-      {/* Desktop sidenav — height follows content, not page height */}
       <aside
         className={`glass-card sticky top-24 hidden shrink-0 flex-col md:flex ${
           collapsed ? 'w-14 items-center gap-1 p-2' : 'w-[var(--layout-sidenav-width)] gap-1 p-4'
@@ -107,12 +122,16 @@ export function DashboardShell({
         >
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <p className="text-xs uppercase tracking-wider text-muted-subtle">Dashboard</p>
+              <p className="text-xs uppercase tracking-wider text-muted-subtle">
+                {t('dashboard.label')}
+              </p>
               {isResolved ? (
                 <>
                   <p className="mt-0.5 truncate font-medium text-primary">{user?.name}</p>
                   {role && (
-                    <span className="chip-category mt-1.5 inline-block">{ROLE_LABELS[role]}</span>
+                    <span className="chip-category mt-1.5 inline-block">
+                      {t(roleLabelKey(role))}
+                    </span>
                   )}
                 </>
               ) : (
@@ -123,7 +142,7 @@ export function DashboardShell({
           {collapsed && isResolved && (
             <span
               className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-overlay-hover)] text-xs font-semibold text-primary"
-              title={user?.name ?? 'Account'}
+              title={user?.name ?? t('dashboard.account')}
             >
               {(user?.name ?? '?').slice(0, 1).toUpperCase()}
             </span>
@@ -132,7 +151,7 @@ export function DashboardShell({
             <span className="h-8 w-8 animate-pulse rounded-full bg-[var(--color-overlay-hover)]" />
           )}
           <IconButton
-            label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            label={collapsed ? t('dashboard.expandSidebar') : t('dashboard.collapseSidebar')}
             tooltipSide="right"
             size="sm"
             onClick={toggle}
@@ -147,7 +166,7 @@ export function DashboardShell({
 
         <nav
           className={`flex flex-col gap-1 ${collapsed ? 'items-center' : ''}`}
-          aria-label="Dashboard"
+          aria-label={t('dashboard.label')}
         >
           {!isResolved &&
             Array.from({ length: 4 }, (_, i) => (
@@ -163,13 +182,14 @@ export function DashboardShell({
             const href = item.hash ? `${item.href}#${item.hash}` : item.href;
             const Icon = getNavIcon(item.icon);
             const active = isActive(item);
+            const label = t(item.labelKey);
 
             if (collapsed) {
               return (
                 <IconLink
-                  key={`${item.href}-${item.label}`}
+                  key={`${item.href}-${item.labelKey}`}
                   href={href}
-                  label={item.label}
+                  label={label}
                   active={active}
                   tooltipSide="right"
                 >
@@ -180,7 +200,7 @@ export function DashboardShell({
 
             return (
               <Link
-                key={`${item.href}-${item.label}`}
+                key={`${item.href}-${item.labelKey}`}
                 href={href}
                 aria-current={active ? 'page' : undefined}
                 className={`flex items-center gap-3 rounded-inner px-3 py-2 text-sm transition-colors ${
@@ -190,13 +210,18 @@ export function DashboardShell({
                 }`}
               >
                 <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-                <span className="truncate">{item.label}</span>
+                <span className="truncate">{label}</span>
               </Link>
             );
           })}
 
           {collapsed ? (
-            <IconLink href="/" label="Back to Catalog" tooltipSide="right" className="mt-2">
+            <IconLink
+              href="/"
+              label={t('dashboard.backToCatalog')}
+              tooltipSide="right"
+              className="mt-2"
+            >
               <Home className="h-5 w-5" strokeWidth={1.75} />
             </IconLink>
           ) : (
@@ -205,7 +230,7 @@ export function DashboardShell({
               className="mt-2 flex items-center gap-3 rounded-inner px-3 py-2 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
             >
               <Home className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-              <span>Back to Catalog</span>
+              <span>{t('dashboard.backToCatalog')}</span>
             </Link>
           )}
         </nav>
@@ -213,20 +238,20 @@ export function DashboardShell({
         <div className={`mt-3 border-t border-subtle pt-3 ${collapsed ? '' : 'w-full'}`}>
           {collapsed ? (
             <IconButton
-              label="Sign out"
+              label={t('nav.signOut')}
               tooltipSide="right"
-              onClick={() => signOut({ callbackUrl: '/' })}
+              onClick={handleSignOut}
             >
               <LogOut className="h-5 w-5" strokeWidth={1.75} />
             </IconButton>
           ) : (
             <button
               type="button"
-              onClick={() => signOut({ callbackUrl: '/' })}
+              onClick={handleSignOut}
               className="flex w-full items-center gap-3 rounded-inner px-3 py-2 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
             >
               <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-              Sign out
+              {t('nav.signOut')}
             </button>
           )}
         </div>
@@ -241,12 +266,12 @@ export function DashboardShell({
             )}
             {isResolved && role && (
               <p className="mt-2 text-xs text-muted-subtle md:hidden">
-                {user?.name} · {ROLE_LABELS[role]}
+                {user?.name} · {t(roleLabelKey(role))}
               </p>
             )}
           </div>
           <IconButton
-            label="Open dashboard menu"
+            label={t('dashboard.openMenu')}
             className="shrink-0 md:hidden"
             showTooltip={false}
             onClick={() => setMobileOpen(true)}
@@ -261,7 +286,7 @@ export function DashboardShell({
       <Drawer
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        title="Dashboard"
+        title={t('dashboard.label')}
         side="left"
       >
         <div className="mb-4">
@@ -269,21 +294,23 @@ export function DashboardShell({
             <>
               <p className="font-medium text-primary">{user?.name}</p>
               {role && (
-                <span className="chip-category mt-2 inline-block">{ROLE_LABELS[role]}</span>
+                <span className="chip-category mt-2 inline-block">
+                  {t(roleLabelKey(role))}
+                </span>
               )}
             </>
           ) : (
             <div className="h-10 w-32 animate-pulse rounded-inner bg-[var(--color-overlay-hover)]" />
           )}
         </div>
-        <nav className="flex flex-col gap-1" aria-label="Dashboard">
+        <nav className="flex flex-col gap-1" aria-label={t('dashboard.label')}>
           {navItems.map((item) => {
             const href = item.hash ? `${item.href}#${item.hash}` : item.href;
             return (
               <DrawerNavItem
-                key={`${item.href}-${item.label}`}
+                key={`${item.href}-${item.labelKey}`}
                 href={href}
-                label={item.label}
+                label={t(item.labelKey)}
                 icon={getNavIcon(item.icon)}
                 active={isActive(item)}
                 onClick={() => setMobileOpen(false)}
@@ -292,7 +319,7 @@ export function DashboardShell({
           })}
           <DrawerNavItem
             href="/"
-            label="Back to Catalog"
+            label={t('dashboard.backToCatalog')}
             icon={Home}
             onClick={() => setMobileOpen(false)}
           />
@@ -301,12 +328,12 @@ export function DashboardShell({
           type="button"
           onClick={() => {
             setMobileOpen(false);
-            void signOut({ callbackUrl: '/' });
+            handleSignOut();
           }}
           className="mt-4 flex w-full items-center gap-3 rounded-inner px-3 py-2.5 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
         >
           <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-          Sign out
+          {t('nav.signOut')}
         </button>
       </Drawer>
     </div>

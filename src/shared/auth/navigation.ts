@@ -2,10 +2,11 @@ import type { Permission } from './permissions';
 import { hasPermission } from './permissions';
 import type { UserRole } from './roles';
 import type { NavIconKey } from '@/shared/ui/nav-icons';
+import type { MessageKey } from '@/shared/i18n';
 
 export interface DashboardNavItem {
   href: string;
-  label: string;
+  labelKey: MessageKey;
   icon: NavIconKey;
   permission?: Permission;
   hash?: string;
@@ -15,7 +16,7 @@ export interface DashboardNavItem {
 
 export interface SettingsNavItem {
   href: string;
-  label: string;
+  labelKey: MessageKey;
   icon: NavIconKey;
   /** Extra role gate beyond manage_own_profile */
   roles?: UserRole[];
@@ -24,48 +25,53 @@ export interface SettingsNavItem {
 
 export const DASHBOARD_NAV: Record<UserRole, DashboardNavItem[]> = {
   customer: [
-    { href: '/dashboard/customer', label: 'Overview', icon: 'overview' },
+    { href: '/dashboard/customer', labelKey: 'nav.overview', icon: 'overview' },
     {
       href: '/dashboard/customer',
-      label: 'Orders',
+      labelKey: 'nav.orders',
       icon: 'orders',
       permission: 'view_own_orders',
       hash: 'orders',
     },
     {
       href: '/dashboard/customer',
-      label: 'Addresses',
+      labelKey: 'nav.addresses',
       icon: 'addresses',
       permission: 'manage_cart',
       hash: 'addresses',
     },
     {
       href: '/dashboard/customer',
-      label: 'Try-on History',
+      labelKey: 'nav.history',
       icon: 'history',
       permission: 'view_own_try_on_history',
       hash: 'history',
     },
   ],
   merchant: [
-    { href: '/dashboard/merchant', label: 'Products', icon: 'products', permission: 'manage_products' },
     {
       href: '/dashboard/merchant',
-      label: 'Orders',
+      labelKey: 'nav.products',
+      icon: 'products',
+      permission: 'manage_products',
+    },
+    {
+      href: '/dashboard/merchant',
+      labelKey: 'nav.orders',
       icon: 'orders',
       permission: 'fulfill_orders',
       hash: 'orders',
     },
     {
       href: '/dashboard/merchant',
-      label: 'Analytics',
+      labelKey: 'nav.analytics',
       icon: 'analytics',
       permission: 'manage_products',
       hash: 'analytics',
     },
     {
       href: '/dashboard/merchant',
-      label: 'Store',
+      labelKey: 'nav.store',
       icon: 'store',
       permission: 'manage_merchants',
       hash: 'store',
@@ -74,15 +80,20 @@ export const DASHBOARD_NAV: Record<UserRole, DashboardNavItem[]> = {
   support: [
     {
       href: '/dashboard/support',
-      label: 'Orders',
+      labelKey: 'nav.orders',
       icon: 'orders',
       permission: 'view_all_orders',
       hash: 'orders',
     },
-    { href: '/dashboard/support', label: 'User Lookup', icon: 'userLookup', permission: 'view_users' },
     {
       href: '/dashboard/support',
-      label: 'System Health',
+      labelKey: 'nav.userLookup',
+      icon: 'userLookup',
+      permission: 'view_users',
+    },
+    {
+      href: '/dashboard/support',
+      labelKey: 'nav.health',
       icon: 'health',
       permission: 'view_system_health',
       hash: 'health',
@@ -91,21 +102,27 @@ export const DASHBOARD_NAV: Record<UserRole, DashboardNavItem[]> = {
   admin: [
     {
       href: '/dashboard/admin',
-      label: 'Overview',
+      labelKey: 'nav.overview',
       icon: 'overview',
       permission: 'view_system_health',
     },
     {
       href: '/dashboard/admin',
-      label: 'Orders',
+      labelKey: 'nav.orders',
       icon: 'orders',
       permission: 'view_all_orders',
       hash: 'orders',
     },
-    { href: '/dashboard/admin', label: 'Users', icon: 'users', permission: 'manage_users', hash: 'users' },
     {
       href: '/dashboard/admin',
-      label: 'Merchants',
+      labelKey: 'nav.users',
+      icon: 'users',
+      permission: 'manage_users',
+      hash: 'users',
+    },
+    {
+      href: '/dashboard/admin',
+      labelKey: 'nav.merchants',
       icon: 'merchants',
       permission: 'manage_merchants',
       hash: 'merchants',
@@ -114,34 +131,34 @@ export const DASHBOARD_NAV: Record<UserRole, DashboardNavItem[]> = {
   super_admin: [
     {
       href: '/dashboard/super-admin',
-      label: 'Overview',
+      labelKey: 'nav.overview',
       icon: 'overview',
       permission: 'view_system_health',
     },
     {
       href: '/dashboard/super-admin',
-      label: 'Orders',
+      labelKey: 'nav.orders',
       icon: 'orders',
       permission: 'view_all_orders',
       hash: 'orders',
     },
     {
       href: '/dashboard/super-admin',
-      label: 'Feature Flags',
+      labelKey: 'nav.flags',
       icon: 'flags',
       permission: 'manage_system',
       hash: 'flags',
     },
     {
       href: '/dashboard/super-admin',
-      label: 'Users & Roles',
+      labelKey: 'nav.roles',
       icon: 'roles',
       permission: 'assign_roles',
       hash: 'roles',
     },
     {
       href: '/dashboard/super-admin',
-      label: 'Merchants',
+      labelKey: 'nav.merchants',
       icon: 'merchants',
       permission: 'manage_merchants',
       hash: 'merchants',
@@ -150,12 +167,28 @@ export const DASHBOARD_NAV: Record<UserRole, DashboardNavItem[]> = {
 };
 
 export const SETTINGS_NAV: SettingsNavItem[] = [
-  { href: '/settings/profile', label: 'Profile', icon: 'profile', permission: 'manage_own_profile' },
-  { href: '/settings/account', label: 'Account', icon: 'account', permission: 'manage_own_profile' },
+  {
+    href: '/settings/profile',
+    labelKey: 'settings.nav.profile',
+    icon: 'profile',
+    permission: 'manage_own_profile',
+  },
+  {
+    href: '/settings/account',
+    labelKey: 'settings.nav.account',
+    icon: 'account',
+    permission: 'manage_own_profile',
+  },
   {
     href: '/settings/appearance',
-    label: 'Appearance',
+    labelKey: 'settings.nav.appearance',
     icon: 'appearance',
+    permission: 'manage_own_profile',
+  },
+  {
+    href: '/settings/language',
+    labelKey: 'settings.nav.language',
+    icon: 'language',
     permission: 'manage_own_profile',
   },
 ];

@@ -7,8 +7,11 @@ import Link from '@/shared/components/Link';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { Button } from '@/shared/components/Button';
 import { AuthOrDivider, GoogleSignInButton } from '@/shared/components/GoogleSignInButton';
+import { onLoginSuccessMarkPrefsPending } from '@/shared/hooks/usePreferences';
+import { useT } from '@/shared/hooks/useT';
 
 function LoginForm() {
+  const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
@@ -24,6 +27,7 @@ function LoginForm() {
     setGoogleLoading(true);
 
     try {
+      onLoginSuccessMarkPrefsPending();
       await signIn('google', { callbackUrl });
     } finally {
       setGoogleLoading(false);
@@ -44,10 +48,11 @@ function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError('Invalid email or password');
+      setError(t('auth.login.invalid'));
       return;
     }
 
+    onLoginSuccessMarkPrefsPending();
     router.push(callbackUrl);
     router.refresh();
   }
@@ -55,16 +60,16 @@ function LoginForm() {
   return (
     <GlassCard className="w-full p-8">
       <h1 className="font-serif text-3xl font-semibold text-primary">
-        Welcome back
+        {t('auth.login.title')}
       </h1>
       <p className="mt-2 text-sm text-muted">
-        Sign in to access your dashboard
+        {t('auth.login.subtitle')}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div>
           <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-            Email
+            {t('auth.email')}
           </label>
           <input
             id="email"
@@ -77,7 +82,7 @@ function LoginForm() {
         </div>
         <div>
           <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
-            Password
+            {t('auth.password')}
           </label>
           <input
             id="password"
@@ -94,7 +99,7 @@ function LoginForm() {
         )}
 
         <Button type="submit" disabled={loading || googleLoading} className="w-full">
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? t('auth.login.submitting') : t('auth.login.submit')}
         </Button>
       </form>
 
@@ -108,9 +113,9 @@ function LoginForm() {
       </div>
 
       <p className="mt-6 text-center text-sm text-muted">
-        No account?{' '}
+        {t('auth.login.noAccount')}{' '}
         <Link href="/register" className="text-link">
-          Register
+          {t('auth.login.registerLink')}
         </Link>
       </p>
     </GlassCard>
@@ -118,9 +123,10 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const t = useT();
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-narrow items-center px-6 py-12">
-      <Suspense fallback={<p className="text-sm text-muted-subtle">Loading...</p>}>
+      <Suspense fallback={<p className="text-sm text-muted-subtle">{t('common.loading')}</p>}>
         <LoginForm />
       </Suspense>
     </div>

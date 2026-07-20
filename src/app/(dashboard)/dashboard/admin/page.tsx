@@ -14,9 +14,11 @@ import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS, USER_ROLES } from '@/shared/auth/roles';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { StatCardsSkeleton } from '@/shared/components/Skeleton';
+import { useT } from '@/shared/hooks/useT';
 import type { DashboardStats, Merchant, User, UserRole } from '@/shared/types';
 
 export default function AdminDashboardPage() {
+  const t = useT();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [merchants, setMerchants] = useState<Merchant[]>([]);
@@ -107,8 +109,8 @@ export default function AdminDashboardPage() {
 
   return (
     <DashboardShell
-      title="Admin Dashboard"
-      description="Manage users, merchants, and monitor platform health"
+      title={t('dashboard.admin.title')}
+      description={t('dashboard.admin.description')}
     >
       <RoleGate
         permission="view_system_health"

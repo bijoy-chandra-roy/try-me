@@ -16,6 +16,7 @@ import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS, USER_ROLES } from '@/shared/auth/roles';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { StatCardsSkeleton } from '@/shared/components/Skeleton';
+import { useT } from '@/shared/hooks/useT';
 import type { DashboardStats, Merchant, User, UserRole } from '@/shared/types';
 
 interface SystemConfig {
@@ -24,6 +25,7 @@ interface SystemConfig {
 }
 
 export default function SuperAdminDashboardPage() {
+  const t = useT();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [merchants, setMerchants] = useState<Merchant[]>([]);
@@ -99,8 +101,8 @@ export default function SuperAdminDashboardPage() {
 
   return (
     <DashboardShell
-      title="Super Admin Dashboard"
-      description="Full system control, role assignment, and configuration"
+      title={t('dashboard.superAdmin.title')}
+      description={t('dashboard.superAdmin.description')}
     >
       <RoleGate
         permission="view_system_health"

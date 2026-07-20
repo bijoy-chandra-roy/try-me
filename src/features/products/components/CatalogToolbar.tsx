@@ -6,6 +6,7 @@ import { CategoryFilter } from '@/features/products/components/CategoryFilter';
 import { Checkbox } from '@/shared/components/Checkbox';
 import { IconButton } from '@/shared/components/IconButton';
 import { Select } from '@/shared/components/Select';
+import { useT } from '@/shared/hooks/useT';
 import type {
   CatalogFilterState,
   CatalogLayout,
@@ -13,19 +14,11 @@ import type {
 } from '@/features/products/lib/catalog-filters';
 import type { ProductCategory } from '@/shared/types';
 
-const SORT_OPTIONS: { value: CatalogSort; label: string }[] = [
-  { value: 'featured', label: 'Featured' },
-  { value: 'price-asc', label: 'Price: Low to High' },
-  { value: 'price-desc', label: 'Price: High to Low' },
-  { value: 'name', label: 'Name A–Z' },
-  { value: 'rating', label: 'Top Rated' },
-];
-
-const LAYOUT_OPTIONS: { value: CatalogLayout; label: string; icon: typeof LayoutGrid }[] = [
-  { value: 'grid', label: 'Grid', icon: LayoutGrid },
-  { value: 'compact', label: 'Compact', icon: Rows3 },
-  { value: 'list', label: 'List', icon: LayoutList },
-];
+const LAYOUT_ICONS: Record<CatalogLayout, typeof LayoutGrid> = {
+  grid: LayoutGrid,
+  compact: Rows3,
+  list: LayoutList,
+};
 
 interface CatalogToolbarProps {
   filters: CatalogFilterState;
@@ -40,7 +33,22 @@ export function CatalogToolbar({
   onChange,
   onReset,
 }: CatalogToolbarProps) {
+  const t = useT();
   const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  const sortOptions: { value: CatalogSort; label: string }[] = [
+    { value: 'featured', label: t('catalog.sort.featured') },
+    { value: 'price-asc', label: t('catalog.sort.priceAsc') },
+    { value: 'price-desc', label: t('catalog.sort.priceDesc') },
+    { value: 'name', label: t('catalog.sort.name') },
+    { value: 'rating', label: t('catalog.sort.rating') },
+  ];
+
+  const layoutOptions: { value: CatalogLayout; label: string }[] = [
+    { value: 'grid', label: t('catalog.layout.grid') },
+    { value: 'compact', label: t('catalog.layout.compact') },
+    { value: 'list', label: t('catalog.layout.list') },
+  ];
 
   const hasActiveFilters =
     Boolean(filters.query.trim()) ||
@@ -62,7 +70,7 @@ export function CatalogToolbar({
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <label className="relative min-w-0 flex-1">
-          <span className="sr-only">Search products</span>
+          <span className="sr-only">{t('catalog.searchAria')}</span>
           <Search
             className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-subtle"
             strokeWidth={1.75}
@@ -72,7 +80,7 @@ export function CatalogToolbar({
             type="search"
             value={filters.query}
             onChange={(e) => patch({ query: e.target.value })}
-            placeholder="Search by name, description…"
+            placeholder={t('catalog.searchPlaceholder')}
             className="input-glass input-glass-lg w-full pl-10 pr-10 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
             autoComplete="off"
           />
@@ -81,7 +89,7 @@ export function CatalogToolbar({
               type="button"
               onClick={() => patch({ query: '' })}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-muted-subtle hover:bg-[var(--color-overlay-hover)] hover:text-primary"
-              aria-label="Clear search"
+              aria-label={t('catalog.clearSearch')}
             >
               <X className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
             </button>
@@ -93,14 +101,14 @@ export function CatalogToolbar({
             <Select
               value={filters.sort}
               onChange={(sort) => patch({ sort })}
-              options={SORT_OPTIONS}
-              aria-label="Sort products"
+              options={sortOptions}
+              aria-label={t('catalog.sortAria')}
               className="w-full"
             />
           </div>
 
           <IconButton
-            label={advancedOpen ? 'Hide filters' : 'Show filters'}
+            label={advancedOpen ? t('catalog.hideFilters') : t('catalog.showFilters')}
             onClick={() => setAdvancedOpen((o) => !o)}
             className={advancedOpen ? 'bg-[var(--color-overlay-pressed)]' : ''}
           >
@@ -110,10 +118,11 @@ export function CatalogToolbar({
           <div
             className="ml-auto inline-flex rounded-full border border-subtle p-0.5 sm:ml-0"
             role="group"
-            aria-label="Layout"
+            aria-label={t('catalog.layoutAria')}
           >
-            {LAYOUT_OPTIONS.map(({ value, label, icon: Icon }) => {
+            {layoutOptions.map(({ value, label }) => {
               const active = filters.layout === value;
+              const Icon = LAYOUT_ICONS[value];
               return (
                 <IconButton
                   key={value}
@@ -139,8 +148,8 @@ export function CatalogToolbar({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CategoryFilter selected={filters.category} onChange={setCategory} />
         <p className="shrink-0 text-xs text-muted-subtle sm:text-sm">
-          {resultCount} {resultCount === 1 ? 'product' : 'products'}
-          {hasActiveFilters ? ' matched' : ''}
+          {t('catalog.resultCount', { n: resultCount })}
+          {hasActiveFilters ? t('catalog.resultMatched') : ''}
         </p>
       </div>
 
@@ -149,12 +158,12 @@ export function CatalogToolbar({
           <Checkbox
             checked={filters.inStockOnly}
             onChange={(inStockOnly) => patch({ inStockOnly })}
-            label="In stock only"
+            label={t('catalog.inStockOnly')}
             className="sm:mb-1"
           />
 
           <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-muted sm:w-28">
-            Min price
+            {t('catalog.minPrice')}
             <input
               type="number"
               inputMode="decimal"
@@ -168,7 +177,7 @@ export function CatalogToolbar({
           </label>
 
           <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-muted sm:w-28">
-            Max price
+            {t('catalog.maxPrice')}
             <input
               type="number"
               inputMode="decimal"
@@ -176,7 +185,7 @@ export function CatalogToolbar({
               step="0.01"
               value={filters.maxPrice}
               onChange={(e) => patch({ maxPrice: e.target.value })}
-              placeholder="Any"
+              placeholder={t('catalog.maxPriceAny')}
               className="input-glass w-full"
             />
           </label>
@@ -187,7 +196,7 @@ export function CatalogToolbar({
               onClick={onReset}
               className="btn-ghost btn-sm self-start sm:mb-0.5 sm:ml-auto"
             >
-              Clear filters
+              {t('catalog.clearFilters')}
             </button>
           ) : null}
         </div>

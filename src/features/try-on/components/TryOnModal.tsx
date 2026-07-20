@@ -7,6 +7,7 @@ import { ImageUpload } from '@/features/try-on/components/ImageUpload';
 import { TryOnResultView } from '@/features/try-on/components/TryOnResult';
 import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
+import { useT } from '@/shared/hooks/useT';
 import type { Product } from '@/shared/types';
 
 interface TryOnModalProps {
@@ -15,6 +16,7 @@ interface TryOnModalProps {
 }
 
 export function TryOnModal({ product, onClose }: TryOnModalProps) {
+  const t = useT();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const {
     tryOn,
@@ -68,7 +70,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
           <div className="mb-5 flex shrink-0 items-start justify-between">
             <div className="min-w-0 pr-4">
               <h2 className="font-serif text-xl font-semibold text-primary">
-                Virtual Try-On
+                {t('tryOn.modalTitle')}
               </h2>
               <p className="mt-1 truncate text-sm text-muted">{product.name}</p>
             </div>
@@ -76,7 +78,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               type="button"
               onClick={handleClose}
               className="btn-destructive shrink-0"
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -110,8 +112,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               {loading && awaitingDecision && (
                 <div className="mt-5 space-y-3 rounded-lg bg-sand-100/80 p-4 dark:bg-olive-700/30">
                   <p className="text-sm text-olive-700 dark:text-sand-100">
-                    Still generating — the AI can take several minutes on the free queue.
-                    Keep waiting for the live result, or cancel.
+                    {t('tryOn.stillGenerating')}
                   </p>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <Button
@@ -119,7 +120,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
                       className="flex-1"
                       onClick={continueWaiting}
                     >
-                      Keep waiting
+                      {t('tryOn.keepWaiting')}
                     </Button>
                     <Button
                       type="button"
@@ -127,7 +128,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
                       className="flex-1"
                       onClick={cancelTryOn}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
                   </div>
                 </div>
@@ -141,16 +142,16 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--color-on-accent)] border-t-transparent" />
-                    {awaitingDecision ? 'Waiting for your choice…' : 'Processing try-on…'}
+                    {awaitingDecision ? t('tryOn.waitingChoice') : t('tryOn.processing')}
                   </span>
                 ) : (
-                  'Generate Try-On'
+                  t('tryOn.generate')
                 )}
               </Button>
 
               {loading && !awaitingDecision && (
                 <p className="mt-3 text-center text-xs text-muted-subtle">
-                  Free AI queues can take a few minutes. You can cancel anytime via Close.
+                  {t('tryOn.queueHint')}
                 </p>
               )}
             </>
@@ -165,7 +166,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               }}
               className="mt-4 w-full shrink-0 btn-secondary btn-md"
             >
-              Try another photo
+              {t('tryOn.tryAnother')}
             </button>
           )}
         </div>

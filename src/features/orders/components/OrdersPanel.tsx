@@ -7,6 +7,7 @@ import { GlassCard } from '@/shared/components/GlassCard';
 import { fetchOrders, updateOrderStatus } from '@/features/orders/api/orders.api';
 import { ApiError } from '@/shared/lib/api-client';
 import { ListSkeleton } from '@/shared/components/Skeleton';
+import { useT } from '@/shared/hooks/useT';
 import type { Order } from '@/shared/types';
 
 interface OrdersPanelProps {
@@ -24,6 +25,7 @@ export function OrdersPanel({
   allowCancel = false,
   allowMarkPaid = false,
 }: OrdersPanelProps) {
+  const t = useT();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,11 +43,13 @@ export function OrdersPanel({
           : undefined;
       setOrders(await fetchOrders(params));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to load orders');
+      setError(err instanceof ApiError ? err.message : t('orders.loadFailed'));
       setOrders([]);
     } finally {
       setLoading(false);
     }
+    // t is unstable (new fn each render); locale changes don't need a reload
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showSearch, orderNumber, email]);
 
   useEffect(() => {
@@ -58,7 +62,7 @@ export function OrdersPanel({
       const updated = await updateOrderStatus(id, { advance: true });
       setOrders((prev) => prev.map((o) => (o._id === id ? updated : o)));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Update failed');
+      setError(err instanceof ApiError ? err.message : t('orders.updateFailed'));
     } finally {
       setBusyId(null);
     }
@@ -70,7 +74,7 @@ export function OrdersPanel({
       const updated = await updateOrderStatus(id, { status: 'cancelled' });
       setOrders((prev) => prev.map((o) => (o._id === id ? updated : o)));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Cancel failed');
+      setError(err instanceof ApiError ? err.message : t('orders.cancelFailed'));
     } finally {
       setBusyId(null);
     }
@@ -82,39 +86,44 @@ export function OrdersPanel({
       const updated = await updateOrderStatus(id, { paymentStatus: 'paid' });
       setOrders((prev) => prev.map((o) => (o._id === id ? updated : o)));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Update failed');
+      setError(err instanceof ApiError ? err.message : t('orders.updateFailed'));
     } finally {
       setBusyId(null);
     }
   }
 
+  const titleKey =
+    mode === 'merchant'
+      ? 'orders.title.merchant'
+      : mode === 'all'
+        ? 'orders.title.all'
+        : 'orders.title.own';
+
   return (
     <div id="orders" className="scroll-mt-24 space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 className="font-serif text-xl font-semibold">
-          {mode === 'merchant' ? 'Store orders' : mode === 'all' ? 'All orders' : 'My orders'}
-        </h2>
+        <h2 className="font-serif text-xl font-semibold">{t(titleKey)}</h2>
         <Button variant="secondary" size="sm" onClick={() => void load()}>
-          Refresh
+          {t('common.refresh')}
         </Button>
       </div>
 
       {showSearch && (
         <div className="flex flex-wrap gap-2">
           <input
-            placeholder="Order number"
+            placeholder={t('orders.searchOrderNumber')}
             value={orderNumber}
             onChange={(e) => setOrderNumber(e.target.value)}
             className="input-glass rounded-xl px-3 py-2 text-sm"
           />
           <input
-            placeholder="Customer email"
+            placeholder={t('orders.searchEmail')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="input-glass rounded-xl px-3 py-2 text-sm"
           />
           <Button variant="secondary" size="sm" onClick={() => void load()}>
-            Search
+            {t('common.search')}
           </Button>
         </div>
       )}
@@ -125,7 +134,7 @@ export function OrdersPanel({
         <ListSkeleton rows={3} />
       ) : orders.length === 0 ? (
         <GlassCard className="p-6 text-sm text-muted">
-          No orders found.
+          {t('orders.empty')}
         </GlassCard>
       ) : (
         orders.map((order) => (
@@ -139,8 +148,11 @@ export function OrdersPanel({
                   {order.orderNumber}
                 </Link>
                 <p className="text-sm text-muted">
-                  {new Date(order.createdAt).toLocaleString()} · {order.items.length} item(s) · $
-                  {order.total.toFixed(2)}
+                  {t('orders.meta', {
+                    date: new Date(order.createdAt).toLocaleString(),
+                    n: order.items.length,
+                    total: order.total.toFixed(2),
+                  })}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -162,7 +174,7 @@ export function OrdersPanel({
             <div className="mt-3 flex flex-wrap gap-2">
               <Link href={`/orders/${order._id}`}>
                 <Button variant="secondary" size="sm">
-                  View
+                  {t('orders.view')}
                 </Button>
               </Link>
               {allowAdvance &&
@@ -173,7 +185,7 @@ export function OrdersPanel({
                     disabled={busyId === order._id}
                     onClick={() => advance(order._id)}
                   >
-                    Advance
+                    {t('orders.advance')}
                   </Button>
                 )}
               {allowCancel &&
@@ -184,7 +196,7 @@ export function OrdersPanel({
                     disabled={busyId === order._id}
                     onClick={() => cancel(order._id)}
                   >
-                    Cancel
+                    {t('orders.cancel')}
                   </Button>
                 )}
               {allowMarkPaid && order.paymentStatus === 'pending' && (
@@ -194,7 +206,7 @@ export function OrdersPanel({
                   disabled={busyId === order._id}
                   onClick={() => markPaid(order._id)}
                 >
-                  Mark paid
+                  {t('orders.markPaid')}
                 </Button>
               )}
             </div>

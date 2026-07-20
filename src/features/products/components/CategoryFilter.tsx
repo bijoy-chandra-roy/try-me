@@ -2,18 +2,20 @@
 
 import type { ProductCategory } from '@/shared/types';
 import { CATEGORY_ICONS } from '@/features/products/components/CategoryIcons';
+import { useT } from '@/shared/hooks/useT';
+import type { MessageKey } from '@/shared/i18n';
 
 const CATEGORIES: {
   value: ProductCategory | undefined;
-  label: string;
+  labelKey: MessageKey;
   iconKey: keyof typeof CATEGORY_ICONS;
 }[] = [
-  { value: undefined, label: 'All', iconKey: 'all' },
-  { value: 'tops', label: 'Tops', iconKey: 'tops' },
-  { value: 'bottoms', label: 'Bottoms', iconKey: 'bottoms' },
-  { value: 'dresses', label: 'Dresses', iconKey: 'dresses' },
-  { value: 'outerwear', label: 'Outerwear', iconKey: 'outerwear' },
-  { value: 'accessories', label: 'Accessories', iconKey: 'accessories' },
+  { value: undefined, labelKey: 'catalog.category.all', iconKey: 'all' },
+  { value: 'tops', labelKey: 'catalog.category.tops', iconKey: 'tops' },
+  { value: 'bottoms', labelKey: 'catalog.category.bottoms', iconKey: 'bottoms' },
+  { value: 'dresses', labelKey: 'catalog.category.dresses', iconKey: 'dresses' },
+  { value: 'outerwear', labelKey: 'catalog.category.outerwear', iconKey: 'outerwear' },
+  { value: 'accessories', labelKey: 'catalog.category.accessories', iconKey: 'accessories' },
 ];
 
 interface CategoryFilterProps {
@@ -22,18 +24,21 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
+  const t = useT();
+
   return (
     <div
       className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       role="group"
-      aria-label="Filter by category"
+      aria-label={t('catalog.categoryAria')}
     >
-      {CATEGORIES.map(({ value, label, iconKey }) => {
+      {CATEGORIES.map(({ value, labelKey, iconKey }) => {
         const isActive = selected === value;
         const Icon = CATEGORY_ICONS[iconKey];
+        const label = t(labelKey);
         return (
           <button
-            key={label}
+            key={labelKey}
             type="button"
             aria-pressed={isActive}
             onClick={() => onChange(value)}

@@ -1,6 +1,7 @@
 'use client';
 
 import { Tooltip } from '@/shared/components/Tooltip';
+import { useT } from '@/shared/hooks/useT';
 import type { TryOnResult } from '@/shared/types';
 
 interface TryOnResultProps {
@@ -8,13 +9,15 @@ interface TryOnResultProps {
 }
 
 export function TryOnResultView({ result }: TryOnResultProps) {
+  const t = useT();
+
   return (
     <div className="space-y-4">
       <div className="relative overflow-hidden rounded-element ring-1 ring-[var(--color-border)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={result.compositeImageUrl}
-          alt={`Try-on result for ${result.productName}`}
+          alt={t('tryOn.resultAlt', { productName: result.productName })}
           className="mx-auto max-h-96 w-full object-contain"
         />
       </div>
@@ -26,15 +29,15 @@ export function TryOnResultView({ result }: TryOnResultProps) {
           </p>
           <p className="truncate text-xs text-muted-subtle">
             {result.fromFallback
-              ? 'Served from resilient fallback cache'
-              : 'Generated via VTO API'}
+              ? t('tryOn.fallbackStatus')
+              : t('tryOn.liveStatus')}
           </p>
         </div>
         <Tooltip
           content={
             result.fromFallback
-              ? 'API unavailable — showing a cached composite'
-              : 'Freshly generated from the live VTO service'
+              ? t('tryOn.fallbackTooltip')
+              : t('tryOn.liveTooltip')
           }
         >
           <span
@@ -42,7 +45,7 @@ export function TryOnResultView({ result }: TryOnResultProps) {
               result.fromFallback ? 'chip-status-fallback' : 'chip-status-live'
             }`}
           >
-            {result.fromFallback ? 'Fallback' : 'Live'}
+            {result.fromFallback ? t('tryOn.badge.fallback') : t('tryOn.badge.live')}
           </span>
         </Tooltip>
       </div>

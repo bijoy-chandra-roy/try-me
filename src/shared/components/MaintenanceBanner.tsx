@@ -1,6 +1,7 @@
 'use client';
 
 import { useSystemStatus } from '@/shared/hooks/useSystemStatus';
+import { useT } from '@/shared/hooks/useT';
 
 interface MaintenanceBannerProps {
   /** SSR-seeded value so the banner can occupy space on first paint when active. */
@@ -13,6 +14,7 @@ export function MaintenanceBanner({ initialMaintenanceMode }: MaintenanceBannerP
       ? { maintenanceMode: initialMaintenanceMode }
       : undefined
   );
+  const t = useT();
 
   // Show immediately when SSR says maintenance is on; otherwise wait for client confirm.
   const show = loaded ? maintenanceMode : initialMaintenanceMode === true;
@@ -28,9 +30,7 @@ export function MaintenanceBanner({ initialMaintenanceMode }: MaintenanceBannerP
         color: 'var(--color-warning)',
       }}
     >
-      {canBypassMaintenance
-        ? 'Maintenance mode is active. You have super-admin bypass for try-on.'
-        : 'Virtual try-on is temporarily unavailable for maintenance. Browse the catalog in the meantime.'}
+      {canBypassMaintenance ? t('maintenance.bypass') : t('maintenance.public')}
     </div>
   );
 }

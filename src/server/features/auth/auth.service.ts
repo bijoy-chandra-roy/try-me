@@ -1,6 +1,11 @@
 import bcrypt from 'bcryptjs';
 import type { UserRole } from '@/shared/auth/roles';
 import { canAssignRole } from '@/shared/auth/roles';
+import {
+  DEFAULT_PREFERENCES,
+  type UserPreferences,
+} from '@/shared/constants';
+import { normalizePreferences } from '@/shared/lib/preferences';
 import { AppError } from '@/server/lib/errors';
 import { userRepository } from './user.repository';
 
@@ -88,6 +93,34 @@ class AuthService {
     const user = await userRepository.update(userId, updates);
     if (!user) throw new AppError('User not found', 404);
     return user;
+  }
+
+  async getPreferences(userId: string): Promise<UserPreferences> {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new AppError('User not found', 404);
+    return normalizePreferences(user.preferences ?? DEFAULT_PREFERENCES);
+  }
+
+  async updatePreferences(
+    userId: string,
+    data: Partial<UserPreferences>
+  ): Promise<UserPreferences> {
+    const current = await this.getPreferences(userId);
+    const next = normalizePreferences({ ...current, ...data });
+    if (next.colorSchemeId === 'custom' && !next.customScheme) {
+      throw new AppError('Custom scheme requires light and dark token sets', 400);
+    }
+    const user = await userRepository.update(userId, { preferences: next });
+    if (!user) throw new AppError('User not found', 404);
+    return normalizePreferences(user.preferences ?? next);
+  }
+
+  async resetPreferences(userId: string): Promise<UserPreferences> {
+    const user = await userRepository.update(userId, {
+      preferences: { ...DEFAULT_PREFERENCES },
+    });
+    if (!user) throw new AppError('User not found', 404);
+    return { ...DEFAULT_PREFERENCES };
   }
 
   async createUser(

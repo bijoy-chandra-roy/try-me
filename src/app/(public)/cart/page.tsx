@@ -14,8 +14,10 @@ import {
 import { useCart, setCartStore } from '@/features/cart/hooks/useCart';
 import { CartLineSkeleton } from '@/shared/components/Skeleton';
 import { ApiError } from '@/shared/lib/api-client';
+import { useT } from '@/shared/hooks/useT';
 
 export default function CartPage() {
+  const t = useT();
   const { items, loading, refresh } = useCart();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -38,7 +40,7 @@ export default function CartPage() {
       const cart = await updateCartItem(productId, quantity, size, customSelections);
       setCartStore(cart);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Update failed');
+      setError(err instanceof ApiError ? err.message : t('cart.updateFailed'));
     } finally {
       setBusy(false);
     }
@@ -55,7 +57,7 @@ export default function CartPage() {
       const cart = await removeCartItem(productId, size, customSelections);
       setCartStore(cart);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Remove failed');
+      setError(err instanceof ApiError ? err.message : t('cart.removeFailed'));
     } finally {
       setBusy(false);
     }
@@ -73,9 +75,9 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-form px-6 py-10">
-      <h1 className="font-serif text-3xl font-semibold text-primary">Shopping cart</h1>
+      <h1 className="font-serif text-3xl font-semibold text-primary">{t('cart.title')}</h1>
       <p className="mt-1 text-sm text-muted">
-        Review items before checkout. Payment is cash on delivery.
+        {t('cart.subtitle')}
       </p>
 
       {error && <p className="mt-4 text-sm text-error">{error}</p>}
@@ -85,9 +87,9 @@ export default function CartPage() {
           <CartLineSkeleton rows={3} />
         ) : items.length === 0 ? (
           <GlassCard className="p-8 text-center" elastic={false}>
-            <p className="text-muted">Your cart is empty.</p>
+            <p className="text-muted">{t('cart.empty')}</p>
             <Link href="/" className="mt-4 inline-block">
-              <Button>Browse catalog</Button>
+              <Button>{t('cart.browse')}</Button>
             </Link>
           </GlassCard>
         ) : (
@@ -103,7 +105,9 @@ export default function CartPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <h2 className="truncate font-serif text-lg font-semibold">{item.name}</h2>
-                {item.size && <p className="text-sm text-muted">Size: {item.size}</p>}
+                {item.size && (
+                  <p className="text-sm text-muted">{t('cart.size', { size: item.size })}</p>
+                )}
                 <p className="mt-1 font-medium tabular-nums">${item.price.toFixed(2)}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <Button
@@ -133,7 +137,7 @@ export default function CartPage() {
                     disabled={busy}
                     onClick={() => remove(item.productId, item.size, item.customSelections)}
                   >
-                    Remove
+                    {t('cart.remove')}
                   </Button>
                 </div>
               </div>
@@ -145,15 +149,15 @@ export default function CartPage() {
 
           <GlassCard className="flex flex-wrap items-center justify-between gap-4 p-6" elastic={false}>
             <div>
-              <p className="text-sm text-muted">Subtotal</p>
+              <p className="text-sm text-muted">{t('cart.subtotal')}</p>
               <p className="text-2xl font-semibold tabular-nums">${subtotal.toFixed(2)}</p>
             </div>
             <div className="flex gap-2">
               <Button variant="ghost" disabled={busy} onClick={handleClear}>
-                Clear cart
+                {t('cart.clear')}
               </Button>
               <Link href="/checkout">
-                <Button disabled={busy}>Checkout</Button>
+                <Button disabled={busy}>{t('cart.checkout')}</Button>
               </Link>
             </div>
           </GlassCard>

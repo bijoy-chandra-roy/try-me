@@ -1,32 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { applyTheme, readStoredTheme, type Theme } from '@/shared/lib/theme';
+import { usePreferences } from '@/shared/hooks/usePreferences';
+import type { ThemeMode } from '@/shared/constants';
 
+/** @deprecated Prefer usePreferences for full appearance control. */
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [ready, setReady] = useState(false);
+  const { prefs, ready, savePreferences } = usePreferences();
 
-  useEffect(() => {
-    const stored = readStoredTheme();
-    setThemeState(stored);
-    applyTheme(stored);
-    setReady(true);
-
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => {
-      if (readStoredTheme() === 'system') {
-        applyTheme('system');
-      }
-    };
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
-  }, []);
-
-  function setTheme(next: Theme) {
-    setThemeState(next);
-    applyTheme(next);
+  function setTheme(next: ThemeMode) {
+    void savePreferences({ theme: next });
   }
 
-  return { theme, setTheme, ready };
+  return { theme: prefs.theme, setTheme, ready };
 }

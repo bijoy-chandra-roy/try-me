@@ -15,6 +15,7 @@ import { MaintenanceBanner } from '@/shared/components/MaintenanceBanner';
 import { ProductGridSkeleton } from '@/shared/components/Skeleton';
 import { TryOnModal } from '@/features/try-on/components/TryOnModal';
 import { useSystemStatus } from '@/shared/hooks/useSystemStatus';
+import { useT } from '@/shared/hooks/useT';
 import type { Product } from '@/shared/types';
 
 interface CatalogHomeProps {
@@ -28,6 +29,7 @@ export function CatalogHome({
   initialMaintenanceMode = false,
   initialGuestTryOnLimit = 3,
 }: CatalogHomeProps) {
+  const t = useT();
   const { products, loading, error } = useProducts(undefined, initialProducts);
   const [filters, setFilters] = useState<CatalogFilterState>(DEFAULT_CATALOG_FILTERS);
   const [tryOnProduct, setTryOnProduct] = useState<Product | null>(null);
@@ -70,17 +72,16 @@ export function CatalogHome({
       <div className="mx-auto max-w-content px-4 py-8 sm:px-6 sm:py-10">
         <section className="mb-8 sm:mb-10">
           <h2 className="font-serif text-3xl font-semibold tracking-tight text-primary sm:text-4xl">
-            Curated Essentials
+            {t('catalog.heroTitle')}
           </h2>
           <p className="mt-2 max-w-xl text-sm text-muted sm:text-base">
-            Upload a photo and preview any piece on yourself with our virtual try-on.
-            Resilient by design — always returns a result.
+            {t('catalog.heroBody')}
             <span
               className={`mt-1 block min-h-[1.25rem] text-sm text-muted-subtle ${
                 tryOnBlocked ? 'invisible' : ''
               }`}
             >
-              Guests: {guestTryOnLimit} try-ons per hour. Sign in for unlimited access.
+              {t('catalog.guestLimit', { n: guestTryOnLimit })}
             </span>
           </p>
         </section>
@@ -103,7 +104,7 @@ export function CatalogHome({
               color: 'var(--color-error)',
             }}
           >
-            {error}. Make sure the development server is running.
+            {t('catalog.loadErrorHint', { error })}
           </div>
         )}
 

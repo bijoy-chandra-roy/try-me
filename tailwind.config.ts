@@ -5,8 +5,18 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-urbanist)', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-cormorant)', 'Georgia', 'serif'],
+        sans: [
+          'var(--font-sans-active)',
+          'var(--font-urbanist)',
+          'system-ui',
+          'sans-serif',
+        ],
+        serif: [
+          'var(--font-serif-active)',
+          'var(--font-cormorant)',
+          'Georgia',
+          'serif',
+        ],
       },
       colors: {
         sand: {

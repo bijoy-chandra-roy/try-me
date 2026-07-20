@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import {
   clearLastKnownAuth,
   reportAuthConnectivity,
 } from '@/shared/hooks/useAuth';
+import { signOutAndClearPreferences } from '@/shared/lib/auth-actions';
 
 const BASE_RETRY_MS = 1_000;
 const MAX_RETRY_MS = 30_000;
@@ -55,7 +56,7 @@ export function AuthRealtimeListener() {
         reportAuthConnectivity(true);
         clearLastKnownAuth();
         es.close();
-        void signOut({ callbackUrl: '/login?error=AccountInactive' });
+        void signOutAndClearPreferences('/login?error=AccountInactive');
       });
 
       es.onerror = () => {

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from '@/shared/components/Link';
-import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard,
   LogIn,
@@ -18,20 +17,29 @@ import { IconButton } from '@/shared/components/IconButton';
 import { IconLink } from '@/shared/components/IconLink';
 import { Drawer } from '@/shared/components/Drawer';
 import { DrawerNavItem } from '@/shared/components/DrawerNavItem';
-import { ROLE_LABELS, getDashboardPath } from '@/shared/auth/roles';
+import { getDashboardPath, type UserRole } from '@/shared/auth/roles';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { useT } from '@/shared/hooks/useT';
 import { useCart } from '@/features/cart/hooks/useCart';
+import type { MessageKey } from '@/shared/i18n';
+import {
+  confirmSignOut,
+  signOutAndClearPreferences,
+} from '@/shared/lib/auth-actions';
 
-const PERMISSION_SHORT_LABELS: Record<string, string> = {
-  manage_products: 'Products',
-  manage_users: 'Users',
-  view_users: 'User lookup',
-  view_system_health: 'System health',
-  manage_system: 'System config',
-  assign_roles: 'Role management',
-  fulfill_orders: 'Orders',
-  view_all_orders: 'All orders',
-};
+function roleLabel(
+  t: (key: MessageKey, params?: Record<string, string | number>) => string,
+  role: UserRole
+) {
+  return t(`roles.${role}` as MessageKey);
+}
+
+function permissionLabel(
+  t: (key: MessageKey, params?: Record<string, string | number>) => string,
+  permission: string
+) {
+  return t(`permissions.${permission}` as MessageKey);
+}
 
 function AuthActionPlaceholder({ count = 2 }: { count?: number }) {
   return (
@@ -50,6 +58,7 @@ function AuthActionPlaceholder({ count = 2 }: { count?: number }) {
 export function Header() {
   const { role, permissions, isAuthenticated, isResolved } = useAuth();
   const { itemCount } = useCart();
+  const t = useT();
   const canCart = permissions.includes('manage_cart');
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -67,6 +76,11 @@ export function Header() {
 
   const dashboardHref = role ? getDashboardPath(role) : '/dashboard';
 
+  function handleSignOut() {
+    if (!confirmSignOut(t('settings.account.signOutConfirm'))) return;
+    void signOutAndClearPreferences('/');
+  }
+
   return (
     <header className="glass-header sticky top-0 z-sticky">
       <div className="relative mx-auto flex max-w-content items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
@@ -76,10 +90,10 @@ export function Header() {
               TryMe
             </h1>
           </Link>
-          <Tooltip content="AI-powered virtual try-on for every product">
+          <Tooltip content={t('brand.tagline')}>
             <span className="chip-category hidden cursor-default sm:inline-flex sm:items-center">
               <Sparkles className="mr-1 h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
-              Virtual Try-On
+              {t('brand.chip')}
             </span>
           </Tooltip>
         </div>
@@ -91,7 +105,7 @@ export function Header() {
           ) : (
             <>
               {isAuthenticated && canCart && (
-                <IconLink href="/cart" label="Cart" badge={itemCount}>
+                <IconLink href="/cart" label={t('nav.cart')} badge={itemCount}>
                   <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
                 </IconLink>
               )}
@@ -100,34 +114,38 @@ export function Header() {
                   <Tooltip
                     content={
                       staffPermissions.length > 0
-                        ? `Access: ${staffPermissions.map((p) => PERMISSION_SHORT_LABELS[p] ?? p).join(', ')}`
-                        : ROLE_LABELS[role]
+                        ? t('header.accessPrefix', {
+                            permissions: staffPermissions
+                              .map((p) => permissionLabel(t, p))
+                              .join(', '),
+                          })
+                        : roleLabel(t, role)
                     }
                   >
                     <span className="chip-category mx-1 hidden cursor-default md:inline-block">
-                      {ROLE_LABELS[role]}
+                      {roleLabel(t, role)}
                     </span>
                   </Tooltip>
-                  <IconLink href={dashboardHref} label="Dashboard">
+                  <IconLink href={dashboardHref} label={t('nav.dashboard')}>
                     <LayoutDashboard className="h-5 w-5" strokeWidth={1.75} />
                   </IconLink>
-                  <IconLink href="/settings/profile" label="Settings">
+                  <IconLink href="/settings/profile" label={t('nav.settings')}>
                     <Settings className="h-5 w-5" strokeWidth={1.75} />
                   </IconLink>
-                  <IconButton label="Sign out" onClick={() => signOut({ callbackUrl: '/' })}>
+                  <IconButton label={t('nav.signOut')} onClick={handleSignOut}>
                     <LogOut className="h-5 w-5" strokeWidth={1.75} />
                   </IconButton>
                 </>
               ) : isAuthenticated ? (
-                <IconButton label="Sign out" onClick={() => signOut({ callbackUrl: '/' })}>
+                <IconButton label={t('nav.signOut')} onClick={handleSignOut}>
                   <LogOut className="h-5 w-5" strokeWidth={1.75} />
                 </IconButton>
               ) : (
                 <>
-                  <IconLink href="/login" label="Sign in">
+                  <IconLink href="/login" label={t('nav.signIn')}>
                     <LogIn className="h-5 w-5" strokeWidth={1.75} />
                   </IconLink>
-                  <IconLink href="/register" label="Register">
+                  <IconLink href="/register" label={t('nav.register')}>
                     <UserPlus className="h-5 w-5" strokeWidth={1.75} />
                   </IconLink>
                 </>
@@ -139,12 +157,12 @@ export function Header() {
         {/* Mobile: cart + hamburger */}
         <div className="flex items-center gap-1 sm:hidden">
           {isResolved && isAuthenticated && canCart && (
-            <IconLink href="/cart" label="Cart" badge={itemCount}>
+            <IconLink href="/cart" label={t('nav.cart')} badge={itemCount}>
               <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
             </IconLink>
           )}
           <IconButton
-            label="Open menu"
+            label={t('header.openMenu')}
             onClick={() => setMenuOpen(true)}
             showTooltip={false}
           >
@@ -153,31 +171,31 @@ export function Header() {
         </div>
       </div>
 
-      <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} title="Menu" side="right">
-        <nav className="flex flex-col gap-1" aria-label="Site menu">
+      <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} title={t('header.menu')} side="right">
+        <nav className="flex flex-col gap-1" aria-label={t('header.siteMenu')}>
           {!isResolved ? (
-            <p className="px-3 py-2 text-sm text-muted-subtle">Loading…</p>
+            <p className="px-3 py-2 text-sm text-muted-subtle">{t('common.loading')}</p>
           ) : isAuthenticated && role ? (
             <>
               {role && (
-                <p className="mb-2 px-3 text-xs text-muted-subtle">{ROLE_LABELS[role]}</p>
+                <p className="mb-2 px-3 text-xs text-muted-subtle">{roleLabel(t, role)}</p>
               )}
               <DrawerNavItem
                 href={dashboardHref}
-                label="Dashboard"
+                label={t('nav.dashboard')}
                 icon={LayoutDashboard}
                 onClick={() => setMenuOpen(false)}
               />
               <DrawerNavItem
                 href="/settings/profile"
-                label="Settings"
+                label={t('nav.settings')}
                 icon={Settings}
                 onClick={() => setMenuOpen(false)}
               />
               {canCart && (
                 <DrawerNavItem
                   href="/cart"
-                  label="Cart"
+                  label={t('nav.cart')}
                   icon={ShoppingCart}
                   badge={itemCount}
                   onClick={() => setMenuOpen(false)}
@@ -187,12 +205,12 @@ export function Header() {
                 type="button"
                 onClick={() => {
                   setMenuOpen(false);
-                  void signOut({ callbackUrl: '/' });
+                  handleSignOut();
                 }}
                 className="mt-2 flex items-center gap-3 rounded-inner px-3 py-2.5 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
               >
                 <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-                Sign out
+                {t('nav.signOut')}
               </button>
             </>
           ) : isAuthenticated ? (
@@ -200,24 +218,24 @@ export function Header() {
               type="button"
               onClick={() => {
                 setMenuOpen(false);
-                void signOut({ callbackUrl: '/' });
+                handleSignOut();
               }}
               className="flex items-center gap-3 rounded-inner px-3 py-2.5 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
             >
               <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-              Sign out
+              {t('nav.signOut')}
             </button>
           ) : (
             <>
               <DrawerNavItem
                 href="/login"
-                label="Sign in"
+                label={t('nav.signIn')}
                 icon={LogIn}
                 onClick={() => setMenuOpen(false)}
               />
               <DrawerNavItem
                 href="/register"
-                label="Register"
+                label={t('nav.register')}
                 icon={UserPlus}
                 onClick={() => setMenuOpen(false)}
               />

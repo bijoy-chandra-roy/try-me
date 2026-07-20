@@ -10,6 +10,7 @@ import { Tooltip } from '@/shared/components/Tooltip';
 import { ShoppingCart, Sparkles } from 'lucide-react';
 import { useAuth, usePermission } from '@/shared/hooks/useAuth';
 import { useSystemStatus } from '@/shared/hooks/useSystemStatus';
+import { useT } from '@/shared/hooks/useT';
 import { addToCart } from '@/features/cart/api/cart.api';
 import { setCartStore } from '@/features/cart/hooks/useCart';
 import { ApiError } from '@/shared/lib/api-client';
@@ -30,6 +31,7 @@ export function ProductCard({
   layout = 'grid',
   priority = false,
 }: ProductCardProps) {
+  const t = useT();
   const isList = layout === 'list';
   const isCompact = layout === 'compact';
   const isUnavailable = !product.inStock || product.stockQuantity <= 0;
@@ -57,10 +59,10 @@ export function ProductCard({
   }, [product.imageUrl]);
 
   const tryOnTooltip = tryOnBlocked
-    ? 'Try-on unavailable during maintenance'
+    ? t('product.tryOnMaintenance')
     : isUnavailable
-      ? 'This item is currently unavailable'
-      : 'Preview on your photo';
+      ? t('product.tryOnUnavailable')
+      : t('product.tryOnPreview');
 
   const needsSize = (product.sizes?.length ?? 0) > 0;
   const cartDisabled = isUnavailable || adding || (needsSize && !selectedSize);
@@ -71,7 +73,7 @@ export function ProductCard({
       return;
     }
     if (!canManageCart) {
-      setCartMessage('You cannot add items to cart');
+      setCartMessage(t('product.noCartPermission'));
       return;
     }
     setAdding(true);
@@ -83,9 +85,9 @@ export function ProductCard({
         size: needsSize ? selectedSize : undefined,
       });
       setCartStore(cart);
-      setCartMessage('Added to cart');
+      setCartMessage(t('product.addedToCart'));
     } catch (err) {
-      setCartMessage(err instanceof ApiError ? err.message : 'Could not add to cart');
+      setCartMessage(err instanceof ApiError ? err.message : t('product.addFailed'));
     } finally {
       setAdding(false);
     }
@@ -111,7 +113,7 @@ export function ProductCard({
     <GlassCard
       hover
       elastic={!isList}
-      className={`group flex ${isList ? 'flex-row' : 'flex-col'} ${
+      className={`group motion-card-hover flex ${isList ? 'flex-row' : 'flex-col'} ${
         isUnavailable ? 'row-dimmed' : ''
       }`}
     >
@@ -133,12 +135,12 @@ export function ProductCard({
         />
         {isUnavailable && (
           <span className="chip absolute left-2 top-2 bg-[var(--color-accent-fill)] text-[var(--color-on-accent)] sm:left-3 sm:top-3">
-            Out of stock
+            {t('product.outOfStock')}
           </span>
         )}
         {!isUnavailable && product.stockQuantity <= 5 && (
           <span className="chip absolute left-2 top-2 status-chip-pending sm:left-3 sm:top-3">
-            Only {product.stockQuantity} left
+            {t('product.onlyNLeft', { n: product.stockQuantity })}
           </span>
         )}
       </div>
@@ -159,21 +161,23 @@ export function ProductCard({
             )}
             {(product.reviewCount ?? 0) > 0 && (
               <p className="mt-1 text-xs text-muted">
-                ★ {product.averageRating?.toFixed(1)} · {product.reviewCount} review
-                {(product.reviewCount ?? 0) === 1 ? '' : 's'}
+                {t('product.reviews', {
+                  rating: product.averageRating?.toFixed(1) ?? '0',
+                  n: product.reviewCount ?? 0,
+                })}
               </p>
             )}
           </div>
           {!isCompact && (
             <Popover
-              label="More options"
+              label={t('product.moreOptions')}
               items={[
                 {
-                  label: 'Copy product name',
+                  label: t('product.copyName'),
                   onClick: () => navigator.clipboard.writeText(product.name),
                 },
                 {
-                  label: 'Copy price',
+                  label: t('product.copyPrice'),
                   onClick: () =>
                     navigator.clipboard.writeText(`$${product.price.toFixed(2)}`),
                 },
@@ -245,26 +249,26 @@ export function ProductCard({
                   size="sm"
                   onClick={() => onTryOn(product)}
                   disabled={tryOnDisabled}
-                  aria-label="Try on"
+                  aria-label={t('product.tryOnAria')}
                 >
                   <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={1.75} aria-hidden />
                     <span className={isCompact ? 'text-xs' : 'text-xs sm:text-sm'}>
-                      Try On
+                      {t('product.tryOn')}
                     </span>
                   </span>
                 </Button>
               </span>
             </Tooltip>
             {isAuthenticated ? (
-              <Tooltip content={adding ? 'Adding…' : 'Add to cart'}>
+              <Tooltip content={adding ? t('product.adding') : t('product.addToCart')}>
                 <Button
                   className="w-full"
                   size="sm"
                   variant="secondary"
                   onClick={handleAddToCart}
                   disabled={cartDisabled}
-                  aria-label="Add to cart"
+                  aria-label={t('product.addToCart')}
                 >
                   <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5">
                     <ShoppingCart
@@ -273,20 +277,20 @@ export function ProductCard({
                       aria-hidden
                     />
                     <span className={isCompact ? 'text-xs' : 'text-xs sm:text-sm'}>
-                      {adding ? '…' : 'Cart'}
+                      {adding ? '…' : t('product.cart')}
                     </span>
                   </span>
                 </Button>
               </Tooltip>
             ) : (
-              <Tooltip content="Sign in to add to cart">
+              <Tooltip content={t('product.signInToAdd')}>
                 <Link href={`/login?callbackUrl=${encodeURIComponent('/')}`}>
                   <Button
                     className="w-full"
                     size="sm"
                     variant="secondary"
                     disabled={isUnavailable}
-                    aria-label="Add to cart"
+                    aria-label={t('product.addToCart')}
                   >
                     <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5">
                       <ShoppingCart
@@ -295,7 +299,7 @@ export function ProductCard({
                         aria-hidden
                       />
                       <span className={isCompact ? 'text-xs' : 'text-xs sm:text-sm'}>
-                        Cart
+                        {t('product.cart')}
                       </span>
                     </span>
                   </Button>

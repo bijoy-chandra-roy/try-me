@@ -1,5 +1,6 @@
 import mongoose, { Schema, model, models } from 'mongoose';
 import type { UserRole } from '@/shared/auth/roles';
+import type { UserPreferences } from '@/shared/constants';
 import type { UserStatus } from '@/shared/types';
 
 export interface UserDocument {
@@ -10,9 +11,49 @@ export interface UserDocument {
   role: UserRole;
   merchantId?: mongoose.Types.ObjectId | null;
   status: UserStatus;
+  preferences?: UserPreferences | null;
   createdAt: Date;
   updatedAt: Date;
 }
+
+const colorTokensSchema = new Schema(
+  {
+    backgroundBody: { type: String },
+    backgroundSurface: { type: String },
+    textPrimary: { type: String },
+    textSecondary: { type: String },
+    accentFill: { type: String },
+    onAccent: { type: String },
+    border: { type: String },
+    borderEmphasized: { type: String },
+  },
+  { _id: false }
+);
+
+const preferencesSchema = new Schema(
+  {
+    theme: { type: String, enum: ['light', 'dark', 'system'] },
+    colorSchemeId: {
+      type: String,
+      enum: ['olive', 'clay', 'ocean', 'charcoal', 'custom'],
+    },
+    customScheme: {
+      type: new Schema(
+        {
+          light: { type: colorTokensSchema },
+          dark: { type: colorTokensSchema },
+        },
+        { _id: false }
+      ),
+      default: null,
+    },
+    fontPairId: { type: String, enum: ['brand', 'modern', 'classic', 'bengali'] },
+    locale: { type: String, enum: ['en', 'bn'] },
+    reduceMotion: { type: Boolean },
+    cardTilt: { type: Boolean },
+  },
+  { _id: false }
+);
 
 const userSchema = new Schema<UserDocument>(
   {
@@ -27,6 +68,7 @@ const userSchema = new Schema<UserDocument>(
     },
     merchantId: { type: Schema.Types.ObjectId, ref: 'Merchant', default: null },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+    preferences: { type: preferencesSchema, default: null },
   },
   { timestamps: true }
 );

@@ -8,6 +8,7 @@ export const USER_ROLES = [
 
 export type UserRole = (typeof USER_ROLES)[number];
 
+/** English labels for server/logs. UI should use `t(\`roles.${role}\`)` via useT(). */
 export const ROLE_LABELS: Record<UserRole, string> = {
   customer: 'Customer',
   merchant: 'Merchant',

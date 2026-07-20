@@ -1,10 +1,12 @@
 import type { UserRole } from '@/shared/auth/roles';
+import type { UserPreferences } from '@/shared/constants';
 import type { UserStatus } from '@/shared/types';
 import { User, type UserDocument } from './user.model';
 
 export type UserRecord = Omit<UserDocument, '_id' | 'passwordHash' | 'merchantId'> & {
   _id: string;
   merchantId?: string | null;
+  preferences?: UserPreferences | null;
 };
 
 export type SafeUserRecord = UserRecord;
@@ -19,6 +21,7 @@ class UserRepository {
       role: d.role,
       merchantId: d.merchantId ? String(d.merchantId) : null,
       status: d.status,
+      preferences: (d.preferences as UserPreferences | null | undefined) ?? null,
       createdAt: d.createdAt,
       updatedAt: d.updatedAt,
     };
@@ -78,6 +81,7 @@ class UserRepository {
       merchantId: string | null;
       status: UserStatus;
       passwordHash: string;
+      preferences: UserPreferences | null;
     }>
   ): Promise<UserRecord | null> {
     const user = await User.findByIdAndUpdate(id, data, { new: true }).lean();
