@@ -54,13 +54,17 @@ async function syncUserFromDatabase(token: {
   await ensureDbConnection();
 
   const freshUser = await userRepository.findById(token.id);
-  if (!freshUser) return;
+  token.roleSyncedAt = now;
+
+  if (!freshUser || freshUser.status === 'inactive') {
+    token.status = 'inactive';
+    return;
+  }
 
   token.role = freshUser.role;
   token.merchantId = freshUser.merchantId ?? null;
   token.name = freshUser.name;
   token.status = freshUser.status;
-  token.roleSyncedAt = now;
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({

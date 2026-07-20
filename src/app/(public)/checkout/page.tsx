@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { cartSubtotal } from '@/features/cart/api/cart.api';
@@ -14,6 +14,7 @@ import {
 } from '@/features/addresses/api/addresses.api';
 import { checkout } from '@/features/orders/api/orders.api';
 import { ApiError } from '@/shared/lib/api-client';
+import { CartLineSkeleton, Skeleton } from '@/shared/components/Skeleton';
 import type { Address } from '@/shared/types';
 
 const emptyForm: AddressInput = {
@@ -58,6 +59,7 @@ export default function CheckoutPage() {
   }, [refresh]);
 
   const subtotal = cartSubtotal(items);
+  const pageLoading = loading || cartLoading;
 
   async function placeOrder(e: React.FormEvent) {
     e.preventDefault();
@@ -81,7 +83,7 @@ export default function CheckoutPage() {
     }
   }
 
-  if (!cartLoading && items.length === 0) {
+  if (!pageLoading && items.length === 0) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-16 text-center">
         <h1 className="font-serif text-3xl font-semibold">Nothing to checkout</h1>
@@ -98,16 +100,29 @@ export default function CheckoutPage() {
         Checkout
       </h1>
       <p className="mt-1 text-sm text-muted">
-        Cash on delivery — pay when your order arrives. Total: ${subtotal.toFixed(2)}
+        Cash on delivery — pay when your order arrives.
+        {pageLoading ? (
+          <span className="ml-1 inline-block align-middle">
+            <Skeleton className="inline-block h-4 w-16" />
+          </span>
+        ) : (
+          <> Total: ${subtotal.toFixed(2)}</>
+        )}
       </p>
 
-      {(loading || cartLoading) && (
-        <div className="flex justify-center py-20">
-          <span className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent-fill)] border-t-transparent" />
+      {pageLoading ? (
+        <div className="mt-8 space-y-6">
+          <div className="glass-card space-y-3 p-6">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+          <div className="glass-card space-y-3 p-6">
+            <Skeleton className="h-6 w-28" />
+            <CartLineSkeleton rows={2} />
+          </div>
         </div>
-      )}
-
-      {!loading && !cartLoading && (
+      ) : (
         <form onSubmit={placeOrder} className="mt-8 space-y-6">
           <GlassCard className="space-y-4 p-6">
             <h2 className="font-serif text-xl font-semibold">Shipping address</h2>

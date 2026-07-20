@@ -13,6 +13,7 @@ import { Select } from '@/shared/components/Select';
 import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS, USER_ROLES } from '@/shared/auth/roles';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
+import { StatCardsSkeleton } from '@/shared/components/Skeleton';
 import type { DashboardStats, Merchant, User, UserRole } from '@/shared/types';
 
 export default function AdminDashboardPage() {
@@ -109,8 +110,16 @@ export default function AdminDashboardPage() {
       title="Admin Dashboard"
       description="Manage users, merchants, and monitor platform health"
     >
-      <RoleGate permission="view_system_health">
-        {stats && (
+      <RoleGate
+        permission="view_system_health"
+        loadingFallback={
+          <StatCardsSkeleton
+            count={6}
+            className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+          />
+        }
+      >
+        {stats ? (
           <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <StatCard label="Users" value={stats.totalUsers} />
             <StatCard label="Products" value={stats.totalProducts} />
@@ -122,6 +131,11 @@ export default function AdminDashboardPage() {
               value={`$${(stats.totalRevenue ?? 0).toFixed(0)}`}
             />
           </div>
+        ) : (
+          <StatCardsSkeleton
+            count={6}
+            className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+          />
         )}
 
         <GlassCard className="mb-8 p-6" elastic={false}>

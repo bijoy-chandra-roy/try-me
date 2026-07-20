@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { fetchOrders, updateOrderStatus } from '@/features/orders/api/orders.api';
 import { ApiError } from '@/shared/lib/api-client';
+import { ListSkeleton } from '@/shared/components/Skeleton';
 import type { Order } from '@/shared/types';
 
 interface OrdersPanelProps {
@@ -120,19 +121,13 @@ export function OrdersPanel({
 
       {error && <p className="text-sm text-error">{error}</p>}
 
-      {loading && (
-        <div className="flex justify-center py-8">
-          <span className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-accent-fill)] border-t-transparent" />
-        </div>
-      )}
-
-      {!loading && orders.length === 0 && (
+      {loading ? (
+        <ListSkeleton rows={3} />
+      ) : orders.length === 0 ? (
         <GlassCard className="p-6 text-sm text-muted">
           No orders found.
         </GlassCard>
-      )}
-
-      {!loading &&
+      ) : (
         orders.map((order) => (
           <GlassCard key={order._id} className="p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
@@ -204,7 +199,8 @@ export function OrdersPanel({
               )}
             </div>
           </GlassCard>
-        ))}
+        ))
+      )}
     </div>
   );
 }

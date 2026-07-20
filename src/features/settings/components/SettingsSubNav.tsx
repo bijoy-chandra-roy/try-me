@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { getSettingsNavItems } from '@/shared/auth/navigation';

@@ -17,6 +17,11 @@ import { CustomFieldsEditor } from '@/shared/components/CustomFieldsEditor';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { apiClient } from '@/shared/lib/api-client';
+import {
+  DashboardContentSkeleton,
+  ListSkeleton,
+  StatCardsSkeleton,
+} from '@/shared/components/Skeleton';
 import type { Product, ProductCategory, ProductCustomField } from '@/shared/types';
 
 interface MerchantStats {
@@ -45,14 +50,14 @@ const emptyProduct = {
 };
 
 export default function MerchantDashboardPage() {
-  const { user } = useAuth();
+  const { user, isResolved } = useAuth();
   const [stats, setStats] = useState<MerchantStats | null>(null);
   const [form, setForm] = useState(emptyProduct);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const needsOnboarding = !user?.merchantId;
+  const needsOnboarding = isResolved && !user?.merchantId;
 
   async function loadStats() {
     setLoading(true);
@@ -67,12 +72,13 @@ export default function MerchantDashboardPage() {
   }
 
   useEffect(() => {
+    if (!isResolved) return;
     if (!user?.merchantId) {
       setLoading(false);
       return;
     }
-    loadStats();
-  }, [user?.merchantId]);
+    void loadStats();
+  }, [user?.merchantId, isResolved]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -123,6 +129,17 @@ export default function MerchantDashboardPage() {
     });
   }
 
+  if (!isResolved) {
+    return (
+      <DashboardShell
+        title="Merchant Dashboard"
+        description="Manage products, fulfill orders, and view analytics"
+      >
+        <DashboardContentSkeleton />
+      </DashboardShell>
+    );
+  }
+
   if (needsOnboarding) {
     return (
       <DashboardShell
@@ -141,9 +158,17 @@ export default function MerchantDashboardPage() {
       title="Merchant Dashboard"
       description="Manage products, fulfill orders, and view analytics"
     >
-      <RoleGate permission="manage_products">
+      <RoleGate
+        permission="manage_products"
+        loadingFallback={
+          <StatCardsSkeleton
+            count={6}
+            className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+          />
+        }
+      >
         <div id="analytics" className="scroll-mt-24">
-          {stats && (
+          {stats ? (
             <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
               <StatCard label="Products" value={stats.productCount} />
               <StatCard label="Try-ons" value={stats.tryOnCount} />
@@ -152,6 +177,11 @@ export default function MerchantDashboardPage() {
               <StatCard label="Orders" value={stats.orderCount ?? 0} />
               <StatCard label="Units sold" value={stats.unitsSold ?? 0} />
             </div>
+          ) : (
+            <StatCardsSkeleton
+              count={6}
+              className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+            />
           )}
         </div>
       </RoleGate>
@@ -277,7 +307,9 @@ export default function MerchantDashboardPage() {
 
           <div className="lg:col-span-3">
             <h2 className="mb-4 font-serif text-xl font-semibold">Your products</h2>
-            {loading && <p className="text-sm text-muted-subtle">Loading...</p>}
+            {loading ? (
+              <ListSkeleton rows={4} />
+            ) : (
             <DataList>
               {stats?.products.map((product) => (
                 <ListRow key={product._id} dimmed={!product.inStock}>
@@ -310,6 +342,7 @@ export default function MerchantDashboardPage() {
                 </ListRow>
               ))}
             </DataList>
+            )}
           </div>
         </div>
       </RoleGate>

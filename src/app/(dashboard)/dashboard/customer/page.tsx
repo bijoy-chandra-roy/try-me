@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { GlassCard } from '@/shared/components/GlassCard';
@@ -12,6 +12,7 @@ import { AddressesPanel } from '@/features/addresses/components/AddressesPanel';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { apiClient } from '@/shared/lib/api-client';
 import { fetchOrders } from '@/features/orders/api/orders.api';
+import { ProductCardSkeleton, StatCardsSkeleton } from '@/shared/components/Skeleton';
 import type { TryOnHistory } from '@/shared/types';
 
 export default function CustomerDashboardPage() {
@@ -37,11 +38,15 @@ export default function CustomerDashboardPage() {
       title="Customer Dashboard"
       description="Orders, addresses, and try-on history"
     >
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
-        <StatCard label="Orders" value={orderCount} />
-        <StatCard label="Try-ons saved" value={history.length} />
-        <StatCard label="Account" value={user?.email ?? '—'} hint="Signed in" />
-      </div>
+      {loading ? (
+        <StatCardsSkeleton count={3} className="mb-8 grid gap-4 sm:grid-cols-3" />
+      ) : (
+        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+          <StatCard label="Orders" value={orderCount} />
+          <StatCard label="Try-ons saved" value={history.length} />
+          <StatCard label="Account" value={user?.email ?? '—'} hint="Signed in" />
+        </div>
+      )}
 
       <div className="mb-10">
         <RoleGate permission="view_own_orders">
@@ -78,30 +83,36 @@ export default function CustomerDashboardPage() {
       <RoleGate permission="view_own_try_on_history">
         <section id="history" className="scroll-mt-24">
           <h2 className="mb-4 font-serif text-xl font-semibold">Try-on history</h2>
-          {loading && <p className="text-sm text-muted-subtle">Loading history...</p>}
-          {!loading && history.length === 0 && (
+          {loading ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }, (_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : history.length === 0 ? (
             <GlassCard className="p-6 text-sm text-muted">
               No try-ons yet. Head to the catalog to get started.
             </GlassCard>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {history.map((item) => (
+                <GlassCard key={item._id} className="overflow-hidden">
+                  <img
+                    src={item.compositeImageUrl}
+                    alt={item.productName}
+                    className="aspect-[3/4] w-full object-cover"
+                  />
+                  <div className="p-4">
+                    <p className="font-medium">{item.productName}</p>
+                    <p className="mt-1 text-xs text-muted-subtle">
+                      {new Date(item.createdAt).toLocaleString()} ·{' '}
+                      {item.fromFallback ? 'Fallback' : 'Live'}
+                    </p>
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
           )}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {history.map((item) => (
-              <GlassCard key={item._id} className="overflow-hidden">
-                <img
-                  src={item.compositeImageUrl}
-                  alt={item.productName}
-                  className="aspect-[3/4] w-full object-cover"
-                />
-                <div className="p-4">
-                  <p className="font-medium">{item.productName}</p>
-                  <p className="mt-1 text-xs text-muted-subtle">
-                    {new Date(item.createdAt).toLocaleString()} ·{' '}
-                    {item.fromFallback ? 'Fallback' : 'Live'}
-                  </p>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
         </section>
       </RoleGate>
     </DashboardShell>

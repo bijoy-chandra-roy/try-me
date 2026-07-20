@@ -2,10 +2,22 @@
 
 import { useSystemStatus } from '@/shared/hooks/useSystemStatus';
 
-export function MaintenanceBanner() {
-  const { maintenanceMode, loaded, canBypassMaintenance } = useSystemStatus();
+interface MaintenanceBannerProps {
+  /** SSR-seeded value so the banner can occupy space on first paint when active. */
+  initialMaintenanceMode?: boolean;
+}
 
-  if (!loaded || !maintenanceMode) return null;
+export function MaintenanceBanner({ initialMaintenanceMode }: MaintenanceBannerProps = {}) {
+  const { maintenanceMode, loaded, canBypassMaintenance } = useSystemStatus(
+    initialMaintenanceMode !== undefined
+      ? { maintenanceMode: initialMaintenanceMode }
+      : undefined
+  );
+
+  // Show immediately when SSR says maintenance is on; otherwise wait for client confirm.
+  const show = loaded ? maintenanceMode : initialMaintenanceMode === true;
+
+  if (!show) return null;
 
   return (
     <div

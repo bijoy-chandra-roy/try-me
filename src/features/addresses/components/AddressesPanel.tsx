@@ -11,6 +11,7 @@ import {
   type AddressInput,
 } from '@/features/addresses/api/addresses.api';
 import { ApiError } from '@/shared/lib/api-client';
+import { ListSkeleton } from '@/shared/components/Skeleton';
 import type { Address } from '@/shared/types';
 
 const empty: AddressInput = {
@@ -73,8 +74,10 @@ export function AddressesPanel() {
   return (
     <div id="addresses" className="scroll-mt-24 space-y-4">
       <h2 className="font-serif text-xl font-semibold">Shipping addresses</h2>
-      {loading && <p className="text-sm">Loading…</p>}
-      {addresses.map((a) => (
+      {loading ? (
+        <ListSkeleton rows={2} />
+      ) : (
+        addresses.map((a) => (
         <GlassCard key={a._id} className="flex flex-wrap items-start justify-between gap-3 p-4">
           <div className="text-sm">
             <p className="font-medium">
@@ -102,7 +105,8 @@ export function AddressesPanel() {
             </Button>
           </div>
         </GlassCard>
-      ))}
+        ))
+      )}
 
       <GlassCard className="p-5">
         <h3 className="font-medium">Add address</h3>

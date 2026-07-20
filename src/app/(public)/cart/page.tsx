@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import {
@@ -12,6 +12,7 @@ import {
   updateCartItem,
 } from '@/features/cart/api/cart.api';
 import { useCart, setCartStore } from '@/features/cart/hooks/useCart';
+import { CartLineSkeleton } from '@/shared/components/Skeleton';
 import { ApiError } from '@/shared/lib/api-client';
 
 export default function CartPage() {
@@ -77,25 +78,20 @@ export default function CartPage() {
         Review items before checkout. Payment is cash on delivery.
       </p>
 
-      {loading && (
-        <div className="flex justify-center py-20">
-          <span className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent-fill)] border-t-transparent" />
-        </div>
-      )}
-
       {error && <p className="mt-4 text-sm text-error">{error}</p>}
 
-      {!loading && items.length === 0 && (
-        <GlassCard className="mt-8 p-8 text-center" elastic={false}>
-          <p className="text-muted">Your cart is empty.</p>
-          <Link href="/" className="mt-4 inline-block">
-            <Button>Browse catalog</Button>
-          </Link>
-        </GlassCard>
-      )}
-
-      {!loading && items.length > 0 && (
-        <div className="mt-8 space-y-4">
+      <div className="mt-8">
+        {loading ? (
+          <CartLineSkeleton rows={3} />
+        ) : items.length === 0 ? (
+          <GlassCard className="p-8 text-center" elastic={false}>
+            <p className="text-muted">Your cart is empty.</p>
+            <Link href="/" className="mt-4 inline-block">
+              <Button>Browse catalog</Button>
+            </Link>
+          </GlassCard>
+        ) : (
+        <div className="space-y-4">
           {items.map((item) => (
             <GlassCard
               key={`${item.productId}-${item.size ?? ''}-${JSON.stringify(item.customSelections ?? {})}`}
@@ -162,7 +158,8 @@ export default function CartPage() {
             </div>
           </GlassCard>
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

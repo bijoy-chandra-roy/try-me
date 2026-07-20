@@ -6,7 +6,7 @@
  *   <= 768px  hamburger drawer; global Header remains
  */
 
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -86,8 +86,8 @@ export function DashboardShell({
   description?: string;
   children: React.ReactNode;
 }) {
-  const { user, role } = useAuth();
-  const navItems = role ? getDashboardNavItems(role) : [];
+  const { user, role, isResolved } = useAuth();
+  const navItems = role && isResolved ? getDashboardNavItems(role) : [];
   const isActive = useDashboardNavActive();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { collapsed, toggle } = useCollapsedNav();
@@ -108,19 +108,28 @@ export function DashboardShell({
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="text-xs uppercase tracking-wider text-muted-subtle">Dashboard</p>
-              <p className="mt-0.5 truncate font-medium text-primary">{user?.name}</p>
-              {role && (
-                <span className="chip-category mt-1.5 inline-block">{ROLE_LABELS[role]}</span>
+              {isResolved ? (
+                <>
+                  <p className="mt-0.5 truncate font-medium text-primary">{user?.name}</p>
+                  {role && (
+                    <span className="chip-category mt-1.5 inline-block">{ROLE_LABELS[role]}</span>
+                  )}
+                </>
+              ) : (
+                <div className="mt-1.5 h-10 w-28 animate-pulse rounded-inner bg-[var(--color-overlay-hover)]" />
               )}
             </div>
           )}
-          {collapsed && (
+          {collapsed && isResolved && (
             <span
               className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-overlay-hover)] text-xs font-semibold text-primary"
               title={user?.name ?? 'Account'}
             >
               {(user?.name ?? '?').slice(0, 1).toUpperCase()}
             </span>
+          )}
+          {collapsed && !isResolved && (
+            <span className="h-8 w-8 animate-pulse rounded-full bg-[var(--color-overlay-hover)]" />
           )}
           <IconButton
             label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -140,6 +149,16 @@ export function DashboardShell({
           className={`flex flex-col gap-1 ${collapsed ? 'items-center' : ''}`}
           aria-label="Dashboard"
         >
+          {!isResolved &&
+            Array.from({ length: 4 }, (_, i) => (
+              <span
+                key={i}
+                className={`animate-pulse rounded-inner bg-[var(--color-overlay-hover)] ${
+                  collapsed ? 'h-10 w-10' : 'h-9 w-full'
+                }`}
+                aria-hidden
+              />
+            ))}
           {navItems.map((item) => {
             const href = item.hash ? `${item.href}#${item.hash}` : item.href;
             const Icon = getNavIcon(item.icon);
@@ -220,7 +239,7 @@ export function DashboardShell({
             {description && (
               <p className="mt-1 text-sm text-muted sm:mt-2 sm:text-base">{description}</p>
             )}
-            {role && (
+            {isResolved && role && (
               <p className="mt-2 text-xs text-muted-subtle md:hidden">
                 {user?.name} · {ROLE_LABELS[role]}
               </p>
@@ -246,9 +265,15 @@ export function DashboardShell({
         side="left"
       >
         <div className="mb-4">
-          <p className="font-medium text-primary">{user?.name}</p>
-          {role && (
-            <span className="chip-category mt-2 inline-block">{ROLE_LABELS[role]}</span>
+          {isResolved ? (
+            <>
+              <p className="font-medium text-primary">{user?.name}</p>
+              {role && (
+                <span className="chip-category mt-2 inline-block">{ROLE_LABELS[role]}</span>
+              )}
+            </>
+          ) : (
+            <div className="h-10 w-32 animate-pulse rounded-inner bg-[var(--color-overlay-hover)]" />
           )}
         </div>
         <nav className="flex flex-col gap-1" aria-label="Dashboard">

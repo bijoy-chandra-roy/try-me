@@ -7,6 +7,7 @@ import {
   requirePermission,
   requireAnyPermission,
 } from '@/server/lib/auth-guard';
+import { publishAuthEvent } from '@/server/lib/auth-events';
 import { AppError } from '@/server/lib/errors';
 import { jsonError, jsonSuccess } from '@/server/lib/api-response';
 import { hasPermission } from '@/shared/auth/permissions';
@@ -65,6 +66,14 @@ export async function PATCH(
         name: body.name,
         password: body.password,
       });
+      publishAuthEvent({
+        userId: id,
+        type: 'user.updated',
+        name: updated.name,
+        role: updated.role,
+        status: updated.status,
+        merchantId: updated.merchantId ?? null,
+      });
       return jsonSuccess(updated);
     }
 
@@ -98,6 +107,26 @@ export async function PATCH(
     }
 
     const updated = await authService.updateUserRole(currentUser.role, id, data);
+    if (!updated) throw new AppError('User not found', 404);
+
+    if (updated.status === 'inactive') {
+      publishAuthEvent({
+        userId: id,
+        type: 'user.revoked',
+        status: 'inactive',
+        role: updated.role,
+      });
+    } else {
+      publishAuthEvent({
+        userId: id,
+        type: 'user.updated',
+        name: updated.name,
+        role: updated.role,
+        status: updated.status,
+        merchantId: updated.merchantId ?? null,
+      });
+    }
+
     return jsonSuccess(updated);
   } catch (error) {
     return jsonError(error);

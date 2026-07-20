@@ -9,19 +9,25 @@ interface SystemStatus {
   guestTryOnLimit: number;
 }
 
-export function useSystemStatus() {
+export function useSystemStatus(initial?: Partial<SystemStatus>) {
   const [status, setStatus] = useState<SystemStatus>({
-    maintenanceMode: false,
-    guestTryOnLimit: 3,
+    maintenanceMode: initial?.maintenanceMode ?? false,
+    guestTryOnLimit: initial?.guestTryOnLimit ?? 3,
   });
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(initial?.maintenanceMode !== undefined);
   const canBypassMaintenance = usePermission('manage_system');
 
   useEffect(() => {
     apiClient<SystemStatus>('/system/status')
       .then(setStatus)
-      .catch(() => setStatus({ maintenanceMode: false, guestTryOnLimit: 3 }))
+      .catch(() =>
+        setStatus({
+          maintenanceMode: initial?.maintenanceMode ?? false,
+          guestTryOnLimit: initial?.guestTryOnLimit ?? 3,
+        })
+      )
       .finally(() => setLoaded(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seed once from SSR
   }, []);
 
   const tryOnBlocked = status.maintenanceMode && !canBypassMaintenance;

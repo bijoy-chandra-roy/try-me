@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import type { ReactNode } from 'react';
 import { Tooltip } from '@/shared/components/Tooltip';
 import type { FloatingSide } from '@/shared/hooks/useFloatingPosition';

@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Urbanist } from 'next/font/google';
+import { auth } from '@/auth';
 import { Header } from '@/shared/components/Header';
 import { SessionSync } from '@/shared/components/SessionSync';
+import { AuthRealtimeListener } from '@/shared/components/AuthRealtimeListener';
 import { SessionProvider } from '@/shared/providers/SessionProvider';
 import './globals.css';
 
@@ -23,7 +25,9 @@ export const metadata: Metadata = {
   description: 'E-commerce with AI-powered virtual try-on. See clothes on you before you buy.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+
   return (
     <html lang="en" className={`${urbanist.variable} ${cormorant.variable}`} suppressHydrationWarning>
       <head>
@@ -34,8 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen font-sans">
-        <SessionProvider>
+        <SessionProvider session={session}>
           <SessionSync />
+          <AuthRealtimeListener />
           <div className="ambient-bg" aria-hidden="true" />
           <Header />
           <main>{children}</main>

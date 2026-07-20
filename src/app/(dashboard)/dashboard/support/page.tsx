@@ -11,6 +11,7 @@ import { StatCard } from '@/features/dashboard/components/StatCard';
 import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS } from '@/shared/auth/roles';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
+import { Skeleton, StatCardsSkeleton } from '@/shared/components/Skeleton';
 import type { DashboardStats, TryOnHistory, User } from '@/shared/types';
 
 interface UserDetail {
@@ -66,15 +67,35 @@ export default function SupportDashboardPage() {
       title="Support Dashboard"
       description="Look up customers, assist with try-on sessions, and monitor platform health"
     >
-      <RoleGate permission="view_system_health">
+      <RoleGate
+        permission="view_system_health"
+        loadingFallback={
+          <StatCardsSkeleton count={4} className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" />
+        }
+      >
         <section id="health" className="mb-8 scroll-mt-24">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="System status" value={health} />
-            {stats && (
+            {stats ? (
               <>
                 <StatCard label="Total users" value={stats.totalUsers} />
                 <StatCard label="Total try-ons" value={stats.totalTryOns} />
                 <StatCard label="Orders" value={stats.totalOrders ?? 0} />
+              </>
+            ) : (
+              <>
+                <div className="glass-card space-y-2 p-4">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-7 w-12" />
+                </div>
+                <div className="glass-card space-y-2 p-4">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-7 w-12" />
+                </div>
+                <div className="glass-card space-y-2 p-4">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-7 w-12" />
+                </div>
               </>
             )}
           </div>

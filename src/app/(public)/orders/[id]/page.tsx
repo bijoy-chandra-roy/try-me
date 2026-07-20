@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import { useParams } from 'next/navigation';
 import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
@@ -10,6 +10,7 @@ import { fetchOrder, updateOrderStatus } from '@/features/orders/api/orders.api'
 import { createReview } from '@/features/reviews/api/reviews.api';
 import { useAuth, usePermission } from '@/shared/hooks/useAuth';
 import { ApiError } from '@/shared/lib/api-client';
+import { OrderDetailSkeleton } from '@/shared/components/Skeleton';
 import type { Order } from '@/shared/types';
 
 export default function OrderDetailPage() {
@@ -89,27 +90,19 @@ export default function OrderDetailPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-24">
-        <span className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent-fill)] border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (error || !order) {
-    return (
-      <div className="mx-auto max-w-2xl px-6 py-16 text-center">
-        <p className="text-error">{error || 'Order not found'}</p>
-        <Link href="/" className="mt-4 inline-block">
-          <Button>Home</Button>
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
+      {loading ? (
+        <OrderDetailSkeleton />
+      ) : error || !order ? (
+        <div className="py-6 text-center">
+          <p className="text-error">{error || 'Order not found'}</p>
+          <Link href="/" className="mt-4 inline-block">
+            <Button>Home</Button>
+          </Link>
+        </div>
+      ) : (
+        <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-primary">
@@ -227,6 +220,8 @@ export default function OrderDetailPage() {
           <Button>Continue shopping</Button>
         </Link>
       </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { Button } from '@/shared/components/Button';
 import { useAuth } from '@/shared/hooks/useAuth';

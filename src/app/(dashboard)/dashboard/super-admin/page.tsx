@@ -15,6 +15,7 @@ import { ScrollArea } from '@/shared/components/ScrollArea';
 import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS, USER_ROLES } from '@/shared/auth/roles';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
+import { StatCardsSkeleton } from '@/shared/components/Skeleton';
 import type { DashboardStats, Merchant, User, UserRole } from '@/shared/types';
 
 interface SystemConfig {
@@ -101,8 +102,16 @@ export default function SuperAdminDashboardPage() {
       title="Super Admin Dashboard"
       description="Full system control, role assignment, and configuration"
     >
-      <RoleGate permission="view_system_health">
-        {stats && (
+      <RoleGate
+        permission="view_system_health"
+        loadingFallback={
+          <StatCardsSkeleton
+            count={6}
+            className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+          />
+        }
+      >
+        {stats ? (
           <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <StatCard label="Users" value={stats.totalUsers} />
             <StatCard label="Products" value={stats.totalProducts} />
@@ -111,6 +120,11 @@ export default function SuperAdminDashboardPage() {
             <StatCard label="Orders" value={stats.totalOrders ?? 0} />
             <StatCard label="Revenue" value={`$${(stats.totalRevenue ?? 0).toFixed(0)}`} />
           </div>
+        ) : (
+          <StatCardsSkeleton
+            count={6}
+            className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+          />
         )}
       </RoleGate>
 

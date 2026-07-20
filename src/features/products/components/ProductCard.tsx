@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { Popover } from '@/shared/components/Popover';
@@ -18,9 +18,11 @@ import type { Product } from '@/shared/types';
 interface ProductCardProps {
   product: Product;
   onTryOn: (product: Product) => void;
+  /** Prefer eager load for above-the-fold cards (first ~6). */
+  priority?: boolean;
 }
 
-export function ProductCard({ product, onTryOn }: ProductCardProps) {
+export function ProductCard({ product, onTryOn, priority = false }: ProductCardProps) {
   const isUnavailable = !product.inStock || product.stockQuantity <= 0;
   const { isAuthenticated } = useAuth();
   const hasTryOnPermission = usePermission('try_on');
@@ -32,6 +34,18 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] ?? '');
   const [adding, setAdding] = useState(false);
   const [cartMessage, setCartMessage] = useState('');
+
+  useEffect(() => {
+    if (!product.imageUrl || typeof window === 'undefined') return;
+    try {
+      const img = new window.Image();
+      img.fetchPriority = 'low';
+      img.decoding = 'async';
+      img.src = product.imageUrl;
+    } catch {
+      /* ignore */
+    }
+  }, [product.imageUrl]);
 
   const tryOnTooltip = tryOnBlocked
     ? 'Try-on unavailable during maintenance'
@@ -78,6 +92,8 @@ export function ProductCard({ product, onTryOn }: ProductCardProps) {
           src={product.imageUrl}
           alt={product.name}
           fill
+          priority={priority}
+          loading={priority ? 'eager' : 'lazy'}
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/shared/components/Link';
 import type { LucideIcon } from 'lucide-react';
 
 interface DrawerNavItemProps {
