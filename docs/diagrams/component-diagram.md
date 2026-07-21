@@ -1,54 +1,87 @@
-# Component Diagram — TryMe (Spiral 1)
+# Component Diagram — TryMe (Current)
 
-Illustrates the structural wiring of the Next.js frontend, Express backend, MongoDB, ImgBB API, and VTO API.
+Illustrates the unified Next.js App Router architecture: client features, Route Handlers, server feature layer, and external services.
 
 ```mermaid
 graph TB
-    subgraph Client["Client Layer"]
-        UI["Next.js Frontend<br/>(App Router)"]
-        Upload["Image Upload Component"]
-        Catalog["Product Catalog"]
-        Result["Try-On Result View"]
+    subgraph Client["Client Layer (src/app + src/features)"]
+        Pages["App Router Pages<br/>(public, auth, dashboard, settings)"]
+        Features["Feature Modules<br/>(products, try-on, cart, orders, …)"]
+        SharedUI["Shared UI & Hooks<br/>(Button, GlassCard, useAuth, useT)"]
+        Middleware["Edge Middleware<br/>(JWT + RBAC route guard)"]
     end
 
-    subgraph Server["Express Backend"]
-        API["API Router<br/>/api/*"]
-        ProductsCtrl["Products Controller"]
-        TryOnCtrl["Try-On Controller"]
-        ProductSvc["Product Service"]
-        TryOnSvc["Try-On Service"]
-        UploadSvc["Upload Service"]
-        CB["Circuit Breaker<br/>(10s timeout)"]
-        VTOClient["VTO API Client"]
+    subgraph API["API Layer (src/app/api)"]
+        AuthRoutes["/api/auth/*<br/>NextAuth + register + SSE events"]
+        ProductRoutes["/api/products/*"]
+        TryOnRoutes["/api/try-on/*"]
+        CartRoutes["/api/cart · /api/checkout"]
+        OrderRoutes["/api/orders/*"]
+        UserRoutes["/api/users · /api/merchants"]
+        SystemRoutes["/api/system · /api/dashboard · /api/health"]
+    end
+
+    subgraph Server["Server Layer (src/server/features)"]
+        AuthSvc["auth.service"]
+        ProductSvc["product.service"]
+        TryOnSvc["try-on.service"]
+        CartSvc["cart.service"]
+        OrderSvc["order.service"]
+        MerchantSvc["merchant.service"]
+        ReviewSvc["review.service"]
+        AddressSvc["address.service"]
+        UploadSvc["upload.service"]
+        DashboardSvc["dashboard.service"]
+        SystemSvc["system-config.service"]
+        CB["Circuit Breaker<br/>(VTO timeout)"]
+        VTOClient["VTO API Client<br/>(SSE /call/tryon)"]
         ImgBBClient["ImgBB Client"]
         Fallback["Fallback Cache<br/>(local image)"]
-        ProductRepo["Product Repository"]
+        Repos["Repositories<br/>(Mongoose models)"]
     end
 
     subgraph External["External Services"]
         MongoDB[("MongoDB")]
-        ImgBB["ImgBB API<br/>(Image Storage)"]
-        VTO["IDM-VTON API<br/>(Hugging Face Space)"]
+        ImgBB["ImgBB API"]
+        VTO["IDM-VTON<br/>(Hugging Face Space)"]
+        Google["Google OAuth"]
     end
 
-    UI --> Upload
-    UI --> Catalog
-    UI --> Result
+    Pages --> Features
+    Features --> SharedUI
+    Middleware --> Pages
 
-    Upload -->|"POST /api/try-on<br/>(multipart)"| API
-    Catalog -->|"GET /api/products"| API
+    Features -->|"fetch /api/*"| AuthRoutes
+    Features --> ProductRoutes
+    Features --> TryOnRoutes
+    Features --> CartRoutes
+    Features --> OrderRoutes
+    Features --> UserRoutes
+    Features --> SystemRoutes
 
-    API --> ProductsCtrl
-    API --> TryOnCtrl
+    AuthRoutes --> AuthSvc
+    ProductRoutes --> ProductSvc
+    TryOnRoutes --> TryOnSvc
+    CartRoutes --> CartSvc
+    CartRoutes --> OrderSvc
+    OrderRoutes --> OrderSvc
+    UserRoutes --> AuthSvc
+    UserRoutes --> MerchantSvc
+    SystemRoutes --> DashboardSvc
+    SystemRoutes --> SystemSvc
 
-    ProductsCtrl --> ProductSvc
-    ProductSvc --> ProductRepo
-    ProductRepo --> MongoDB
-
-    TryOnCtrl --> TryOnSvc
+    AuthSvc --> Repos
+    ProductSvc --> Repos
     TryOnSvc --> UploadSvc
     TryOnSvc --> ProductSvc
     TryOnSvc --> CB
+    CartSvc --> Repos
+    OrderSvc --> Repos
+    MerchantSvc --> Repos
+    ReviewSvc --> Repos
+    AddressSvc --> Repos
+
+    Repos --> MongoDB
 
     UploadSvc --> ImgBBClient
     ImgBBClient --> ImgBB
@@ -57,7 +90,18 @@ graph TB
     CB -->|"timeout / HTTP error"| Fallback
     VTOClient --> VTO
 
-    TryOnSvc -->|"composite image URL"| Result
+    AuthSvc --> Google
 ```
+
+## Layer Summary
+
+| Layer | Location | Responsibility |
+|-------|----------|----------------|
+| **Client** | `src/app/`, `src/features/`, `src/shared/` | Pages, feature UI, shared primitives, i18n, theme |
+| **Edge** | `src/middleware.ts` | JWT validation, role-based route access |
+| **API** | `src/app/api/*/route.ts` | HTTP boundary, auth guards, request parsing |
+| **Server** | `src/server/features/*/` | Business logic, orchestration, external integrations |
+| **Infrastructure** | `src/server/lib/`, `src/server/db/` | Auth guards, API responses, DB connection, caching |
+| **External** | MongoDB, ImgBB, Hugging Face, Google | Persistence, image hosting, AI try-on, OAuth |
 
 [← Diagram index](diagrams.md)

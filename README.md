@@ -20,7 +20,7 @@ Unified **Next.js App Router** application — UI and API live in the same codeb
 - **Circuit Breaker** on VTO API: 10-second timeout or any HTTP error triggers instant fallback to a local cached composite image
 - **Shared types** in `src/shared/types/` for end-to-end contracts
 
-See [docs/diagrams/diagrams.md](docs/diagrams/diagrams.md) for all architecture and project diagrams.
+See [docs/how-it-works.md](docs/how-it-works.md) for a feature walkthrough, [docs/diagrams/diagrams.md](docs/diagrams/diagrams.md) for architecture diagrams, [docs/sdlc-model.md](docs/sdlc-model.md) for the Spiral Model lifecycle, and [docs/swe-model.md](docs/swe-model.md) for the software engineering architecture.
 
 ## Project Structure
 
@@ -37,7 +37,10 @@ TryMe/
 ├── cache/                # Fallback VTO result image
 ├── scripts/seed-products.ts
 └── docs/
-    ├── design.md
+    ├── how-it-works.md     # Feature walkthrough & user journeys
+    ├── sdlc-model.md       # Spiral Model lifecycle
+    ├── swe-model.md        # Software engineering architecture
+    ├── design/
     └── diagrams/
 ```
 
@@ -158,12 +161,14 @@ All configuration lives in `.env.local`:
 
 ## Spiral Model Notes
 
-This repository represents **Spiral 1 — Operational Prototype**:
+| Spiral | Focus | Status |
+|--------|-------|--------|
+| **1 — Operational Prototype** | VTO workflow, product catalog, circuit-breaker fallback | Delivered |
+| **2 — Auth & RBAC** | Auth.js, 6 roles, 21 permissions, role dashboards | Delivered |
+| **3 — Commerce** | Cart, checkout (COD), orders, addresses, reviews | Delivered |
+| **4 — Design & Polish** | Design system, settings/i18n, VTO SSE fix, Vercel deploy | Delivered |
 
-- End-to-end VTO workflow with resilient fallback
-- Product catalog with category filtering
-- Role-based auth with six roles and role-specific dashboards
-- Unified Next.js architecture ready for subsequent spirals (cart, payments, enhanced VTO)
+See [docs/sdlc-model.md](docs/sdlc-model.md) for the full SDLC process and [docs/swe-model.md](docs/swe-model.md) for architecture patterns.
 
 ## License
 

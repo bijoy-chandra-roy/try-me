@@ -1,87 +1,111 @@
-# Activity / Swimlane Diagram — Virtual Try-On Flow
+# Activity / Swimlane Diagram — End-to-End Commerce & Try-On Flow
 
-End-to-end process flow partitioned by responsible lane.
+Process flow partitioned by responsible lane, covering browse → try-on → cart → checkout → order tracking.
 
 ```mermaid
 flowchart TB
     subgraph User["👤 User"]
-        U1([Open TryMe app])
+        U1([Open TryMe])
         U2([Browse / filter catalog])
-        U3([Select a product])
-        U4([Upload reference photo])
-        U5([View try-on result])
-        U6{Accept result?}
-        U7([Try another product])
+        U3([Try on a product])
+        U4([Add to cart])
+        U5([Proceed to checkout])
+        U6([Enter shipping address])
+        U7([Place order (COD)])
+        U8([Track order status])
+        U9([Write review after delivery])
     end
 
     subgraph Frontend["🖥️ Next.js Frontend"]
-        F1[Load product catalog]
-        F2[Apply category filter]
-        F3[Open Try-On modal]
-        F4[Validate image file]
-        F5[POST /api/try-on<br/>multipart form]
-        F6[Render composite image]
-        F7[Show Live or Fallback badge]
+        F1[Load catalog via useProducts]
+        F2[Open TryOnModal]
+        F3[POST /api/try-on]
+        F4[Show Live / Fallback badge]
+        F5[Add item via useCart]
+        F6[Load cart & addresses]
+        F7[POST /api/checkout]
+        F8[Redirect to order page]
+        F9[OrdersPanel / review form]
     end
 
-    subgraph Backend["⚙️ Express Backend"]
-        B1[Receive try-on request]
-        B2[Upload image via UploadService]
-        B3[Fetch product from ProductService]
-        B4[Invoke Circuit Breaker]
-        B5[Return JSON response]
+    subgraph Middleware["🔒 Edge Middleware"]
+        MW1{Authenticated?}
+        MW2{Has permission?}
+    end
+
+    subgraph API["⚡ Route Handlers"]
+        R1[Product routes]
+        R2[Try-on route + rate limit]
+        R3[Cart routes]
+        R4[Checkout route]
+        R5[Order routes]
+        R6[Review routes]
+    end
+
+    subgraph Server["⚙️ Server Services"]
+        S1[ProductService]
+        S2[TryOnService + Circuit Breaker]
+        S3[CartService]
+        S4[OrderService.checkout]
+        S5[ReviewService]
     end
 
     subgraph External["🌐 External Services"]
-        E1[(MongoDB<br/>product lookup)]
-        E2[ImgBB API<br/>image hosting]
-        E3[VTO API<br/>IDM-VTON]
-        E4[Fallback cache<br/>local image]
+        E1[(MongoDB)]
+        E2[ImgBB API]
+        E3[VTO API (SSE)]
+        E4[Fallback cache]
     end
 
     U1 --> F1
-    U2 --> F2
-    F2 --> U3
-    U3 --> F3
-    F3 --> U4
-    U4 --> F4
-    F4 --> F5
+    F1 --> R1 --> S1 --> E1
+    U2 --> F1
+    U3 --> F2 --> F3
 
-    F1 --> E1
-    F5 --> B1
-    B1 --> B2
-    B2 --> E2
-    B2 --> B3
-    B3 --> E1
-    B3 --> B4
+    F3 --> MW1
+    MW1 -->|Guest| R2
+    MW1 -->|Auth| MW2
+    MW2 --> R2
+    R2 --> S2
+    S2 --> E2
+    S2 --> E3
+    S2 -->|timeout/error| E4
+    S2 --> E1
+    S2 --> F4
+    F4 --> U3
 
-    B4 --> E3
-    B4 -->|timeout or HTTP error| E4
-    E3 -->|success within 10s| B5
-    E4 --> B5
+    U4 --> F5 --> MW2
+    MW2 --> R3 --> S3 --> E1
 
-    B5 --> F6
-    F6 --> F7
-    F7 --> U5
-    U5 --> U6
-    U6 -->|No| U7
-    U7 --> U2
-    U6 -->|Yes| U1
+    U5 --> F6
+    U6 --> F7
+    F7 --> MW2 --> R4 --> S4
+    S4 --> S3
+    S4 --> E1
+    S4 --> F8
+    F8 --> U7
+
+    U8 --> F9 --> R5 --> E1
+    U9 --> F9 --> R6 --> S5 --> E1
 ```
 
 ## Lane Responsibilities
 
 | Lane | Activities |
 |------|------------|
-| **User** | Navigation, product selection, photo upload, result review |
-| **Next.js Frontend** | Catalog rendering, client validation, API calls, result display |
-| **Express Backend** | Request orchestration, service delegation, circuit-breaker logic |
-| **External Services** | Persistent catalog, image storage, AI try-on, fallback resilience |
+| **User** | Browse, try-on, cart, checkout, order tracking, reviews |
+| **Next.js Frontend** | Feature hooks, modals, forms, API calls, result display |
+| **Edge Middleware** | JWT validation, role/permission checks on protected routes |
+| **Route Handlers** | HTTP boundary, parse requests, invoke services, return JSON |
+| **Server Services** | Business logic, stock management, circuit-breaker orchestration |
+| **External Services** | MongoDB persistence, ImgBB hosting, VTO AI, fallback resilience |
 
 ## Decision Points
 
-1. **Image validation (Frontend)** — Rejects invalid files before hitting the API.
-2. **Circuit Breaker (Backend → External)** — On VTO timeout (>10 s) or HTTP error, serves pre-cached fallback image instead of failing the request.
-3. **User acceptance** — Shopper may retry with a different product or restart the session.
+1. **Guest vs authenticated (Middleware)** — Guests get rate-limited try-on; cart/checkout require sign-in.
+2. **Permission check (Middleware + AuthGuard)** — Each API route enforces granular permissions (e.g. `manage_cart`, `place_orders`).
+3. **Circuit Breaker (TryOnService)** — VTO timeout or SSE error → instant fallback image; user always sees a result.
+4. **Stock validation (CartService / OrderService)** — Checkout decrements inventory; cancellation restocks.
+5. **Review eligibility (ReviewService)** — Reviews require a delivered purchase for that product.
 
 [← Diagram index](diagrams.md)

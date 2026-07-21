@@ -1,71 +1,132 @@
-# Use Case Diagram — TryMe (Spiral 1)
+# Use Case Diagram — TryMe (Current)
 
-Illustrates the actors and functional capabilities of the Virtual Try-On e-commerce prototype.
+Actors, use cases, and system boundaries across all delivered spirals.
 
 ```mermaid
 flowchart TB
-    User(("Shopper"))
+    Guest(("Guest"))
+    Customer(("Customer"))
+    Merchant(("Merchant"))
+    Support(("Support Staff"))
+    Admin(("Admin"))
+    SuperAdmin(("Super Admin"))
 
     subgraph TryMe["TryMe System"]
-        UC1(["Browse Product Catalog"])
-        UC2(["Filter Products by Category"])
-        UC3(["View Product Details"])
-        UC4(["Upload Reference Photo"])
-        UC5(["Request Virtual Try-On"])
-        UC6(["View Try-On Result"])
-        UC7(["Identify Live vs Fallback Result"])
+        direction TB
+
+        subgraph Catalog["Catalog & Try-On"]
+            UC1(["Browse Product Catalog"])
+            UC2(["Filter by Category"])
+            UC3(["Virtual Try-On"])
+            UC4(["View Try-On History"])
+            UC5(["Identify Live vs Fallback"])
+        end
+
+        subgraph Commerce["Commerce"]
+            UC6(["Manage Cart"])
+            UC7(["Checkout (COD)"])
+            UC8(["Track Orders"])
+            UC9(["Write Product Review"])
+            UC10(["Manage Addresses"])
+        end
+
+        subgraph Account["Account"]
+            UC11(["Register / Sign In"])
+            UC12(["Google OAuth"])
+            UC13(["Manage Profile & Preferences"])
+        end
+
+        subgraph MerchantOps["Merchant Operations"]
+            UC14(["Manage Products"])
+            UC15(["View Merchant Analytics"])
+            UC16(["Manage Store Profile"])
+        end
+
+        subgraph AdminOps["Administration"]
+            UC17(["Manage Users & Roles"])
+            UC18(["Manage Merchants"])
+            UC19(["View Platform Stats"])
+            UC20(["System Config & Maintenance"])
+            UC21(["Assume Role (Super Admin)"])
+        end
     end
 
     ImgBB(("ImgBB API"))
-    VTO(("VTO API<br/>(IDM-VTON)"))
+    VTO(("VTO API"))
     MongoDB(("MongoDB"))
+    Google(("Google OAuth"))
 
-    User --> UC1
-    User --> UC2
-    User --> UC3
-    User --> UC5
-    User --> UC6
-    User --> UC7
+    Guest --> UC1
+    Guest --> UC2
+    Guest --> UC3
+    Guest --> UC11
+
+    Customer --> UC1
+    Customer --> UC3
+    Customer --> UC4
+    Customer --> UC6
+    Customer --> UC7
+    Customer --> UC8
+    Customer --> UC9
+    Customer --> UC10
+    Customer --> UC11
+    Customer --> UC12
+    Customer --> UC13
+
+    Merchant --> UC14
+    Merchant --> UC15
+    Merchant --> UC16
+    Merchant --> UC8
+
+    Support --> UC4
+    Support --> UC8
+    Support --> UC17
+    Support --> UC19
+
+    Admin --> UC17
+    Admin --> UC18
+    Admin --> UC19
+    Admin --> UC20
+
+    SuperAdmin --> UC21
 
     UC2 -.->|extends| UC1
-    UC3 -.->|extends| UC1
-
-    UC5 -.->|includes| UC4
-    UC5 -.->|includes| UC3
-    UC6 -.->|includes| UC5
-    UC7 -.->|extends| UC6
+    UC5 -.->|extends| UC3
+    UC7 -.->|includes| UC6
+    UC9 -.->|includes| UC8
+    UC12 -.->|extends| UC11
 
     UC1 --> MongoDB
+    UC3 --> ImgBB
+    UC3 --> VTO
     UC3 --> MongoDB
-    UC5 --> ImgBB
-    UC5 --> VTO
-    UC5 --> MongoDB
+    UC7 --> MongoDB
+    UC11 --> MongoDB
+    UC12 --> Google
 ```
 
 ## Actors
 
 | Actor | Role |
 |-------|------|
-| **Shopper** | Primary user who browses products and performs virtual try-on |
-| **MongoDB** | Secondary actor — stores and serves product catalog data |
-| **ImgBB API** | Secondary actor — hosts uploaded user reference photos |
-| **VTO API** | Secondary actor — generates composite try-on images |
+| **Guest** | Anonymous visitor; browse catalog, rate-limited try-on (3/hour) |
+| **Customer** | Registered shopper; full try-on, cart, checkout, orders, reviews |
+| **Merchant** | Store owner; manage products, view analytics, fulfill orders |
+| **Support Staff** | User lookup, order support, try-on history inspection |
+| **Admin** | User/merchant management, platform health |
+| **Super Admin** | All admin capabilities + role assumption for testing |
+| **MongoDB** | Secondary actor — persistent data store |
+| **ImgBB API** | Secondary actor — image hosting |
+| **VTO API** | Secondary actor — AI composite generation |
+| **Google OAuth** | Secondary actor — social sign-in |
 
-## Use Cases
+## Use Case Summary by Spiral
 
-| ID | Use Case | Description |
-|----|----------|-------------|
-| UC1 | Browse Product Catalog | Load and display all available products |
-| UC2 | Filter Products by Category | Narrow catalog by tops, bottoms, dresses, etc. |
-| UC3 | View Product Details | See name, price, description, and garment image |
-| UC4 | Upload Reference Photo | Provide a personal photo for try-on |
-| UC5 | Request Virtual Try-On | Submit photo + product to generate a composite image |
-| UC6 | View Try-On Result | Display the composite image returned by the backend |
-| UC7 | Identify Live vs Fallback Result | Show badge indicating VTO API or circuit-breaker fallback |
-
-## Relationships
-
-- **Include** — *Request Virtual Try-On* requires uploading a photo and resolving the selected product.
-- **Extend** — *Filter by Category* and *View Product Details* extend catalog browsing; *Identify Live vs Fallback* extends result viewing.
+| Spiral | Use Cases Delivered |
+|--------|-------------------|
+| **Spiral 1** | UC1–UC5 (catalog + VTO + fallback badge) |
+| **Spiral 2** | UC11–UC13, UC17–UC21 (auth, RBAC, dashboards) |
+| **Spiral 3** | UC6–UC10, UC14–UC16 (commerce + merchant ops) |
+| **Spiral 4** | UC13 enhanced (appearance, i18n, theme preferences) |
 
 [← Diagram index](diagrams.md)

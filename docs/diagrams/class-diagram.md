@@ -1,128 +1,284 @@
-# Class Diagram — TryMe (Spiral 1)
+# Class Diagram — TryMe (Current)
 
-Domain model, backend service layers, and key frontend types.
+Domain models, server service layers, auth/RBAC, and key frontend types.
 
 ```mermaid
 classDiagram
     direction TB
 
+    %% ── Domain Models ──
+    class User {
+        <<Mongoose Model>>
+        +String email
+        +String passwordHash
+        +String name
+        +UserRole role
+        +ObjectId merchantId
+        +UserStatus status
+        +UserPreferences preferences
+    }
+
     class Product {
         <<Mongoose Model>>
         +String name
-        +String description
         +Number price
         +ProductCategory category
         +String imageUrl
         +String[] sizes
+        +CustomField[] customFields
         +Boolean inStock
-        +Date createdAt
-        +Date updatedAt
+        +Number stockQuantity
+        +ObjectId merchantId
+    }
+
+    class Merchant {
+        <<Mongoose Model>>
+        +String name
+        +ObjectId ownerId
+        +MerchantStatus status
+    }
+
+    class Cart {
+        <<Mongoose Model>>
+        +ObjectId userId
+        +CartItem[] items
+    }
+
+    class Order {
+        <<Mongoose Model>>
+        +ObjectId userId
+        +String orderNumber
+        +OrderStatus status
+        +OrderItem[] items
+        +ShippingAddress shippingAddress
+        +Number total
+    }
+
+    class Address {
+        <<Mongoose Model>>
+        +ObjectId userId
+        +String street
+        +Boolean isDefault
+    }
+
+    class Review {
+        <<Mongoose Model>>
+        +ObjectId userId
+        +ObjectId productId
+        +ObjectId orderId
+        +Number rating
+        +String comment
+    }
+
+    class TryOnHistory {
+        <<Mongoose Model>>
+        +ObjectId userId
+        +ObjectId productId
+        +String compositeImageUrl
+        +Boolean fromFallback
+    }
+
+    class SystemConfig {
+        <<Mongoose Model>>
+        +Boolean maintenanceMode
+        +Number guestTryOnLimit
+    }
+
+    %% ── Repositories ──
+    class UserRepository {
+        +findById(id) User
+        +findByEmail(email) User
+        +create(data) User
+        +update(id, data) User
     }
 
     class ProductRepository {
         +findAll(filters) Product[]
         +findById(id) Product
         +create(data) Product
-        +insertMany(products) Product[]
-        +deleteAll() void
+        +update(id, data) Product
+        +delete(id) void
+    }
+
+    class CartRepository {
+        +findByUserId(userId) Cart
+        +upsert(userId, items) Cart
+    }
+
+    class OrderRepository {
+        +findByUserId(userId) Order[]
+        +create(data) Order
+        +updateStatus(id, status) Order
+    }
+
+    class TryOnHistoryRepository {
+        +findByUserId(userId) TryOnHistory[]
+        +create(data) TryOnHistory
+        +delete(id) void
+    }
+
+    %% ── Services ──
+    class AuthService {
+        +register(data) User
+        +findOrCreateOAuthUser(profile) User
+        +validateCredentials(email, password) User
     }
 
     class ProductService {
         +getProducts(filters) Product[]
         +getProductById(id) Product
+        +createProduct(data) Product
     }
 
-    class ProductController {
-        +listProducts(req, res, next) void
-        +getProduct(req, res, next) void
+    class TryOnService {
+        +processTryOn(file, productId, userId) TryOnResponse
+    }
+
+    class CartService {
+        +getCart(userId) Cart
+        +addItem(userId, item) Cart
+        +updateQuantity(userId, itemId, qty) Cart
+        +clearCart(userId) void
+    }
+
+    class OrderService {
+        +checkout(userId, address) Order
+        +getOrders(filters) Order[]
+        +updateStatus(id, status) Order
+    }
+
+    class MerchantService {
+        +getMerchants() Merchant[]
+        +createMerchant(data) Merchant
+        +updateMerchant(id, data) Merchant
     }
 
     class UploadService {
         +uploadUserImage(file) String
+        +uploadImageFromSource(url) String
+    }
+
+    class TryOnHistoryService {
+        +saveHistory(userId, result) TryOnHistory
+        +getHistory(userId) TryOnHistory[]
+        +deleteHistory(id) void
+    }
+
+    class DashboardService {
+        +getDashboardStats() Stats
+        +getMerchantDashboardStats(merchantId) Stats
+    }
+
+    class SystemConfigService {
+        +getConfig() SystemConfig
+        +updateConfig(data) SystemConfig
+    }
+
+    %% ── Infrastructure ──
+    class CircuitBreaker {
+        -Number timeoutMs
+        +execute(operation) CircuitBreakerResult
+    }
+
+    class VtoApiClient {
+        +generateTryOn(userUrl, garmentUrl) VtoResult
     }
 
     class ImgBBClient {
         +uploadImage(buffer, filename) String
     }
 
-    class TryOnService {
-        +processTryOn(file, productId) TryOnResponse
-    }
-
-    class TryOnController {
-        +createTryOn(req, res, next) void
-    }
-
-    class CircuitBreaker {
-        -Number timeoutMs
-        -Function fallbackFn
-        +execute(operation) CircuitBreakerResult
-        -_executeWithTimeout(operation) Promise
-    }
-
-    class VtoApiClient {
-        -String apiUrl
-        +generateTryOn(userImageUrl, garmentImageUrl) VtoResult
-        -_extractOutputPath(result) String
-    }
-
     class FallbackCache {
-        -String imagePath
         +getFallbackResult() VtoResult
     }
 
+    class AuthGuard {
+        +requireAuth() Session
+        +requirePermission(perm) Session
+        +getOptionalAuth() Session
+    }
+
+    class GuestRateLimiter {
+        +checkGuestRateLimit(ip) void
+    }
+
+    %% ── Shared Types ──
     class TryOnResult {
         <<TypeScript Interface>>
         +String compositeImageUrl
-        +String userImageUrl
-        +String productImageUrl
-        +String productName
-        +String source
         +Boolean fromFallback
+        +String source
     }
 
+    class Permission {
+        <<Enum>>
+        try_on
+        manage_cart
+        place_orders
+        manage_products
+        assign_roles
+        manage_system
+    }
+
+    %% ── Frontend ──
     class useTryOn {
         <<React Hook>>
-        +tryOn(userImage, productId) TryOnResult
-        +reset() void
-        +Boolean loading
-        +String error
-        +TryOnResult result
+        +tryOn(image, productId) TryOnResult
+        +loading Boolean
+        +error String
     }
 
-    class useProducts {
+    class useCart {
         <<React Hook>>
-        +Product[] products
-        +Boolean loading
-        +String error
-        +fetchProducts(category) void
+        +items CartItem[]
+        +addToCart(product) void
+        +updateQuantity(id, qty) void
     }
 
-    ProductRepository --> Product : persists
-    ProductService --> ProductRepository : uses
-    ProductController --> ProductService : delegates
+    class useAuth {
+        <<React Hook>>
+        +user SessionUser
+        +hasPermission(perm) Boolean
+    }
 
-    UploadService --> ImgBBClient : uses
-    TryOnService --> UploadService : uses
-    TryOnService --> ProductService : uses
-    TryOnService --> CircuitBreaker : uses
-    CircuitBreaker --> VtoApiClient : wraps
-    CircuitBreaker --> FallbackCache : on failure
-    TryOnController --> TryOnService : delegates
+    %% ── Relationships ──
+    UserRepository --> User
+    ProductRepository --> Product
+    CartRepository --> Cart
+    OrderRepository --> Order
+    TryOnHistoryRepository --> TryOnHistory
 
-    useTryOn ..> TryOnResult : returns
-    useProducts ..> Product : displays
+    AuthService --> UserRepository
+    ProductService --> ProductRepository
+    TryOnService --> ProductService
+    TryOnService --> UploadService
+    TryOnService --> CircuitBreaker
+    TryOnService --> TryOnHistoryService
+    CartService --> CartRepository
+    OrderService --> OrderRepository
+    OrderService --> CartService
+    MerchantService --> Merchant
+    DashboardService --> ProductRepository
+    DashboardService --> OrderRepository
+
+    UploadService --> ImgBBClient
+    CircuitBreaker --> VtoApiClient
+    CircuitBreaker --> FallbackCache
+    TryOnHistoryService --> TryOnHistoryRepository
+
+    useTryOn ..> TryOnResult
+    useCart ..> Cart
+    useAuth ..> Permission
 ```
 
 ## Layer Summary
 
 | Layer | Classes | Responsibility |
 |-------|---------|----------------|
-| **Domain** | `Product`, `TryOnResult` | Data shape for catalog and try-on responses |
-| **Repository** | `ProductRepository` | MongoDB access |
-| **Service** | `ProductService`, `UploadService`, `TryOnService` | Business logic and orchestration |
-| **Infrastructure** | `ImgBBClient`, `VtoApiClient`, `FallbackCache`, `CircuitBreaker` | External APIs and resilience |
-| **Controller** | `ProductController`, `TryOnController` | HTTP request handling |
-| **Presentation** | `useProducts`, `useTryOn` | Frontend state and API integration |
+| **Domain** | `User`, `Product`, `Cart`, `Order`, `TryOnHistory`, … | Mongoose schemas and shared TS types |
+| **Repository** | `*Repository` | MongoDB CRUD per feature |
+| **Service** | `*Service` | Business logic and orchestration |
+| **Infrastructure** | `CircuitBreaker`, `VtoApiClient`, `ImgBBClient`, `AuthGuard` | External APIs, resilience, auth guards |
+| **Presentation** | `useTryOn`, `useCart`, `useAuth` | Client-side state and API integration |
 
 [← Diagram index](diagrams.md)
