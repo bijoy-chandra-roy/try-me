@@ -9,6 +9,7 @@ export interface SessionUser {
   email: string;
   name: string;
   role: UserRole;
+  realRole: UserRole;
   merchantId?: string | null;
   status?: 'active' | 'inactive';
 }
@@ -21,11 +22,17 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     return null;
   }
 
+  const realRole =
+    session.user.realRole && isUserRole(session.user.realRole)
+      ? session.user.realRole
+      : session.user.role;
+
   return {
     id: session.user.id,
     email: session.user.email,
     name: session.user.name,
     role: session.user.role,
+    realRole,
     merchantId: session.user.merchantId ?? null,
     status: session.user.status ?? 'active',
   };

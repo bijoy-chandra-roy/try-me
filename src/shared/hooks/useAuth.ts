@@ -15,6 +15,8 @@ export interface AuthSnapshot {
   email: string;
   name: string;
   role: UserRole;
+  realRole?: UserRole;
+  actingAsRole?: UserRole | null;
   merchantId?: string | null;
   status?: 'active' | 'inactive';
 }
@@ -134,6 +136,8 @@ function snapshotFromSession(user: {
   email?: string | null;
   name?: string | null;
   role: UserRole;
+  realRole?: UserRole;
+  actingAsRole?: UserRole | null;
   merchantId?: string | null;
   status?: 'active' | 'inactive';
 }): AuthSnapshot {
@@ -142,6 +146,8 @@ function snapshotFromSession(user: {
     email: user.email ?? '',
     name: user.name ?? '',
     role: user.role,
+    realRole: user.realRole && isUserRole(user.realRole) ? user.realRole : user.role,
+    actingAsRole: user.actingAsRole ?? null,
     merchantId: user.merchantId ?? null,
     status: user.status ?? 'active',
   };
@@ -170,6 +176,26 @@ export function useAuth() {
   const role =
     effectiveUser?.role && isUserRole(effectiveUser.role) ? effectiveUser.role : undefined;
 
+  const realRoleRaw =
+    effectiveUser && 'realRole' in effectiveUser
+      ? (effectiveUser as AuthSnapshot).realRole
+      : undefined;
+  const realRole =
+    realRoleRaw && isUserRole(realRoleRaw)
+      ? realRoleRaw
+      : role;
+
+  const actingAsRoleRaw =
+    effectiveUser && 'actingAsRole' in effectiveUser
+      ? (effectiveUser as AuthSnapshot).actingAsRole
+      : undefined;
+  const actingAsRole =
+    actingAsRoleRaw && isUserRole(actingAsRoleRaw) ? actingAsRoleRaw : null;
+  const isAssumingRole =
+    realRole === 'super_admin' &&
+    actingAsRole != null &&
+    actingAsRole !== 'super_admin';
+
   const isResolved = status !== 'loading' || lastKnown != null;
   const isAuthenticated =
     status === 'authenticated' ||
@@ -178,7 +204,14 @@ export function useAuth() {
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.id && liveRole) {
-      writeSnapshot(snapshotFromSession({ ...session.user, role: liveRole }));
+      writeSnapshot(
+        snapshotFromSession({
+          ...session.user,
+          role: liveRole,
+          realRole: session.user.realRole,
+          actingAsRole: session.user.actingAsRole,
+        })
+      );
       reportAuthConnectivity(true);
       return;
     }
@@ -191,6 +224,9 @@ export function useAuth() {
   return {
     user: effectiveUser,
     role,
+    realRole,
+    actingAsRole,
+    isAssumingRole,
     permissions: role ? getPermissionsForRole(role) : [],
     isLoading: !isResolved,
     isResolved,

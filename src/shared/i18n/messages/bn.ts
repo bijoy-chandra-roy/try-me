@@ -396,4 +396,18 @@ export const bn: Record<keyof typeof en, string> = {
 
   'dashboard.superAdmin.title': 'সুপার অ্যাডমিন ড্যাশবোর্ড',
   'dashboard.superAdmin.description': 'পূর্ণ সিস্টেম নিয়ন্ত্রণ, রোল অ্যাসাইনমেন্ট এবং কনফিগারেশন',
+
+  // Assume role (super admin only)
+  'assumeRole.title': 'রোল পরিবর্তন',
+  'assumeRole.description':
+    'অস্থায়ীভাবে অন্য রোলের ড্যাশবোর্ড ও অনুমতি ব্যবহার করুন। আপনার অ্যাকাউন্ট সুপার অ্যাডমিনই থাকবে।',
+  'assumeRole.roleLabel': 'রোল',
+  'assumeRole.merchantLabel': 'মার্চেন্ট স্টোর',
+  'assumeRole.merchantPlaceholder': 'একটি মার্চেন্ট বেছে নিন',
+  'assumeRole.merchantRequired': 'মার্চেন্ট হিসেবে দেখতে একটি স্টোর বেছে নিন।',
+  'assumeRole.switch': 'রোল পরিবর্তন',
+  'assumeRole.switching': 'পরিবর্তন হচ্ছে…',
+  'assumeRole.failed': 'রোল পরিবর্তন করা যায়নি',
+  'assumeRole.actingAs': '{role} হিসেবে কাজ করছেন',
+  'assumeRole.exit': 'সুপার অ্যাডমিনে ফিরুন',
 };

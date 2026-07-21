@@ -17,7 +17,8 @@ import { IconButton } from '@/shared/components/IconButton';
 import { IconLink } from '@/shared/components/IconLink';
 import { Drawer } from '@/shared/components/Drawer';
 import { DrawerNavItem } from '@/shared/components/DrawerNavItem';
-import { getDashboardPath, type UserRole } from '@/shared/auth/roles';
+import { RoleStatusChip } from '@/shared/components/RoleStatusChip';
+import { getDashboardPath, USER_ROLES, type UserRole } from '@/shared/auth/roles';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useT } from '@/shared/hooks/useT';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -26,6 +27,13 @@ import {
   confirmSignOut,
   signOutAndClearPreferences,
 } from '@/shared/lib/auth-actions';
+import {
+  assumeRole,
+  dashboardPathAfterAssume,
+} from '@/shared/lib/assume-role';
+import { apiClient } from '@/shared/lib/api-client';
+import type { Merchant } from '@/shared/types';
+import { useRouter } from 'next/navigation';
 
 function roleLabel(
   t: (key: MessageKey, params?: Record<string, string | number>) => string,
@@ -56,11 +64,17 @@ function AuthActionPlaceholder({ count = 2 }: { count?: number }) {
 }
 
 export function Header() {
-  const { role, permissions, isAuthenticated, isResolved } = useAuth();
+  const { role, realRole, permissions, isAuthenticated, isResolved, update, isAssumingRole } =
+    useAuth();
   const { itemCount } = useCart();
   const t = useT();
+  const router = useRouter();
   const canCart = permissions.includes('manage_cart');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileRoleStep, setMobileRoleStep] = useState<'roles' | 'merchants'>('roles');
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [roleError, setRoleError] = useState('');
 
   const staffPermissions = permissions.filter(
     (p) =>
@@ -75,10 +89,53 @@ export function Header() {
   );
 
   const dashboardHref = role ? getDashboardPath(role) : '/dashboard';
+  const canSwitchRole = realRole === 'super_admin';
+
+  const permissionsHint =
+    staffPermissions.length > 0
+      ? t('header.accessPrefix', {
+          permissions: staffPermissions.map((p) => permissionLabel(t, p)).join(', '),
+        })
+      : role
+        ? roleLabel(t, role)
+        : undefined;
 
   function handleSignOut() {
     if (!confirmSignOut(t('settings.account.signOutConfirm'))) return;
     void signOutAndClearPreferences('/');
+  }
+
+  async function switchRole(next: UserRole, merchantId?: string | null) {
+    if (busy) return;
+    setBusy(true);
+    setRoleError('');
+    try {
+      const applied = await assumeRole(update, next, merchantId);
+      setMenuOpen(false);
+      setMobileRoleStep('roles');
+      router.push(dashboardPathAfterAssume(applied));
+      router.refresh();
+    } catch (err) {
+      setRoleError(err instanceof Error ? err.message : t('assumeRole.failed'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onMobileSelectRole(next: UserRole) {
+    if (next === 'merchant') {
+      setMobileRoleStep('merchants');
+      if (merchants.length === 0) {
+        try {
+          const list = await apiClient<Merchant[]>('/merchants');
+          setMerchants(list.filter((m) => m.status === 'approved'));
+        } catch {
+          /* ignore — empty list shows below */
+        }
+      }
+      return;
+    }
+    await switchRole(next);
   }
 
   return (
@@ -104,28 +161,17 @@ export function Header() {
             <AuthActionPlaceholder count={3} />
           ) : (
             <>
-              {isAuthenticated && canCart && (
-                <IconLink href="/cart" label={t('nav.cart')} badge={itemCount}>
-                  <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
-                </IconLink>
-              )}
               {isAuthenticated && role ? (
                 <>
-                  <Tooltip
-                    content={
-                      staffPermissions.length > 0
-                        ? t('header.accessPrefix', {
-                            permissions: staffPermissions
-                              .map((p) => permissionLabel(t, p))
-                              .join(', '),
-                          })
-                        : roleLabel(t, role)
-                    }
-                  >
-                    <span className="chip-category mx-1 hidden cursor-default md:inline-block">
-                      {roleLabel(t, role)}
-                    </span>
-                  </Tooltip>
+                  <RoleStatusChip
+                    className="mx-1 hidden sm:inline-flex"
+                    permissionsHint={permissionsHint}
+                  />
+                  {canCart && (
+                    <IconLink href="/cart" label={t('nav.cart')} badge={itemCount}>
+                      <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
+                    </IconLink>
+                  )}
                   <IconLink href={dashboardHref} label={t('nav.dashboard')}>
                     <LayoutDashboard className="h-5 w-5" strokeWidth={1.75} />
                   </IconLink>
@@ -137,9 +183,16 @@ export function Header() {
                   </IconButton>
                 </>
               ) : isAuthenticated ? (
-                <IconButton label={t('nav.signOut')} onClick={handleSignOut}>
-                  <LogOut className="h-5 w-5" strokeWidth={1.75} />
-                </IconButton>
+                <>
+                  {canCart && (
+                    <IconLink href="/cart" label={t('nav.cart')} badge={itemCount}>
+                      <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
+                    </IconLink>
+                  )}
+                  <IconButton label={t('nav.signOut')} onClick={handleSignOut}>
+                    <LogOut className="h-5 w-5" strokeWidth={1.75} />
+                  </IconButton>
+                </>
               ) : (
                 <>
                   <IconLink href="/login" label={t('nav.signIn')}>
@@ -171,13 +224,77 @@ export function Header() {
         </div>
       </div>
 
-      <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} title={t('header.menu')} side="right">
+      <Drawer
+        open={menuOpen}
+        onClose={() => {
+          setMenuOpen(false);
+          setMobileRoleStep('roles');
+        }}
+        title={t('header.menu')}
+        side="right"
+      >
         <nav className="flex flex-col gap-1" aria-label={t('header.siteMenu')}>
           {!isResolved ? (
             <p className="px-3 py-2 text-sm text-muted-subtle">{t('common.loading')}</p>
           ) : isAuthenticated && role ? (
             <>
-              {role && (
+              {canSwitchRole ? (
+                <div className="mb-3 border-b border-subtle pb-3">
+                  <p className="mb-2 px-3 text-xs text-muted-subtle">{t('assumeRole.title')}</p>
+                  {mobileRoleStep === 'roles' ? (
+                    USER_ROLES.map((r) => {
+                      const current =
+                        (r === 'super_admin' && !isAssumingRole) ||
+                        (r !== 'super_admin' && r === role);
+                      return (
+                        <button
+                          key={r}
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void onMobileSelectRole(r)}
+                          className={`block w-full rounded-inner px-3 py-2.5 text-left text-sm ${
+                            current
+                              ? 'bg-[var(--color-overlay-pressed)] font-medium text-primary'
+                              : 'text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary'
+                          }`}
+                        >
+                          {roleLabel(t, r)}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="mb-1 block w-full px-3 py-1.5 text-left text-xs text-muted-subtle"
+                        onClick={() => setMobileRoleStep('roles')}
+                      >
+                        ← {t('assumeRole.roleLabel')}
+                      </button>
+                      {merchants.length === 0 ? (
+                        <p className="px-3 py-2 text-sm text-muted-subtle">
+                          {t('assumeRole.merchantRequired')}
+                        </p>
+                      ) : (
+                        merchants.map((m) => (
+                          <button
+                            key={m._id}
+                            type="button"
+                            disabled={busy}
+                            onClick={() => void switchRole('merchant', m._id)}
+                            className="block w-full rounded-inner px-3 py-2.5 text-left text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
+                          >
+                            {m.name}
+                          </button>
+                        ))
+                      )}
+                    </>
+                  )}
+                  {roleError && (
+                    <p className="mt-2 px-3 text-xs text-error">{roleError}</p>
+                  )}
+                </div>
+              ) : (
                 <p className="mb-2 px-3 text-xs text-muted-subtle">{roleLabel(t, role)}</p>
               )}
               <DrawerNavItem

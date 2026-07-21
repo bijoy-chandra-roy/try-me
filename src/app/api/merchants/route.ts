@@ -1,14 +1,19 @@
 import { ensureDbConnection } from '@/server/db/connection';
 import { merchantService } from '@/server/features/merchants/merchant.service';
 import { userRepository } from '@/server/features/auth/user.repository';
-import { requirePermission, requireAuth } from '@/server/lib/auth-guard';
+import { requireAuth } from '@/server/lib/auth-guard';
 import { AppError } from '@/server/lib/errors';
 import { jsonError, jsonSuccess } from '@/server/lib/api-response';
 import { hasPermission } from '@/shared/auth/permissions';
 
 export async function GET() {
   try {
-    const user = await requirePermission('manage_merchants');
+    const user = await requireAuth();
+    const canList =
+      hasPermission(user.role, 'manage_merchants') || user.realRole === 'super_admin';
+    if (!canList) {
+      throw new AppError('Forbidden', 403);
+    }
     await ensureDbConnection();
     const merchants = await merchantService.getMerchants();
     return jsonSuccess(merchants);

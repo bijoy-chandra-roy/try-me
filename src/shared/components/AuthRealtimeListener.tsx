@@ -7,6 +7,7 @@ import {
   reportAuthConnectivity,
 } from '@/shared/hooks/useAuth';
 import { signOutAndClearPreferences } from '@/shared/lib/auth-actions';
+import { refreshSession } from '@/shared/lib/assume-role';
 
 const BASE_RETRY_MS = 1_000;
 const MAX_RETRY_MS = 30_000;
@@ -49,7 +50,7 @@ export function AuthRealtimeListener() {
 
       es.addEventListener('user.updated', () => {
         reportAuthConnectivity(true);
-        void update();
+        void refreshSession(update);
       });
 
       es.addEventListener('user.revoked', () => {
@@ -78,7 +79,7 @@ export function AuthRealtimeListener() {
       if (document.visibilityState === 'visible') {
         reportAuthConnectivity(navigator.onLine);
         if (navigator.onLine) {
-          void update();
+          void refreshSession(update);
           if (!esRef.current || esRef.current.readyState === EventSource.CLOSED) {
             connect();
           }
@@ -89,7 +90,7 @@ export function AuthRealtimeListener() {
     function onOnline() {
       reportAuthConnectivity(true);
       retryRef.current = BASE_RETRY_MS;
-      void update();
+      void refreshSession(update);
       connect();
     }
 

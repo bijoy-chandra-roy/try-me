@@ -24,6 +24,7 @@ import { IconButton } from '@/shared/components/IconButton';
 import { IconLink } from '@/shared/components/IconLink';
 import { Drawer } from '@/shared/components/Drawer';
 import { DrawerNavItem } from '@/shared/components/DrawerNavItem';
+import { RoleStatusChip } from '@/shared/components/RoleStatusChip';
 import { getNavIcon } from '@/shared/ui/nav-icons';
 import {
   confirmSignOut,
@@ -96,7 +97,7 @@ export function DashboardShell({
   description?: string;
   children: React.ReactNode;
 }) {
-  const { user, role, isResolved } = useAuth();
+  const { user, role, isResolved, realRole } = useAuth();
   const t = useT();
   const navItems = role && isResolved ? getDashboardNavItems(role) : [];
   const isActive = useDashboardNavActive();
@@ -129,9 +130,15 @@ export function DashboardShell({
                 <>
                   <p className="mt-0.5 truncate font-medium text-primary">{user?.name}</p>
                   {role && (
-                    <span className="chip-category mt-1.5 inline-block">
-                      {t(roleLabelKey(role))}
-                    </span>
+                    <div className="mt-1.5">
+                      {realRole === 'super_admin' ? (
+                        <RoleStatusChip />
+                      ) : (
+                        <span className="chip-category inline-block">
+                          {t(roleLabelKey(role))}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </>
               ) : (
@@ -294,9 +301,15 @@ export function DashboardShell({
             <>
               <p className="font-medium text-primary">{user?.name}</p>
               {role && (
-                <span className="chip-category mt-2 inline-block">
-                  {t(roleLabelKey(role))}
-                </span>
+                <div className="mt-2">
+                  {realRole === 'super_admin' ? (
+                    <RoleStatusChip />
+                  ) : (
+                    <span className="chip-category inline-block">
+                      {t(roleLabelKey(role))}
+                    </span>
+                  )}
+                </div>
               )}
             </>
           ) : (

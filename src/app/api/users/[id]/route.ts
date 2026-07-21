@@ -57,8 +57,33 @@ export async function PATCH(
 
     const body = await request.json();
     const isSelf = currentUser.id === id;
+    const hasRoleChange = body.role && isUserRole(body.role);
+    const hasStatusChange = body.status === 'active' || body.status === 'inactive';
 
     if (isSelf) {
+      if (hasRoleChange) {
+        await requirePermission('assign_roles');
+        const updated = await authService.updateUserRole(currentUser.role, id, {
+          role: body.role,
+          ...(body.name ? { name: body.name } : {}),
+        });
+        if (!updated) throw new AppError('User not found', 404);
+
+        if (body.password) {
+          await authService.updateProfile(id, { password: body.password });
+        }
+
+        publishAuthEvent({
+          userId: id,
+          type: 'user.updated',
+          name: updated.name,
+          role: updated.role,
+          status: updated.status,
+          merchantId: updated.merchantId ?? null,
+        });
+        return jsonSuccess(updated);
+      }
+
       if (!hasPermission(currentUser.role, 'manage_own_profile')) {
         throw new AppError('Forbidden', 403);
       }
@@ -86,9 +111,6 @@ export async function PATCH(
 
     if (body.name) data.name = body.name;
     if (body.merchantId !== undefined) data.merchantId = body.merchantId;
-
-    const hasRoleChange = body.role && isUserRole(body.role);
-    const hasStatusChange = body.status === 'active' || body.status === 'inactive';
 
     if (hasRoleChange) {
       await requirePermission('assign_roles');

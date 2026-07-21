@@ -416,4 +416,18 @@ export const en = {
 
   'dashboard.superAdmin.title': 'Super Admin Dashboard',
   'dashboard.superAdmin.description': 'Full system control, role assignment, and configuration',
+
+  // Assume role (super admin only)
+  'assumeRole.title': 'Switch role',
+  'assumeRole.description':
+    'Temporarily use another role\'s dashboards and permissions. Your account stays super admin.',
+  'assumeRole.roleLabel': 'Role',
+  'assumeRole.merchantLabel': 'Merchant store',
+  'assumeRole.merchantPlaceholder': 'Select a merchant',
+  'assumeRole.merchantRequired': 'Select a merchant store to view as merchant.',
+  'assumeRole.switch': 'Switch role',
+  'assumeRole.switching': 'Switching…',
+  'assumeRole.failed': 'Could not switch role',
+  'assumeRole.actingAs': 'Acting as {role}',
+  'assumeRole.exit': 'Back to Super Admin',
 } as const;

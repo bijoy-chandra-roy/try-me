@@ -69,11 +69,16 @@ export default function SuperAdminDashboardPage() {
 
   async function changeRole(userId: string, role: UserRole) {
     try {
-      await apiClient(`/users/${userId}`, {
+      const updated = await apiClient<User>(`/users/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role }),
       });
+      if (updated.role !== role) {
+        setMessage('Role update failed');
+        await loadAll();
+        return;
+      }
       setMessage(`Role updated to ${ROLE_LABELS[role]}`);
       await loadAll();
     } catch (err) {
