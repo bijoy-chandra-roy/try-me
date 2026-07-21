@@ -2,6 +2,8 @@
 
 Full-stack e-commerce web application with **Virtual Try-On (VTO)** as the core feature. Built following the Spiral Model (Evolutionary Prototyping).
 
+**Live Site:** [https://try-me-rho.vercel.app/](https://try-me-rho.vercel.app/)
+
 ## Tech Stack
 
 | Layer | Technology |
