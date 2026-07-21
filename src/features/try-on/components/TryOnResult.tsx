@@ -2,6 +2,7 @@
 
 import { Tooltip } from '@/shared/components/Tooltip';
 import { useT } from '@/shared/hooks/useT';
+import { TRY_ON_MEDIA_FRAME_CLASS } from '@/features/try-on/constants';
 import type { TryOnResult } from '@/shared/types';
 
 interface TryOnResultProps {
@@ -13,12 +14,12 @@ export function TryOnResultView({ result }: TryOnResultProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-element ring-1 ring-[var(--color-border)]">
+      <div className={TRY_ON_MEDIA_FRAME_CLASS}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={result.compositeImageUrl}
           alt={t('tryOn.resultAlt', { productName: result.productName })}
-          className="mx-auto max-h-96 w-full object-contain"
+          className="max-h-full max-w-full object-contain"
         />
       </div>
 

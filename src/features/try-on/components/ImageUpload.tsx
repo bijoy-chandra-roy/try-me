@@ -5,6 +5,7 @@ import { Camera, ImagePlus, RotateCcw } from 'lucide-react';
 import { Button } from '@/shared/components/Button';
 import { Tooltip } from '@/shared/components/Tooltip';
 import { useT } from '@/shared/hooks/useT';
+import { TRY_ON_MEDIA_FRAME_CLASS } from '@/features/try-on/constants';
 
 interface ImageUploadProps {
   onSelect: (file: File) => void;
@@ -157,7 +158,7 @@ export function ImageUpload({ onSelect, disabled }: ImageUploadProps) {
   if (mode === 'camera') {
     return (
       <div className="space-y-3">
-        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-black ring-1 ring-[var(--color-border)] sm:aspect-video">
+        <div className={`${TRY_ON_MEDIA_FRAME_CLASS} bg-black`}>
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video
             ref={videoRef}
@@ -201,12 +202,12 @@ export function ImageUpload({ onSelect, disabled }: ImageUploadProps) {
   if (mode === 'preview' && preview) {
     return (
       <div className="space-y-3">
-        <div className="relative flex min-h-[200px] w-full items-center justify-center overflow-hidden rounded-xl bg-[var(--color-background-surface)] ring-1 ring-[var(--color-border)]">
+        <div className={`${TRY_ON_MEDIA_FRAME_CLASS} bg-[var(--color-background-surface)]`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={preview}
             alt={t('tryOn.previewAlt')}
-            className="max-h-56 w-full object-contain p-2"
+            className="max-h-full max-w-full object-contain p-2"
           />
         </div>
         <Button
@@ -241,7 +242,7 @@ export function ImageUpload({ onSelect, disabled }: ImageUploadProps) {
           }}
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
-          className={`relative flex min-h-[160px] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors ${
+          className={`${TRY_ON_MEDIA_FRAME_CLASS} flex-col cursor-pointer border-2 border-dashed bg-[var(--color-background-surface)] p-6 transition-colors ${
             dragOver
               ? 'border-[var(--color-accent-fill)] bg-[var(--color-overlay-hover)]'
               : 'border-[var(--color-border-emphasized)] bg-[var(--color-background-surface)]'

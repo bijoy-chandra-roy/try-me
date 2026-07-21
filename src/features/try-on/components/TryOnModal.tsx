@@ -53,21 +53,22 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-overlay flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-overlay overflow-y-auto overscroll-contain">
       <div
-        className="absolute inset-0 backdrop-blur-sm"
+        className="fixed inset-0 backdrop-blur-sm"
         style={{ background: 'var(--color-overlay)' }}
         onClick={loading ? undefined : handleClose}
         role="presentation"
       />
 
-      <GlassCard
-        className="relative z-10 flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col shadow-2xl"
-        elastic={false}
-        overflow="auto"
-      >
-        <div className="p-6">
-          <div className="mb-5 flex shrink-0 items-start justify-between">
+      <div className="relative flex min-h-full items-center justify-center p-4">
+        <GlassCard
+          className="my-auto flex max-h-[min(calc(100dvh-2rem),calc(100%-2rem))] w-full max-w-lg flex-col shadow-2xl"
+          elastic={false}
+          overflow="auto"
+        >
+          <div className="p-6">
+            <div className="mb-5 flex shrink-0 items-start justify-between">
             <div className="min-w-0 pr-4">
               <h2 className="font-serif text-xl font-semibold text-primary">
                 {t('tryOn.modalTitle')}
@@ -169,8 +170,9 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               {t('tryOn.tryAnother')}
             </button>
           )}
-        </div>
-      </GlassCard>
+          </div>
+        </GlassCard>
+      </div>
     </div>
   );
 }
