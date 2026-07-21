@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { useTryOn } from '@/features/try-on/hooks/useTryOn';
 import { ImageUpload } from '@/features/try-on/components/ImageUpload';
@@ -17,6 +18,7 @@ interface TryOnModalProps {
 
 export function TryOnModal({ product, onClose }: TryOnModalProps) {
   const t = useT();
+  const [mounted, setMounted] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const {
     tryOn,
@@ -30,6 +32,10 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
   } = useTryOn();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!product) return;
 
     const previousOverflow = document.body.style.overflow;
@@ -39,7 +45,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
     };
   }, [product]);
 
-  if (!product) return null;
+  if (!product || !mounted) return null;
 
   async function handleSubmit() {
     if (!selectedFile || !product) return;
@@ -52,25 +58,31 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
     onClose();
   }
 
-  return (
-    <div className="fixed inset-0 z-overlay overflow-y-auto overscroll-contain">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-overlay flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="try-on-modal-title"
+    >
       <div
-        className="fixed inset-0 backdrop-blur-sm"
+        className="absolute inset-0 backdrop-blur-sm"
         style={{ background: 'var(--color-overlay)' }}
         onClick={loading ? undefined : handleClose}
         role="presentation"
       />
 
-      <div className="relative flex min-h-full items-center justify-center p-4">
-        <GlassCard
-          className="my-auto flex max-h-[min(calc(100dvh-2rem),calc(100%-2rem))] w-full max-w-lg flex-col shadow-2xl"
-          elastic={false}
-          overflow="auto"
-        >
-          <div className="p-6">
-            <div className="mb-5 flex shrink-0 items-start justify-between">
+      <GlassCard
+        className="relative z-10 w-full max-w-lg shadow-2xl"
+        elastic={false}
+      >
+        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-6 [-webkit-overflow-scrolling:touch]">
+          <div className="mb-5 flex shrink-0 items-start justify-between">
             <div className="min-w-0 pr-4">
-              <h2 className="font-serif text-xl font-semibold text-primary">
+              <h2
+                id="try-on-modal-title"
+                className="font-serif text-xl font-semibold text-primary"
+              >
                 {t('tryOn.modalTitle')}
               </h2>
               <p className="mt-1 truncate text-sm text-muted">{product.name}</p>
@@ -170,9 +182,9 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               {t('tryOn.tryAnother')}
             </button>
           )}
-          </div>
-        </GlassCard>
-      </div>
-    </div>
+        </div>
+      </GlassCard>
+    </div>,
+    document.body
   );
 }
