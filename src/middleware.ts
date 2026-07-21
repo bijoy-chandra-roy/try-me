@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 import { canAccessDashboardPath } from '@/shared/auth/permissions';
 import { getDashboardPath, isUserRole } from '@/shared/auth/roles';
+import { getMiddlewareAuthToken } from '@/shared/lib/middleware-auth';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-  });
+  const token = await getMiddlewareAuthToken(request);
 
   if (!token?.role || !isUserRole(String(token.role))) {
     const loginUrl = new URL('/login', request.url);

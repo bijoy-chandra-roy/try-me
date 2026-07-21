@@ -2,12 +2,6 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { isUserRole, type UserRole } from '@/shared/auth/roles';
-import { getSiteUrl } from '@/shared/lib/site-url';
-
-// Keep Auth.js aligned with the single site URL env when AUTH_URL is unset.
-if (!process.env.AUTH_URL) {
-  process.env.AUTH_URL = getSiteUrl();
-}
 
 export type AssumeRoleUpdate = {
   assumeRole?: UserRole | null;
@@ -169,8 +163,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET,
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: process.env.AUTH_GOOGLE_ID?.trim(),
+      clientSecret: process.env.AUTH_GOOGLE_SECRET?.trim(),
     }),
     Credentials({
       name: 'credentials',
