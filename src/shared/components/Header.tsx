@@ -5,7 +5,6 @@ import Link from '@/shared/components/Link';
 import {
   LayoutDashboard,
   LogIn,
-  LogOut,
   Menu,
   Settings,
   ShoppingCart,
@@ -24,13 +23,10 @@ import { useT } from '@/shared/hooks/useT';
 import { useCart } from '@/features/cart/hooks/useCart';
 import type { MessageKey } from '@/shared/i18n';
 import {
-  confirmSignOut,
-  signOutAndClearPreferences,
-} from '@/shared/lib/auth-actions';
-import {
   assumeRole,
   dashboardPathAfterAssume,
 } from '@/shared/lib/assume-role';
+import { merchantsForAssumeRole } from '@/shared/lib/merchants-for-assume';
 import { apiClient } from '@/shared/lib/api-client';
 import type { Merchant } from '@/shared/types';
 import { useRouter } from 'next/navigation';
@@ -100,11 +96,6 @@ export function Header() {
         ? roleLabel(t, role)
         : undefined;
 
-  function handleSignOut() {
-    if (!confirmSignOut(t('settings.account.signOutConfirm'))) return;
-    void signOutAndClearPreferences('/');
-  }
-
   async function switchRole(next: UserRole, merchantId?: string | null) {
     if (busy) return;
     setBusy(true);
@@ -128,9 +119,9 @@ export function Header() {
       if (merchants.length === 0) {
         try {
           const list = await apiClient<Merchant[]>('/merchants');
-          setMerchants(list.filter((m) => m.status === 'approved'));
-        } catch {
-          /* ignore — empty list shows below */
+          setMerchants(merchantsForAssumeRole(list));
+        } catch (err) {
+          setRoleError(err instanceof Error ? err.message : t('assumeRole.failed'));
         }
       }
       return;
@@ -158,7 +149,7 @@ export function Header() {
         {/* Desktop / tablet icon actions */}
         <div className="hidden items-center gap-1 sm:flex">
           {!isResolved ? (
-            <AuthActionPlaceholder count={3} />
+            <AuthActionPlaceholder count={2} />
           ) : (
             <>
               {isAuthenticated && role ? (
@@ -178,9 +169,6 @@ export function Header() {
                   <IconLink href="/settings/profile" label={t('nav.settings')}>
                     <Settings className="h-5 w-5" strokeWidth={1.75} />
                   </IconLink>
-                  <IconButton label={t('nav.signOut')} onClick={handleSignOut}>
-                    <LogOut className="h-5 w-5" strokeWidth={1.75} />
-                  </IconButton>
                 </>
               ) : isAuthenticated ? (
                 <>
@@ -189,9 +177,6 @@ export function Header() {
                       <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
                     </IconLink>
                   )}
-                  <IconButton label={t('nav.signOut')} onClick={handleSignOut}>
-                    <LogOut className="h-5 w-5" strokeWidth={1.75} />
-                  </IconButton>
                 </>
               ) : (
                 <>
@@ -318,30 +303,14 @@ export function Header() {
                   onClick={() => setMenuOpen(false)}
                 />
               )}
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  handleSignOut();
-                }}
-                className="mt-2 flex items-center gap-3 rounded-inner px-3 py-2.5 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
-              >
-                <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-                {t('nav.signOut')}
-              </button>
             </>
           ) : isAuthenticated ? (
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                handleSignOut();
-              }}
-              className="flex items-center gap-3 rounded-inner px-3 py-2.5 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
-            >
-              <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-              {t('nav.signOut')}
-            </button>
+            <DrawerNavItem
+              href="/settings/account"
+              label={t('nav.settings')}
+              icon={Settings}
+              onClick={() => setMenuOpen(false)}
+            />
           ) : (
             <>
               <DrawerNavItem

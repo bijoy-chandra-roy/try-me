@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from '@/shared/components/Link';
 import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
+import { OverflowText } from '@/shared/components/OverflowText';
 import { Popover } from '@/shared/components/Popover';
 import { Tooltip } from '@/shared/components/Tooltip';
 import { ShoppingCart, Sparkles } from 'lucide-react';
@@ -106,8 +107,8 @@ export function ProductCard({
       : 'gap-2.5 p-3 sm:gap-3 sm:p-5';
 
   const titleClass = isCompact
-    ? 'truncate font-serif text-sm font-semibold leading-snug text-primary sm:text-base'
-    : 'truncate font-serif text-base font-semibold leading-snug text-primary sm:text-lg';
+    ? 'font-serif text-sm font-semibold leading-snug text-primary sm:text-base'
+    : 'font-serif text-base font-semibold leading-snug text-primary sm:text-lg';
 
   return (
     <GlassCard
@@ -149,7 +150,9 @@ export function ProductCard({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <span className="chip-category mb-1">{product.category}</span>
-            <h3 className={titleClass}>{product.name}</h3>
+            <OverflowText as="h3" className={titleClass} title={product.name}>
+              {product.name}
+            </OverflowText>
             {!isCompact && (
               <p
                 className={`mt-1 text-sm text-muted ${

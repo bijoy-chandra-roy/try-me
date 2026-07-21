@@ -10,6 +10,7 @@ import { StatusChip } from '@/shared/components/StatusChip';
 import { Popover } from '@/shared/components/Popover';
 import { RoleGate } from '@/shared/components/RoleGate';
 import { Select } from '@/shared/components/Select';
+import { OverflowText } from '@/shared/components/OverflowText';
 import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS, USER_ROLES } from '@/shared/auth/roles';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
@@ -216,10 +217,12 @@ export default function AdminDashboardPage() {
             {users.map((user) => (
               <ListRow key={user._id} dimmed={user.status === 'inactive'}>
                 <div className="min-w-0">
-                  <p className="truncate font-medium">{user.name}</p>
-                  <p className="truncate text-sm text-muted-subtle">
+                  <OverflowText className="font-medium" title={user.name}>
+                    {user.name}
+                  </OverflowText>
+                  <OverflowText className="text-sm text-muted-subtle">
                     {user.email} · {ROLE_LABELS[user.role]}
-                  </p>
+                  </OverflowText>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusChip status={user.status} />
@@ -275,10 +278,12 @@ export default function AdminDashboardPage() {
               return (
                 <ListRow key={merchant._id}>
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{merchant.name}</p>
-                    <p className="truncate text-sm text-muted-subtle">
+                    <OverflowText className="font-medium" title={merchant.name}>
+                      {merchant.name}
+                    </OverflowText>
+                    <OverflowText className="text-sm text-muted-subtle">
                       {merchant.description || 'No description'}
-                    </p>
+                    </OverflowText>
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusChip status={merchant.status} />

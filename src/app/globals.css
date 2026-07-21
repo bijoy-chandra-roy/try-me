@@ -719,6 +719,24 @@
     color var(--duration-fast) var(--ease-standard);
 }
 
+@keyframes overflow-text-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-1 * var(--overflow-distance, 0px)));
+  }
+}
+
+.overflow-text-marquee {
+  animation: overflow-text-marquee var(--overflow-duration, 8s) linear infinite;
+}
+
+html[data-reduce-motion='true'] .overflow-text-marquee {
+  animation: none !important;
+  transform: none !important;
+}
+
 html[data-reduce-motion='true'] .motion-fade-in,
 html[data-reduce-motion='true'] .motion-card-hover,
 html[data-reduce-motion='true'] .motion-card-hover:hover {
@@ -738,6 +756,11 @@ html[data-reduce-motion='true'] .motion-card-hover:hover {
   .motion-card-hover:hover {
     animation: none !important;
     transition: none !important;
+    transform: none !important;
+  }
+
+  .overflow-text-marquee {
+    animation: none !important;
     transform: none !important;
   }
 }

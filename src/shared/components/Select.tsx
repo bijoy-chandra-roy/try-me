@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useFloatingPosition } from '@/shared/hooks/useFloatingPosition';
 import { ScrollArea } from '@/shared/components/ScrollArea';
+import { OverflowText } from '@/shared/components/OverflowText';
 
 export interface SelectOption<T extends string = string> {
   value: T;
@@ -88,7 +89,7 @@ export function Select<T extends string = string>({
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={`input-glass inline-flex w-full items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:opacity-40 ${className}`}
       >
-        <span className="min-w-0 truncate">{selected?.label ?? 'Select…'}</span>
+        <OverflowText className="flex-1">{selected?.label ?? 'Select…'}</OverflowText>
         <svg
           className={`h-3.5 w-3.5 shrink-0 text-muted-subtle transition-transform duration-200 ${
             open ? 'rotate-180' : ''

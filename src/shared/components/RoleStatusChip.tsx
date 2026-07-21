@@ -13,6 +13,7 @@ import {
   dashboardPathAfterAssume,
 } from '@/shared/lib/assume-role';
 import { apiClient } from '@/shared/lib/api-client';
+import { merchantsForAssumeRole } from '@/shared/lib/merchants-for-assume';
 import type { Merchant } from '@/shared/types';
 import type { MessageKey } from '@/shared/i18n';
 import { ScrollArea } from '@/shared/components/ScrollArea';
@@ -105,7 +106,7 @@ export function RoleStatusChip({
     setError('');
     try {
       const list = await apiClient<Merchant[]>('/merchants');
-      setMerchants(list.filter((m) => m.status === 'approved'));
+      setMerchants(merchantsForAssumeRole(list));
     } catch {
       setError(t('assumeRole.failed'));
     } finally {

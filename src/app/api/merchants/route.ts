@@ -10,7 +10,9 @@ export async function GET() {
   try {
     const user = await requireAuth();
     const canList =
-      hasPermission(user.role, 'manage_merchants') || user.realRole === 'super_admin';
+      hasPermission(user.realRole, 'manage_merchants') ||
+      hasPermission(user.role, 'manage_merchants') ||
+      Boolean(user.actingAsRole);
     if (!canList) {
       throw new AppError('Forbidden', 403);
     }

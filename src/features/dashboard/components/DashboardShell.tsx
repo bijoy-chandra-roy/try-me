@@ -13,7 +13,6 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Home,
-  LogOut,
   Menu,
 } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -25,11 +24,8 @@ import { IconLink } from '@/shared/components/IconLink';
 import { Drawer } from '@/shared/components/Drawer';
 import { DrawerNavItem } from '@/shared/components/DrawerNavItem';
 import { RoleStatusChip } from '@/shared/components/RoleStatusChip';
+import { OverflowText } from '@/shared/components/OverflowText';
 import { getNavIcon } from '@/shared/ui/nav-icons';
-import {
-  confirmSignOut,
-  signOutAndClearPreferences,
-} from '@/shared/lib/auth-actions';
 import { DASHBOARD_NAV_COLLAPSE_KEY } from '@/shared/constants';
 import type { MessageKey } from '@/shared/i18n';
 
@@ -104,11 +100,6 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const { collapsed, toggle } = useCollapsedNav();
 
-  function handleSignOut() {
-    if (!confirmSignOut(t('settings.account.signOutConfirm'))) return;
-    void signOutAndClearPreferences('/');
-  }
-
   return (
     <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-content items-start gap-4 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8">
       <aside
@@ -128,7 +119,9 @@ export function DashboardShell({
               </p>
               {isResolved ? (
                 <>
-                  <p className="mt-0.5 truncate font-medium text-primary">{user?.name}</p>
+                  <OverflowText className="mt-0.5 font-medium text-primary" title={user?.name}>
+                    {user?.name}
+                  </OverflowText>
                   {role && (
                     <div className="mt-1.5">
                       {realRole === 'super_admin' ? (
@@ -217,7 +210,7 @@ export function DashboardShell({
                 }`}
               >
                 <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-                <span className="truncate">{label}</span>
+                <OverflowText className="flex-1">{label}</OverflowText>
               </Link>
             );
           })}
@@ -241,27 +234,6 @@ export function DashboardShell({
             </Link>
           )}
         </nav>
-
-        <div className={`mt-3 border-t border-subtle pt-3 ${collapsed ? '' : 'w-full'}`}>
-          {collapsed ? (
-            <IconButton
-              label={t('nav.signOut')}
-              tooltipSide="right"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-5 w-5" strokeWidth={1.75} />
-            </IconButton>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="flex w-full items-center gap-3 rounded-inner px-3 py-2 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
-            >
-              <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-              {t('nav.signOut')}
-            </button>
-          )}
-        </div>
       </aside>
 
       <div className="min-w-0 flex-1">
@@ -337,17 +309,6 @@ export function DashboardShell({
             onClick={() => setMobileOpen(false)}
           />
         </nav>
-        <button
-          type="button"
-          onClick={() => {
-            setMobileOpen(false);
-            handleSignOut();
-          }}
-          className="mt-4 flex w-full items-center gap-3 rounded-inner px-3 py-2.5 text-sm text-muted hover:bg-[var(--color-overlay-hover)] hover:text-primary"
-        >
-          <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-          {t('nav.signOut')}
-        </button>
       </Drawer>
     </div>
   );

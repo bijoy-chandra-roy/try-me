@@ -12,6 +12,7 @@ import { apiClient } from '@/shared/lib/api-client';
 import { ROLE_LABELS } from '@/shared/auth/roles';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { Skeleton, StatCardsSkeleton } from '@/shared/components/Skeleton';
+import { OverflowText } from '@/shared/components/OverflowText';
 import { useT } from '@/shared/hooks/useT';
 import type { DashboardStats, TryOnHistory, User } from '@/shared/types';
 
@@ -137,8 +138,12 @@ export default function SupportDashboardPage() {
                     onClick={() => viewUser(user._id)}
                     className="min-w-0 flex-1 text-left"
                   >
-                    <p className="truncate font-medium">{user.name}</p>
-                    <p className="truncate text-sm text-muted-subtle">{user.email}</p>
+                    <OverflowText className="font-medium" title={user.name}>
+                      {user.name}
+                    </OverflowText>
+                    <OverflowText className="text-sm text-muted-subtle" title={user.email}>
+                      {user.email}
+                    </OverflowText>
                   </button>
                   <span className="chip-category">{ROLE_LABELS[user.role]}</span>
                 </ListRow>

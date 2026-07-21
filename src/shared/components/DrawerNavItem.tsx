@@ -2,6 +2,7 @@
 
 import Link from '@/shared/components/Link';
 import type { LucideIcon } from 'lucide-react';
+import { OverflowText } from '@/shared/components/OverflowText';
 
 interface DrawerNavItemProps {
   href: string;
@@ -33,7 +34,7 @@ export function DrawerNavItem({
       }`}
     >
       <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-      <span className="min-w-0 flex-1 truncate">{label}</span>
+      <OverflowText className="flex-1">{label}</OverflowText>
       {typeof badge === 'number' && badge > 0 && (
         <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-accent-fill)] px-1.5 text-xs text-[var(--color-on-accent)]">
           {badge > 99 ? '99+' : badge}

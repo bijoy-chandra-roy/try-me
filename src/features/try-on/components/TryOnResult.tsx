@@ -1,6 +1,7 @@
 'use client';
 
 import { Tooltip } from '@/shared/components/Tooltip';
+import { OverflowText } from '@/shared/components/OverflowText';
 import { useT } from '@/shared/hooks/useT';
 import { TRY_ON_MEDIA_FRAME_CLASS } from '@/features/try-on/constants';
 import type { TryOnResult } from '@/shared/types';
@@ -25,14 +26,14 @@ export function TryOnResultView({ result }: TryOnResultProps) {
 
       <div className="flex items-center justify-between rounded-inner bg-[var(--color-overlay-hover)] px-4 py-3">
         <div className="min-w-0 pr-3">
-          <p className="truncate text-sm font-medium text-primary">
+          <OverflowText className="text-sm font-medium text-primary" title={result.productName}>
             {result.productName}
-          </p>
-          <p className="truncate text-xs text-muted-subtle">
+          </OverflowText>
+          <OverflowText className="text-xs text-muted-subtle">
             {result.fromFallback
               ? t('tryOn.fallbackStatus')
               : t('tryOn.liveStatus')}
-          </p>
+          </OverflowText>
         </div>
         <Tooltip
           content={

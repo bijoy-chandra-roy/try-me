@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from '@/shared/components/Link';
 import { Button } from '@/shared/components/Button';
 import { GlassCard } from '@/shared/components/GlassCard';
+import { OverflowText } from '@/shared/components/OverflowText';
 import {
   cartSubtotal,
   clearCart,
@@ -104,7 +105,13 @@ export default function CartPage() {
                 <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="truncate font-serif text-lg font-semibold">{item.name}</h2>
+                <OverflowText
+                  as="h2"
+                  className="font-serif text-lg font-semibold"
+                  title={item.name}
+                >
+                  {item.name}
+                </OverflowText>
                 {item.size && (
                   <p className="text-sm text-muted">{t('cart.size', { size: item.size })}</p>
                 )}

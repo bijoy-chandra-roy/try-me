@@ -14,6 +14,7 @@ import { Checkbox } from '@/shared/components/Checkbox';
 import { ImageUrlField } from '@/shared/components/ImageUrlField';
 import { TagListField } from '@/shared/components/TagListField';
 import { CustomFieldsEditor } from '@/shared/components/CustomFieldsEditor';
+import { OverflowText } from '@/shared/components/OverflowText';
 import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useT } from '@/shared/hooks/useT';
@@ -322,12 +323,14 @@ export default function MerchantDashboardPage() {
                       className="h-12 w-12 rounded-inner object-cover"
                     />
                     <div className="min-w-0">
-                      <p className="truncate font-medium">{product.name}</p>
-                      <p className="truncate text-sm text-muted-subtle">
+                      <OverflowText className="font-medium" title={product.name}>
+                        {product.name}
+                      </OverflowText>
+                      <OverflowText className="text-sm text-muted-subtle">
                         ${product.price.toFixed(2)} · qty {product.stockQuantity ?? 0} ·{' '}
                         {product.inStock ? 'In stock' : 'Out of stock'} ·{' '}
                         {stats.perProduct[product._id] ?? 0} try-ons
-                      </p>
+                      </OverflowText>
                     </div>
                   </div>
                   <Popover

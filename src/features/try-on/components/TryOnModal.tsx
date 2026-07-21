@@ -9,6 +9,7 @@ import { TryOnResultView } from '@/features/try-on/components/TryOnResult';
 import { Button } from '@/shared/components/Button';
 import { Checkbox } from '@/shared/components/Checkbox';
 import { GlassCard } from '@/shared/components/GlassCard';
+import { OverflowText } from '@/shared/components/OverflowText';
 import { useT } from '@/shared/hooks/useT';
 import type { Product } from '@/shared/types';
 
@@ -88,7 +89,9 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               >
                 {t('tryOn.modalTitle')}
               </h2>
-              <p className="mt-1 truncate text-sm text-muted">{product.name}</p>
+              <OverflowText className="mt-1 text-sm text-muted" title={product.name}>
+                {product.name}
+              </OverflowText>
             </div>
             <button
               type="button"

@@ -11,6 +11,7 @@ export interface SessionUser {
   name: string;
   role: UserRole;
   realRole: UserRole;
+  actingAsRole?: UserRole | null;
   merchantId?: string | null;
   status?: 'active' | 'inactive';
 }
@@ -27,12 +28,18 @@ export async function getSessionUser(): Promise<SessionUser | null> {
       ? session.user.realRole
       : session.user.role;
 
+  const actingAsRole =
+    session.user.actingAsRole && isUserRole(session.user.actingAsRole)
+      ? session.user.actingAsRole
+      : null;
+
   return {
     id: session.user.id,
     email: session.user.email,
     name: session.user.name,
     role: session.user.role,
     realRole,
+    actingAsRole,
     merchantId: session.user.merchantId ?? null,
     status: session.user.status ?? 'active',
   };
