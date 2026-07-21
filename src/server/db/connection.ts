@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import type { MongoMemoryServer } from 'mongodb-memory-server';
-import { config } from '@/server/config';
+import { assertSafeProductionConfig, config } from '@/server/config';
 import { productRepository } from '@/server/features/products/product.repository';
 import { SEED_PRODUCTS } from '@/server/db/seed-data';
 import { seedUsersIfEmpty } from '@/server/db/seed-users';
@@ -26,6 +26,8 @@ async function seedIfEmpty() {
 }
 
 export async function connectDatabase() {
+  assertSafeProductionConfig();
+
   if (global.mongooseCache?.conn) {
     return global.mongooseCache.conn;
   }

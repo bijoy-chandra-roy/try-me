@@ -21,9 +21,14 @@ class AuthService {
   }
 
   async register(data: { email: string; password: string; name: string }) {
-    const existing = await userRepository.findByEmail(data.email);
+    const email = data.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new AppError('Invalid email address', 400);
+    }
+
+    const existing = await userRepository.findByEmail(email);
     if (existing) {
-      throw new AppError('Email already registered', 409);
+      throw new AppError('Unable to create account with these details', 409);
     }
 
     if (data.password.length < 8) {
@@ -32,9 +37,9 @@ class AuthService {
 
     const passwordHash = await this.hashPassword(data.password);
     return userRepository.create({
-      email: data.email,
+      email,
       passwordHash,
-      name: data.name,
+      name: data.name.trim(),
       role: 'customer',
     });
   }
@@ -139,7 +144,7 @@ class AuthService {
 
     const existing = await userRepository.findByEmail(data.email);
     if (existing) {
-      throw new AppError('Email already registered', 409);
+      throw new AppError('Unable to create account with these details', 409);
     }
 
     const passwordHash = await this.hashPassword(data.password);

@@ -58,6 +58,29 @@ function serializeOrder(order: OrderRecord) {
   };
 }
 
+/** Merchants need fulfillment location but not full customer contact details. */
+function redactShippingForMerchant(address: ShippingAddress): ShippingAddress {
+  return {
+    label: address.label,
+    fullName: address.fullName,
+    phone: '',
+    line1: address.line1,
+    line2: address.line2,
+    city: address.city,
+    state: address.state,
+    postalCode: address.postalCode,
+    country: address.country,
+  };
+}
+
+function serializeOrderForMerchant(order: OrderRecord, merchantId: string) {
+  return serializeOrder({
+    ...order,
+    shippingAddress: redactShippingForMerchant(order.shippingAddress),
+    items: order.items.filter((i) => i.merchantId === merchantId),
+  });
+}
+
 class OrderService {
   async checkout(
     user: SessionUser,
@@ -169,12 +192,7 @@ class OrderService {
 
     if (hasPermission(user.role, 'fulfill_orders') && user.merchantId) {
       const orders = await orderRepository.findByMerchant(user.merchantId);
-      return orders.map((order) =>
-        serializeOrder({
-          ...order,
-          items: order.items.filter((i) => i.merchantId === user.merchantId),
-        })
-      );
+      return orders.map((order) => serializeOrderForMerchant(order, user.merchantId!));
     }
 
     if (!hasPermission(user.role, 'view_own_orders')) {
@@ -194,10 +212,7 @@ class OrderService {
     if (hasPermission(user.role, 'fulfill_orders') && user.merchantId) {
       const hasItems = order.items.some((i) => i.merchantId === user.merchantId);
       if (!hasItems) throw new AppError('Order not found', 404);
-      return serializeOrder({
-        ...order,
-        items: order.items.filter((i) => i.merchantId === user.merchantId),
-      });
+      return serializeOrderForMerchant(order, user.merchantId);
     }
 
     if (order.userId !== user.id) throw new AppError('Order not found', 404);
@@ -312,7 +327,7 @@ class OrderService {
       }
 
       const updated = await orderRepository.update(id, patch);
-      return serializeOrder(updated!);
+      return serializeOrderForMerchant(updated!, merchantId);
     }
 
     throw new AppError('Forbidden', 403);

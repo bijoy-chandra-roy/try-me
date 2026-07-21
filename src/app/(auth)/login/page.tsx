@@ -9,13 +9,14 @@ import { Button } from '@/shared/components/Button';
 import { AuthOrDivider, GoogleSignInButton } from '@/shared/components/GoogleSignInButton';
 import { onLoginSuccessMarkPrefsPending } from '@/shared/hooks/usePreferences';
 import { useT } from '@/shared/hooks/useT';
+import { safeCallbackUrl } from '@/shared/lib/safe-callback-url';
 
 function LoginForm() {
   const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const callbackUrl = safeCallbackUrl(searchParams.get('callbackUrl'));
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

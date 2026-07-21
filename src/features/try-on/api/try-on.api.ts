@@ -9,6 +9,7 @@ export async function submitTryOn(
   const formData = new FormData();
   formData.append('userImage', userImage);
   formData.append('productId', productId);
+  formData.append('privacyConsent', 'true');
 
   return apiClientFormData<TryOnResult>('/try-on', formData, { signal });
 }

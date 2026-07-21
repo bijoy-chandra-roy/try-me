@@ -7,6 +7,7 @@ import { useTryOn } from '@/features/try-on/hooks/useTryOn';
 import { ImageUpload } from '@/features/try-on/components/ImageUpload';
 import { TryOnResultView } from '@/features/try-on/components/TryOnResult';
 import { Button } from '@/shared/components/Button';
+import { Checkbox } from '@/shared/components/Checkbox';
 import { GlassCard } from '@/shared/components/GlassCard';
 import { useT } from '@/shared/hooks/useT';
 import type { Product } from '@/shared/types';
@@ -20,6 +21,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
   const t = useT();
   const [mounted, setMounted] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [privacyConsent, setPrivacyConsent] = useState(false);
   const {
     tryOn,
     loading,
@@ -48,13 +50,14 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
   if (!product || !mounted) return null;
 
   async function handleSubmit() {
-    if (!selectedFile || !product) return;
+    if (!selectedFile || !product || !privacyConsent) return;
     await tryOn(selectedFile, product._id);
   }
 
   function handleClose() {
     reset();
     setSelectedFile(null);
+    setPrivacyConsent(false);
     onClose();
   }
 
@@ -122,6 +125,19 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
                 <p className="mt-3 text-sm font-medium text-error">{error}</p>
               )}
 
+              <div className="mt-4 rounded-lg bg-sand-100/60 p-3 dark:bg-olive-700/20">
+                <Checkbox
+                  checked={privacyConsent}
+                  onChange={setPrivacyConsent}
+                  disabled={loading}
+                  label={t('tryOn.privacyConsent')}
+                  className="items-start text-left"
+                />
+                <p className="mt-2 pl-7 text-xs text-muted-subtle">
+                  {t('tryOn.privacyConsentDetail')}
+                </p>
+              </div>
+
               {loading && awaitingDecision && (
                 <div className="mt-5 space-y-3 rounded-lg bg-sand-100/80 p-4 dark:bg-olive-700/30">
                   <p className="text-sm text-olive-700 dark:text-sand-100">
@@ -149,7 +165,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
 
               <Button
                 onClick={handleSubmit}
-                disabled={!selectedFile || loading}
+                disabled={!selectedFile || !privacyConsent || loading}
                 className="mt-5 w-full shrink-0 py-3"
               >
                 {loading ? (
@@ -176,6 +192,7 @@ export function TryOnModal({ product, onClose }: TryOnModalProps) {
               onClick={() => {
                 reset();
                 setSelectedFile(null);
+                setPrivacyConsent(false);
               }}
               className="mt-4 w-full shrink-0 btn-secondary btn-md"
             >

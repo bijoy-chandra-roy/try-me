@@ -142,13 +142,14 @@ All configuration lives in `.env.local`:
 | Variable | Description |
 |----------|-------------|
 | `MONGODB_URI` | MongoDB connection string |
-| `USE_IN_MEMORY_DB` | Use in-memory MongoDB with auto-seed (default `true`) |
+| `USE_IN_MEMORY_DB` | Use in-memory MongoDB with auto-seed (default `true` in `.env.example`). **Must be `false` in production** — the app refuses to start otherwise |
+| `TRUST_PROXY` | Set `true` on Vercel/reverse-proxy deploys so guest try-on rate limits use client IP headers |
 | `IMGBB_API_KEY` | ImgBB API key |
 | `HF_TOKEN` | Hugging Face token (better rate limits / ZeroGPU quota) |
 | `VTO_API_URL` | Hugging Face Gradio `/call/tryon` endpoint |
 | `VTO_TIMEOUT_MS` | Circuit breaker timeout before fallback (default 300000 = 5 min) |
 | `NEXT_PUBLIC_SITE_URL` | Public site origin (default `http://localhost:3000`). Set for deploy and **redeploy** after changing |
-| `AUTH_SECRET` | Auth.js session secret (required on Vercel) |
+| `AUTH_SECRET` | Auth.js session secret (**required in production**) |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth credentials (required for Google sign-in) |
 | `AUTH_URL` | Optional; leave unset on Vercel so Auth.js auto-detects the host. Never set to `localhost` in production |
 

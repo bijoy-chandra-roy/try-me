@@ -1,6 +1,7 @@
 import { ensureDbConnection } from '@/server/db/connection';
 import { uploadService } from '@/server/features/upload/upload.service';
 import { AppError } from '@/server/lib/errors';
+import { assertValidImageBuffer } from '@/server/lib/validate-image';
 import { requireAuth } from '@/server/lib/auth-guard';
 import { jsonError, jsonSuccess } from '@/server/lib/api-response';
 
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await image.arrayBuffer());
+    assertValidImageBuffer(buffer, image.type);
     const url = await uploadService.uploadImage({
       buffer,
       originalname: image.name || 'upload.jpg',

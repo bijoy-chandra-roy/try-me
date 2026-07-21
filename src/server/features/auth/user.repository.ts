@@ -1,6 +1,7 @@
 import type { UserRole } from '@/shared/auth/roles';
 import type { UserPreferences } from '@/shared/constants';
 import type { UserStatus } from '@/shared/types';
+import { escapeRegex } from '@/server/lib/escape-regex';
 import { User, type UserDocument } from './user.model';
 
 export type UserRecord = Omit<UserDocument, '_id' | 'passwordHash' | 'merchantId'> & {
@@ -37,6 +38,12 @@ class UserRepository {
     return this.toRecord(user as unknown as UserDocument);
   }
 
+  async findStatusById(id: string): Promise<UserStatus | null> {
+    const user = await User.findById(id).select('status').lean<{ status?: UserStatus }>();
+    if (!user) return null;
+    return user.status ?? 'active';
+  }
+
   async findByIdWithPassword(id: string) {
     return User.findById(id);
   }
@@ -45,9 +52,10 @@ class UserRepository {
     const query: Record<string, unknown> = {};
     if (filters?.role) query.role = filters.role;
     if (filters?.search) {
+      const pattern = escapeRegex(filters.search);
       query.$or = [
-        { email: { $regex: filters.search, $options: 'i' } },
-        { name: { $regex: filters.search, $options: 'i' } },
+        { email: { $regex: pattern, $options: 'i' } },
+        { name: { $regex: pattern, $options: 'i' } },
       ];
     }
     const users = await User.find(query).sort({ createdAt: -1 }).lean();

@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
+import { checkRateLimit } from '@/server/lib/rate-limit';
 import { isUserRole, type UserRole } from '@/shared/auth/roles';
 
 export type AssumeRoleUpdate = {
@@ -43,6 +44,8 @@ declare module 'next-auth/jwt' {
 }
 
 const ROLE_SYNC_INTERVAL_MS = 15_000;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_LIMIT = 20;
 
 type SyncableToken = {
   id?: string;
@@ -174,6 +177,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        const emailKey = String(credentials.email).toLowerCase().trim();
+        const { allowed } = checkRateLimit(
+          `login:${emailKey}`,
+          LOGIN_LIMIT,
+          LOGIN_WINDOW_MS
+        );
+        if (!allowed) {
           return null;
         }
 

@@ -333,6 +333,10 @@ export const en = {
   'tryOn.waitingChoice': 'Waiting for your choice…',
   'tryOn.processing': 'Processing try-on…',
   'tryOn.generate': 'Generate Try-On',
+  'tryOn.privacyConsent':
+    'I agree to upload my photo for virtual try-on processing by third-party services (image hosting and AI).',
+  'tryOn.privacyConsentDetail':
+    'Your photo may be stored on external image hosts and processed by Hugging Face. Signed-in users can delete try-on history from their dashboard.',
   'tryOn.queueHint': 'Free AI queues can take a few minutes. You can cancel anytime via Close.',
   'tryOn.tryAnother': 'Try another photo',
   'tryOn.uploadTooltip': 'Use a clear, front-facing photo for best results',

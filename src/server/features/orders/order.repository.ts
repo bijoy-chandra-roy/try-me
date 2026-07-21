@@ -7,6 +7,7 @@ import type {
   ShippingAddress,
 } from '@/shared/types';
 import mongoose from 'mongoose';
+import { escapeRegex } from '@/server/lib/escape-regex';
 import { Order, type OrderDocument } from './order.model';
 
 export type OrderRecord = {
@@ -126,7 +127,7 @@ class OrderRepository {
   }): Promise<OrderRecord[]> {
     const filter: Record<string, unknown> = {};
     if (query.orderNumber) {
-      filter.orderNumber = { $regex: query.orderNumber, $options: 'i' };
+      filter.orderNumber = { $regex: escapeRegex(query.orderNumber), $options: 'i' };
     }
     if (query.userId) filter.userId = query.userId;
     const docs = await Order.find(filter).sort({ createdAt: -1 }).limit(50).lean();

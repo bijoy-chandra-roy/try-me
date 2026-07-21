@@ -17,6 +17,7 @@ import {
   type ThemeMode,
   type UserPreferences,
 } from '@/shared/constants';
+import { isSafeCssColor } from '@/shared/lib/validate-css-color';
 
 export function resolveTheme(theme: ThemeMode): 'light' | 'dark' {
   if (theme === 'system') {
@@ -29,7 +30,9 @@ export function resolveTheme(theme: ThemeMode): 'light' | 'dark' {
 function isColorTokens(value: unknown): value is ColorTokens {
   if (!value || typeof value !== 'object') return false;
   const t = value as Record<string, unknown>;
-  return Object.keys(COLOR_TOKEN_CSS_VARS).every((k) => typeof t[k] === 'string');
+  return Object.keys(COLOR_TOKEN_CSS_VARS).every(
+    (k) => typeof t[k] === 'string' && isSafeCssColor(String(t[k]))
+  );
 }
 
 function isCustomScheme(value: unknown): value is ColorSchemeModeTokens {

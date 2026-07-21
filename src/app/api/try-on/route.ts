@@ -7,6 +7,7 @@ import { getOptionalAuth } from '@/server/lib/auth-guard';
 import { checkGuestTryOnLimit, getGuestIdentifier } from '@/server/lib/guest-rate-limit';
 import { hasPermission } from '@/shared/auth/permissions';
 import { jsonError, jsonSuccess } from '@/server/lib/api-response';
+import { assertValidImageBuffer } from '@/server/lib/validate-image';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -37,6 +38,11 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const userImage = formData.get('userImage');
     const productId = formData.get('productId');
+    const privacyConsent = formData.get('privacyConsent');
+
+    if (privacyConsent !== 'true') {
+      throw new AppError('Privacy consent is required before try-on.', 400);
+    }
 
     if (!(userImage instanceof File)) {
       throw new AppError('User image is required', 400);
@@ -55,6 +61,7 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await userImage.arrayBuffer());
+    assertValidImageBuffer(buffer, userImage.type);
     const result = await tryOnService.processTryOn({
       file: { buffer, originalname: userImage.name },
       productId,

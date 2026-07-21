@@ -3,6 +3,7 @@ import type { UserRole } from '@/shared/auth/roles';
 import { isUserRole } from '@/shared/auth/roles';
 import { hasPermission, type Permission } from '@/shared/auth/permissions';
 import { AppError } from '@/server/lib/errors';
+import { userRepository } from '@/server/features/auth/user.repository';
 
 export interface SessionUser {
   id: string;
@@ -18,9 +19,8 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const session = await auth();
   if (!session?.user?.id || !isUserRole(session.user.role)) return null;
 
-  if (session.user.status === 'inactive') {
-    return null;
-  }
+  const liveStatus = await userRepository.findStatusById(session.user.id);
+  if (!liveStatus || liveStatus === 'inactive') return null;
 
   const realRole =
     session.user.realRole && isUserRole(session.user.realRole)
