@@ -20,7 +20,7 @@ Unified **Next.js App Router** application — UI and API live in the same codeb
 - **Circuit Breaker** on VTO API: 10-second timeout or any HTTP error triggers instant fallback to a local cached composite image
 - **Shared types** in `src/shared/types/` for end-to-end contracts
 
-See [docs/how-it-works.md](docs/how-it-works.md) for a feature walkthrough, [docs/diagrams/diagrams.md](docs/diagrams/diagrams.md) for architecture diagrams, [docs/sdlc-model.md](docs/sdlc-model.md) for the Spiral Model lifecycle, and [docs/swe-model.md](docs/swe-model.md) for the software engineering architecture.
+See [docs/README.md](docs/README.md) for the full documentation index, [docs/how-it-works.md](docs/how-it-works.md) for a feature walkthrough, [docs/sdlc-model.md](docs/sdlc-model.md) for the Spiral Model lifecycle, and [docs/swe-model.md](docs/swe-model.md) for the software engineering architecture.
 
 ## Project Structure
 
@@ -37,11 +37,13 @@ TryMe/
 ├── cache/                # Fallback VTO result image
 ├── scripts/seed-products.ts
 └── docs/
+    ├── README.md           # Documentation index
     ├── how-it-works.md     # Feature walkthrough & user journeys
     ├── sdlc-model.md       # Spiral Model lifecycle
     ├── swe-model.md        # Software engineering architecture
-    ├── design/
-    └── diagrams/
+    ├── design/             # Living design system contract
+    ├── diagrams/           # Mermaid architecture diagrams
+    └── reference/          # Offline AI/reference snapshots
 ```
 
 ## Quick Start
@@ -169,6 +171,18 @@ All configuration lives in `.env.local`:
 | **4 — Design & Polish** | Design system, settings/i18n, VTO SSE fix, Vercel deploy | Delivered |
 
 See [docs/sdlc-model.md](docs/sdlc-model.md) for the full SDLC process and [docs/swe-model.md](docs/swe-model.md) for architecture patterns.
+
+## Documentation
+
+Full index: [docs/README.md](docs/README.md)
+
+| Topic | Document |
+|-------|----------|
+| Product guide | [docs/how-it-works.md](docs/how-it-works.md) |
+| SDLC / Spirals | [docs/sdlc-model.md](docs/sdlc-model.md) |
+| Engineering model | [docs/swe-model.md](docs/swe-model.md) |
+| Diagrams | [docs/diagrams/README.md](docs/diagrams/README.md) |
+| Design system | [docs/design/design.md](docs/design/design.md) |
 
 ## License
 

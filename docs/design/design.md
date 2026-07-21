@@ -101,4 +101,4 @@ Buttons and inputs share **md** height rhythm unless a size prop says otherwise.
 3. Dense data → rows; widgets → cards.
 4. Read this file (and `.cursor/rules/tryme-design.mdc`) before building UI.
 
-`docs/design/astryx-docs.md` and related dumps are offline reference — not the living contract.
+`docs/reference/` holds offline Astryx and Repomix snapshots — not the living contract. See [reference/README.md](../reference/README.md).

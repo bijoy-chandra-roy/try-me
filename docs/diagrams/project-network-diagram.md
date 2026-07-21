@@ -111,4 +111,4 @@ flowchart LR
 
 Red nodes mark activities on the **critical path** — any delay on these tasks delays the full delivery.
 
-[← Diagram index](diagrams.md)
+[← Diagram index](README.md)

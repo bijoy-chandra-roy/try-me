@@ -104,4 +104,4 @@ graph TB
 | **Infrastructure** | `src/server/lib/`, `src/server/db/` | Auth guards, API responses, DB connection, caching |
 | **External** | MongoDB, ImgBB, Hugging Face, Google | Persistence, image hosting, AI try-on, OAuth |
 
-[← Diagram index](diagrams.md)
+[← Diagram index](README.md)

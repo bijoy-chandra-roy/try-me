@@ -129,4 +129,4 @@ flowchart TB
 | **Spiral 3** | UC6–UC10, UC14–UC16 (commerce + merchant ops) |
 | **Spiral 4** | UC13 enhanced (appearance, i18n, theme preferences) |
 
-[← Diagram index](diagrams.md)
+[← Diagram index](README.md)

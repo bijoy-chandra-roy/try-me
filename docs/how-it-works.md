@@ -250,7 +250,8 @@ Admins approve merchants; merchants create products from their dashboard. Seed d
 | [README](../README.md) | Setup, env vars, API list, demo accounts |
 | [SDLC Model](sdlc-model.md) | How the project was built in spirals |
 | [SWE Model](swe-model.md) | Architecture layers and patterns |
-| [Diagram Index](diagrams/diagrams.md) | Component, sequence, use case, and other diagrams |
+| [Diagram Index](diagrams/README.md) | Component, sequence, use case, and other diagrams |
 | [Design System](design/design.md) | UI rules and tokens |
+| [Documentation Index](README.md) | Full docs table of contents |
 
-[← Documentation index](diagrams/diagrams.md)
+[← Documentation index](README.md)

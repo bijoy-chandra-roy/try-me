@@ -281,4 +281,4 @@ classDiagram
 | **Infrastructure** | `CircuitBreaker`, `VtoApiClient`, `ImgBBClient`, `AuthGuard` | External APIs, resilience, auth guards |
 | **Presentation** | `useTryOn`, `useCart`, `useAuth` | Client-side state and API integration |
 
-[← Diagram index](diagrams.md)
+[← Diagram index](README.md)

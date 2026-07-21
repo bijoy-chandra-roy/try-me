@@ -276,9 +276,9 @@ These principles guided every implementation decision:
 ## Related Documents
 
 - [SDLC Model](sdlc-model.md) — How we planned and delivered each spiral
-- [Diagram Index](diagrams/diagrams.md) — All architecture diagrams
+- [Diagram Index](diagrams/README.md) — All architecture diagrams
 - [Component Diagram](diagrams/component-diagram.md) — Structural wiring
 - [Class Diagram](diagrams/class-diagram.md) — Domain model and layers
 - [Design System](design/design.md) — UI rules and tokens
 
-[← Documentation index](diagrams/diagrams.md)
+[← Documentation index](README.md)

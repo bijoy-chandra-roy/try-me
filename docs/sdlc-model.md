@@ -156,8 +156,8 @@ Each spiral was considered complete when:
 ## Related Documents
 
 - [SWE Model](swe-model.md) — Engineering architecture and patterns
-- [Diagram Index](diagrams/diagrams.md) — All architecture diagrams
+- [Diagram Index](diagrams/README.md) — All architecture diagrams
 - [Design System](design/design.md) — UI rules and tokens
 - [README](../README.md) — Project overview and quick start
 
-[← Documentation index](diagrams/diagrams.md)
+[← Documentation index](README.md)

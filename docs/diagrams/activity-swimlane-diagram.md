@@ -108,4 +108,4 @@ flowchart TB
 4. **Stock validation (CartService / OrderService)** — Checkout decrements inventory; cancellation restocks.
 5. **Review eligibility (ReviewService)** — Reviews require a delivered purchase for that product.
 
-[← Diagram index](diagrams.md)
+[← Diagram index](README.md)

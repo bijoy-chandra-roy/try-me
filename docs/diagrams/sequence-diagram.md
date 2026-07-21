@@ -90,4 +90,4 @@ sequenceDiagram
 | **SSE error handling** | `event: error` always throws immediately (fail-fast to fallback) |
 | **History** | Saved only for authenticated users with `try_on` permission |
 
-[← Diagram index](diagrams.md)
+[← Diagram index](README.md)
