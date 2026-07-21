@@ -382,6 +382,9 @@ export const bn: Record<keyof typeof en, string> = {
   'dashboard.customer.settings': 'সেটিংস',
   'dashboard.customer.historyTitle': 'ট্রাই-অন ইতিহাস',
   'dashboard.customer.historyEmpty': 'এখনও কোনো ট্রাই-অন নেই। শুরু করতে ক্যাটালগে যান।',
+  'dashboard.customer.historyDelete': 'মুছুন',
+  'dashboard.customer.historyDeleteConfirm': 'আপনার ইতিহাস থেকে এই ট্রাই-অনটি মুছে ফেলবেন?',
+  'dashboard.customer.historyDeleteFailed': 'ট্রাই-অন মুছে ফেলা যায়নি',
 
   'dashboard.merchant.title': 'মার্চেন্ট ড্যাশবোর্ড',
   'dashboard.merchant.description': 'পণ্য ম্যানেজ, অর্ডার পূরণ এবং অ্যানালিটিক্স দেখুন',

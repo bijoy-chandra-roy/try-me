@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import Link from '@/shared/components/Link';
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell';
 import { StatCard } from '@/features/dashboard/components/StatCard';
@@ -11,8 +12,9 @@ import { OrdersPanel } from '@/features/orders/components/OrdersPanel';
 import { AddressesPanel } from '@/features/addresses/components/AddressesPanel';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useT } from '@/shared/hooks/useT';
-import { apiClient } from '@/shared/lib/api-client';
+import { apiClient, ApiError } from '@/shared/lib/api-client';
 import { fetchOrders } from '@/features/orders/api/orders.api';
+import { deleteTryOnHistory } from '@/features/try-on/api/try-on.api';
 import { ProductCardSkeleton, StatCardsSkeleton } from '@/shared/components/Skeleton';
 import type { TryOnHistory } from '@/shared/types';
 
@@ -22,6 +24,8 @@ export default function CustomerDashboardPage() {
   const [history, setHistory] = useState<TryOnHistory[]>([]);
   const [orderCount, setOrderCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -34,6 +38,22 @@ export default function CustomerDashboardPage() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  async function removeHistory(id: string) {
+    if (!window.confirm(t('dashboard.customer.historyDeleteConfirm'))) return;
+    setDeletingId(id);
+    setDeleteError('');
+    try {
+      await deleteTryOnHistory(id);
+      setHistory((prev) => prev.filter((item) => item._id !== id));
+    } catch (err) {
+      setDeleteError(
+        err instanceof ApiError ? err.message : t('dashboard.customer.historyDeleteFailed')
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <DashboardShell
@@ -104,24 +124,43 @@ export default function CustomerDashboardPage() {
               {t('dashboard.customer.historyEmpty')}
             </GlassCard>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {history.map((item) => (
-                <GlassCard key={item._id} className="overflow-hidden">
-                  <img
-                    src={item.compositeImageUrl}
-                    alt={item.productName}
-                    className="aspect-[3/4] w-full object-cover"
-                  />
-                  <div className="p-4">
-                    <p className="font-medium">{item.productName}</p>
-                    <p className="mt-1 text-xs text-muted-subtle">
-                      {new Date(item.createdAt).toLocaleString()} ·{' '}
-                      {item.fromFallback ? t('tryOn.badge.fallback') : t('tryOn.badge.live')}
-                    </p>
-                  </div>
-                </GlassCard>
-              ))}
-            </div>
+            <>
+              {deleteError && (
+                <p className="mb-3 text-sm text-error" role="alert">
+                  {deleteError}
+                </p>
+              )}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {history.map((item) => (
+                  <GlassCard key={item._id} className="overflow-hidden">
+                    <img
+                      src={item.compositeImageUrl}
+                      alt={item.productName}
+                      className="aspect-[3/4] w-full object-cover"
+                    />
+                    <div className="flex items-start justify-between gap-3 p-4">
+                      <div className="min-w-0">
+                        <p className="font-medium">{item.productName}</p>
+                        <p className="mt-1 text-xs text-muted-subtle">
+                          {new Date(item.createdAt).toLocaleString()} ·{' '}
+                          {item.fromFallback ? t('tryOn.badge.fallback') : t('tryOn.badge.live')}
+                        </p>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={deletingId === item._id}
+                        onClick={() => removeHistory(item._id)}
+                        aria-label={t('dashboard.customer.historyDelete')}
+                        className="shrink-0 px-2"
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                      </Button>
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+            </>
           )}
         </section>
       </RoleGate>

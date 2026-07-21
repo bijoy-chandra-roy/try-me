@@ -1,4 +1,5 @@
 import { tryOnHistoryRepository } from '@/server/features/try-on/try-on-history.repository';
+import { AppError } from '@/server/lib/errors';
 import type { TryOnResult } from '@/shared/types';
 
 class TryOnHistoryService {
@@ -25,6 +26,11 @@ class TryOnHistoryService {
 
   async getAllHistory(limit = 100) {
     return tryOnHistoryRepository.findAll(limit);
+  }
+
+  async remove(userId: string, id: string): Promise<void> {
+    const deleted = await tryOnHistoryRepository.delete(id, userId);
+    if (!deleted) throw new AppError('Try-on not found', 404);
   }
 
   async getMerchantStats(productIds: string[]) {

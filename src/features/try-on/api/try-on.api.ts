@@ -1,4 +1,4 @@
-import { apiClientFormData } from '@/shared/lib/api-client';
+import { apiClient, apiClientFormData } from '@/shared/lib/api-client';
 import type { TryOnResult } from '@/shared/types';
 
 export async function submitTryOn(
@@ -11,4 +11,8 @@ export async function submitTryOn(
   formData.append('productId', productId);
 
   return apiClientFormData<TryOnResult>('/try-on', formData, { signal });
+}
+
+export async function deleteTryOnHistory(id: string): Promise<void> {
+  await apiClient<{ deleted: boolean }>(`/try-on/history/${id}`, { method: 'DELETE' });
 }

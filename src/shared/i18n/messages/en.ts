@@ -402,6 +402,9 @@ export const en = {
   'dashboard.customer.settings': 'Settings',
   'dashboard.customer.historyTitle': 'Try-on history',
   'dashboard.customer.historyEmpty': 'No try-ons yet. Head to the catalog to get started.',
+  'dashboard.customer.historyDelete': 'Delete',
+  'dashboard.customer.historyDeleteConfirm': 'Delete this try-on from your history?',
+  'dashboard.customer.historyDeleteFailed': 'Could not delete try-on',
 
   'dashboard.merchant.title': 'Merchant Dashboard',
   'dashboard.merchant.description': 'Manage products, fulfill orders, and view analytics',

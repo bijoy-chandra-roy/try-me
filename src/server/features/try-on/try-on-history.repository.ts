@@ -72,6 +72,11 @@ class TryOnHistoryRepository {
     if (filters?.productIds?.length) query.productId = { $in: filters.productIds };
     return TryOnHistory.countDocuments(query);
   }
+
+  async delete(id: string, userId: string): Promise<boolean> {
+    const result = await TryOnHistory.findOneAndDelete({ _id: id, userId });
+    return result !== null;
+  }
 }
 
 export const tryOnHistoryRepository = new TryOnHistoryRepository();
