@@ -142,8 +142,9 @@ All configuration lives in `.env.local`:
 | `HF_TOKEN` | Hugging Face token (better rate limits / ZeroGPU quota) |
 | `VTO_API_URL` | Hugging Face Gradio `/call/tryon` endpoint |
 | `VTO_TIMEOUT_MS` | Circuit breaker timeout before fallback (default 300000 = 5 min) |
+| `NEXT_PUBLIC_SITE_URL` | Public site origin (default `http://localhost:3000`). Set this for deploy — used app-wide and for Auth.js |
 | `AUTH_SECRET` | Auth.js session secret (required) |
-| `AUTH_URL` | App URL for Auth.js (default `http://localhost:3000`) |
+| `AUTH_URL` | Optional Auth.js override; defaults to `NEXT_PUBLIC_SITE_URL` |
 
 ## Scripts
 

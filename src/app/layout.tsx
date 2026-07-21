@@ -8,6 +8,7 @@ import { PreferencesHydrator } from '@/shared/components/PreferencesHydrator';
 import { OnboardingTour } from '@/shared/components/OnboardingTour';
 import { SessionProvider } from '@/shared/providers/SessionProvider';
 import { PREFERENCES_BOOT_SCRIPT } from '@/shared/lib/preferences';
+import { getSiteUrl } from '@/shared/lib/site-url';
 import './globals.css';
 
 const urbanist = Urbanist({
@@ -31,6 +32,7 @@ const notoBengali = Noto_Sans_Bengali({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: 'TryMe — Virtual Try-On Shopping',
   description: 'E-commerce with AI-powered virtual try-on. See clothes on you before you buy.',
 };

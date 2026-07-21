@@ -2,6 +2,12 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { isUserRole, type UserRole } from '@/shared/auth/roles';
+import { getSiteUrl } from '@/shared/lib/site-url';
+
+// Keep Auth.js aligned with the single site URL env when AUTH_URL is unset.
+if (!process.env.AUTH_URL) {
+  process.env.AUTH_URL = getSiteUrl();
+}
 
 export type AssumeRoleUpdate = {
   assumeRole?: UserRole | null;
