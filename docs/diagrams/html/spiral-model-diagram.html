@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spiral Model — SDLC — TryMe (B&amp;W)</title>
+  <style>
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: #f0f0f0;
+  color: #000000;
+  font-family: "Segoe UI", Calibri, Arial, sans-serif;
+}
+header {
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+  gap: 0.75rem; padding: 0.75rem 1.1rem;
+  border-bottom: 1px solid #000000; background: #ffffff;
+  position: sticky; top: 0; z-index: 10;
+}
+h1 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.meta { margin: 0.15rem 0 0; font-size: 0.78rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; max-width: 52rem; justify-content: flex-end; }
+button, label.ctrl {
+  background: #ffffff; color: #000000; border: 1px solid #000000;
+  padding: 0.4rem 0.7rem; font-size: 0.8rem; cursor: pointer; border-radius: 0;
+}
+button:hover, button:focus { background: #000000; color: #ffffff; outline: none; }
+button.active { background: #000000; color: #ffffff; }
+button:disabled { opacity: 0.45; cursor: wait; background: #ffffff; color: #000000; }
+label.ctrl {
+  display: inline-flex; align-items: center; gap: 0.4rem; cursor: default;
+}
+label.ctrl input[type="range"] { width: 7.5rem; cursor: pointer; }
+label.ctrl input[type="number"] {
+  width: 4.2rem; border: 1px solid #000000; padding: 0.15rem 0.25rem; font-size: 0.8rem;
+}
+main {
+  padding: 1.25rem;
+  overflow: auto;
+  background-color: #e8e8e8;
+  background-image:
+    linear-gradient(45deg, #d0d0d0 25%, transparent 25%),
+    linear-gradient(-45deg, #d0d0d0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #d0d0d0 75%),
+    linear-gradient(-45deg, transparent 75%, #d0d0d0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  min-height: calc(100vh - 8rem);
+}
+#diagram-frame {
+  margin: 0 auto;
+  width: var(--diagram-width, 720px);
+  max-width: 100%;
+  background: transparent;
+}
+#diagram { background: transparent; }
+#diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent !important;
+}
+footer {
+  padding: 0.65rem 1.25rem 1.25rem; font-size: 0.75rem;
+  border-top: 1px solid #000000; background: #ffffff;
+}
+.status { font-size: 0.78rem; min-width: 10rem; }
+@media print {
+  header .actions, footer { display: none; }
+  header { position: static; border: none; }
+  main {
+    padding: 0;
+    background: transparent;
+    background-image: none;
+  }
+}
+</style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Spiral Model — SDLC</h1>
+      <p class="meta">Hand-coded SVG (Mermaid cannot draw spirals) — TryMe evolutionary / risk-driven meta-model</p>
+    </div>
+    <div class="actions">
+      <label class="ctrl">Width <input type="range" id="width-range" min="240" max="1800" step="20" value="900" /><input type="number" id="width-num" min="240" max="2400" step="10" value="900" /> px</label>
+      <button type="button" id="btn-svg" disabled>Save SVG</button>
+      <button type="button" id="btn-copy-svg" disabled>Copy SVG</button>
+      <button type="button" id="btn-png" disabled>Save PNG</button>
+      <button type="button" id="btn-copy-png" disabled>Copy PNG</button>
+      <button type="button" id="btn-rerender">Re-render</button>
+      <span class="status" id="status">Loading…</span>
+    </div>
+  </header>
+  <main>
+    <div id="diagram-frame"><div id="diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width="1200" height="1000" style="background:transparent">
+  <defs>
+    <marker id="arrowHead" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L12,5 L0,10 Z" fill="#000000"/>
+    </marker>
+  </defs>
+
+  <!-- X / Y axes — four SDLC quadrants -->
+  <line x1="180.0" y1="520.0" x2="860.0" y2="520.0" stroke="#000000" stroke-width="2.5" marker-end="url(#arrowHead)"/>
+  <line x1="520.0" y1="860.0" x2="520.0" y2="180.0" stroke="#000000" stroke-width="2.5" marker-end="url(#arrowHead)"/>
+
+  <!-- Axis labels — presentation-scale type -->
+  <text x="860.0" y="568.0" text-anchor="end" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">Cumulative cost →</text>
+  <text transform="rotate(-90 480.0 350.0)" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">Progress through cycles →</text>
+  <text x="180.0" y="568.0" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="26" fill="#000000">← start</text>
+
+  <!-- Subtle quadrant guides -->
+  <line x1="270.0" y1="270.0" x2="770.0" y2="770.0" stroke="#000000" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <line x1="270.0" y1="770.0" x2="770.0" y2="270.0" stroke="#000000" stroke-width="1.5" stroke-dasharray="6 6"/>
+
+  <!-- Continuous expanding spiral (drawn under nodes) -->
+  <path d="M556.0,520.0L556.5,521.9L556.8,523.9L557.1,525.9L557.2,527.9L557.2,530.0L557.1,532.1L556.9,534.2L556.6,536.3L556.2,538.4L555.6,540.5L554.9,542.7L554.1,544.7L553.1,546.8L552.0,548.9L550.8,550.8L549.5,552.8L548.1,554.7L546.5,556.5L544.9,558.3L543.1,560.0L541.2,561.6L539.2,563.1L537.1,564.5L534.9,565.8L532.6,567.0L530.2,568.1L527.8,569.1L525.3,570.0L522.7,570.7L520.0,571.2L517.3,571.7L514.5,572.0L511.7,572.1L508.9,572.1L506.1,572.0L503.2,571.6L500.4,571.2L497.5,570.5L494.7,569.7L491.8,568.8L489.0,567.7L486.3,566.4L483.6,565.0L480.9,563.4L478.4,561.6L475.9,559.7L473.5,557.7L471.1,555.5L468.9,553.2L466.8,550.7L464.8,548.1L463.0,545.4L461.2,542.6L459.7,539.6L458.2,536.6L456.9,533.4L455.8,530.2L454.9,526.8L454.1,523.5L453.5,520.0L453.1,516.5L452.9,512.9L452.8,509.4L453.0,505.8L453.3,502.1L453.9,498.5L454.6,494.9L455.5,491.3L456.7,487.7L458.0,484.2L459.5,480.7L461.3,477.3L463.2,474.0L465.3,470.7L467.6,467.6L470.1,464.5L472.7,461.6L475.5,458.8L478.5,456.1L481.7,453.6L485.0,451.2L488.4,449.0L492.0,447.0L495.7,445.2L499.5,443.5L503.4,442.0L507.5,440.8L511.6,439.7L515.7,438.9L520.0,438.2L524.3,437.9L528.7,437.7L533.0,437.8L537.4,438.0L541.8,438.6L546.2,439.4L550.6,440.4L554.9,441.6L559.2,443.1L563.4,444.8L567.6,446.7L571.6,448.9L575.6,451.3L579.5,454.0L583.2,456.8L586.8,459.9L590.2,463.1L593.5,466.6L596.7,470.2L599.6,474.0L602.4,478.0L604.9,482.2L607.2,486.5L609.4,491.0L611.2,495.6L612.9,500.3L614.3,505.1L615.5,510.0L616.4,515.0L617.0,520.0L617.4,525.1L617.5,530.2L617.3,535.4L616.9,540.6L616.1,545.8L615.2,550.9L613.9,556.0L612.3,561.1L610.5,566.1L608.4,571.0L606.0,575.9L603.4,580.6L600.5,585.2L597.4,589.7L594.0,594.0L590.3,598.1L586.5,602.1L582.4,605.9L578.1,609.5L573.6,612.8L568.9,615.9L564.0,618.8L559.0,621.5L553.7,623.9L548.4,626.0L542.9,627.8L537.3,629.4L531.6,630.6L525.8,631.6L520.0,632.2L514.1,632.6L508.2,632.6L502.2,632.4L496.2,631.8L490.3,630.9L484.4,629.7L478.5,628.1L472.7,626.3L467.0,624.1L461.3,621.6L455.8,618.8L450.4,615.7L445.2,612.4L440.1,608.7L435.2,604.8L430.5,600.6L426.0,596.1L421.8,591.4L417.8,586.4L414.0,581.2L410.5,575.8L407.2,570.2L404.3,564.4L401.6,558.5L399.3,552.3L397.3,546.1L395.6,539.7L394.2,533.2L393.2,526.6L392.5,520.0L392.2,513.3L392.2,506.6L392.6,499.8L393.3,493.1L394.4,486.3L395.8,479.7L397.6,473.0L399.8,466.5L402.3,460.0L405.2,453.7L408.4,447.5L411.9,441.5L415.8,435.6L420.0,429.9L424.5,424.5L429.2,419.2L434.3,414.2L439.7,409.4L445.3,405.0L451.2,400.8L457.3,396.9L463.6,393.3L470.1,390.1L476.8,387.1L483.7,384.6L490.7,382.4L497.9,380.5L505.2,379.0L512.6,378.0L520.0,377.2L527.5,376.9L535.0,377.0L542.6,377.5L550.1,378.4L557.6,379.7L565.1,381.3L572.4,383.4L579.7,385.9L586.9,388.7L593.9,392.0L600.8,395.6L607.5,399.6L614.0,403.9L620.3,408.6L626.3,413.7L632.1,419.0L637.7,424.7L642.9,430.7L647.8,437.0L652.4,443.5L656.7,450.3L660.6,457.4L664.2,464.7L667.4,472.1L670.2,479.8L672.6,487.6L674.5,495.5L676.1,503.6L677.3,511.8L678.0,520.0L678.3,528.3L678.1,536.6L677.6,545.0L676.5,553.3L675.1,561.6L673.2,569.8L670.8,577.9L668.1,585.9L664.9,593.8L661.2,601.5L657.2,609.1L652.8,616.5L647.9,623.6L642.7,630.5L637.1,637.1L631.2,643.5L624.9,649.5L618.2,655.2L611.3,660.6L604.1,665.6L596.6,670.3L588.8,674.6L580.8,678.4L572.6,681.9L564.2,684.9L555.6,687.5L546.9,689.6L538.0,691.3L529.0,692.5L520.0,693.2L510.9,693.5L501.8,693.3L492.7,692.6L483.6,691.5L474.5,689.8L465.5,687.7L456.6,685.1L447.9,682.0L439.3,678.4L430.8,674.4L422.6,670.0L414.6,665.1L406.8,659.8L399.3,654.0L392.1,647.9L385.2,641.4L378.6,634.5L372.4,627.2L366.6,619.6L361.2,611.7L356.1,603.5L351.5,595.0L347.3,586.3L343.6,577.3L340.4,568.1L337.6,558.8L335.3,549.2L333.5,539.6L332.3,529.8L331.5,520.0L331.3,510.1L331.5,500.2L332.3,490.3L333.6,480.4L335.5,470.6L337.8,460.8L340.7,451.2L344.1,441.7L348.0,432.3L352.4,423.2L357.2,414.3L362.6,405.6L368.4,397.2L374.6,389.1L381.3,381.3L388.4,373.9L395.9,366.8L403.8,360.1L412.1,353.8L420.7,347.9L429.6,342.5L438.8,337.6L448.3,333.1L458.0,329.1L467.9,325.6L478.1,322.7L488.4,320.3L498.8,318.4L509.4,317.0L520.0,316.2L530.7,316.0L541.4,316.4L552.1,317.3L562.8,318.7L573.4,320.7L583.9,323.3L594.3,326.5L604.5,330.2L614.6,334.4L624.4,339.1L634.0,344.4L643.3,350.2L652.4,356.5L661.1,363.3L669.5,370.5L677.5,378.2L685.1,386.3L692.2,394.9L699.0,403.8L705.3,413.0L711.1,422.7L716.4,432.6L721.1,442.8L725.4,453.3L729.1,464.0L732.2,474.9L734.8,486.0L736.8,497.2L738.2,508.6L739.0,520.0L739.2,531.5L738.8,543.0L737.8,554.5L736.2,566.0L734.0,577.3L731.2,588.6L727.8,599.8L723.8,610.7L719.2,621.5L714.1,632.0L708.4,642.3L702.1,652.3L695.3,662.0L688.0,671.3L680.2,680.2L672.0,688.8L663.3,696.9L654.1,704.6L644.5,711.8L634.6,718.5L624.3,724.6L613.6,730.3L602.7,735.4L591.4,739.9L580.0,743.8L568.3,747.1L556.4,749.9L544.4,752.0L532.2,753.4L520.0,754.2L507.7,754.4L495.4,754.0L483.1,752.9L470.9,751.1L458.7,748.7L446.7,745.7L434.8,742.0L423.1,737.7L411.6,732.8L400.3,727.3L389.4,721.1L378.7,714.4L368.4,707.2L358.5,699.4L349.0,691.0L339.9,682.2L331.2,672.9L323.1,663.1L315.4,652.8L308.3,642.2L301.8,631.2L295.8,619.8L290.4,608.1L285.6,596.2L281.5,583.9L277.9,571.5L275.1,558.8L272.9,546.0L271.3,533.0L270.5,520.0L270.3,506.9L270.9,493.8L272.1,480.7L274.0,467.7L276.5,454.8L279.8,442.0L283.7,429.3L288.4,416.9L293.6,404.7L299.5,392.7L306.1,381.1L313.2,369.8L321.0,358.8L329.3,348.3L338.2,338.2L347.6,328.5L357.5,319.4L368.0,310.7L378.9,302.7L390.2,295.1L401.9,288.2L414.0,281.9L426.4,276.2L439.1,271.1L452.1,266.7L465.4,263.0L478.8,260.0L492.4,257.7L506.2,256.1L520.0,255.2L533.9,255.1L547.8,255.7L561.7,257.0L575.5,259.0L589.2,261.8L602.8,265.3L616.2,269.5L629.3,274.4L642.3,280.0L654.9,286.3L667.2,293.3L679.2,300.9L690.8,309.1L701.9,318.0L712.6,327.4L722.8,337.4L732.5,347.9L741.6,359.0L750.1,370.5L758.1,382.5L765.4,395.0L772.1,407.8L778.1,420.9L783.4,434.4L788.0,448.2L791.9,462.2L795.0,476.4L797.5,490.8L799.1,505.4L800.0,520.0" fill="none" stroke="#000000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Quadrant phase labels -->
+  <text x="720" y="175" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">1. Planning</text>
+  <text x="320" y="175" text-anchor="end" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">2. Risk Analysis</text>
+  <text x="320" y="870" text-anchor="end" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">3. Engineering</text>
+  <text x="720" y="870" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">4. Evaluation / Review</text>
+
+  <!-- Iteration nodes + labels -->
+  <circle cx="520.0" cy="438.2" r="16" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="520.0" y="446.2" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="22" font-weight="700" fill="#000000">1</text><text x="820.0" y="446.2" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">S1 Prototype / Circuit Breaker</text><circle cx="520.0" cy="377.2" r="16" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="520.0" y="385.2" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="22" font-weight="700" fill="#000000">2</text><text x="820.0" y="385.2" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">S2 Auth / RBAC</text><circle cx="520.0" cy="316.2" r="16" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="520.0" y="324.2" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="22" font-weight="700" fill="#000000">3</text><text x="820.0" y="324.2" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">S3 Commerce</text><circle cx="520.0" cy="255.2" r="16" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="520.0" y="263.2" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="22" font-weight="700" fill="#000000">4</text><text x="820.0" y="263.2" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">S4 Polish / Deploy</text>
+</svg></div></div>
+  </main>
+  <footer>TryMe — Sonargaon University. Black ink on <strong>transparent</strong> background (checkerboard is preview-only). Adjust <strong>Width</strong>, then Save/Copy SVG or PNG for slide embedding. This page is hand-maintained (not overwritten by generate_bw_diagram_html.py).</footer>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+  <script>
+window.SVG_FILENAME = "tryme-spiral-model-diagram.svg";
+window.PNG_FILENAME = "tryme-spiral-model-diagram.png";
+
+const SPIRAL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width="1200" height="1000" style="background:transparent">
+  <defs>
+    <marker id="arrowHead" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L12,5 L0,10 Z" fill="#000000"/>
+    </marker>
+  </defs>
+
+  <!-- X / Y axes — four SDLC quadrants -->
+  <line x1="180.0" y1="520.0" x2="860.0" y2="520.0" stroke="#000000" stroke-width="2.5" marker-end="url(#arrowHead)"/>
+  <line x1="520.0" y1="860.0" x2="520.0" y2="180.0" stroke="#000000" stroke-width="2.5" marker-end="url(#arrowHead)"/>
+
+  <!-- Axis labels — presentation-scale type -->
+  <text x="860.0" y="568.0" text-anchor="end" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">Cumulative cost →</text>
+  <text transform="rotate(-90 480.0 350.0)" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">Progress through cycles →</text>
+  <text x="180.0" y="568.0" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="26" fill="#000000">← start</text>
+
+  <!-- Subtle quadrant guides -->
+  <line x1="270.0" y1="270.0" x2="770.0" y2="770.0" stroke="#000000" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <line x1="270.0" y1="770.0" x2="770.0" y2="270.0" stroke="#000000" stroke-width="1.5" stroke-dasharray="6 6"/>
+
+  <!-- Continuous expanding spiral (drawn under nodes) -->
+  <path d="M556.0,520.0L556.5,521.9L556.8,523.9L557.1,525.9L557.2,527.9L557.2,530.0L557.1,532.1L556.9,534.2L556.6,536.3L556.2,538.4L555.6,540.5L554.9,542.7L554.1,544.7L553.1,546.8L552.0,548.9L550.8,550.8L549.5,552.8L548.1,554.7L546.5,556.5L544.9,558.3L543.1,560.0L541.2,561.6L539.2,563.1L537.1,564.5L534.9,565.8L532.6,567.0L530.2,568.1L527.8,569.1L525.3,570.0L522.7,570.7L520.0,571.2L517.3,571.7L514.5,572.0L511.7,572.1L508.9,572.1L506.1,572.0L503.2,571.6L500.4,571.2L497.5,570.5L494.7,569.7L491.8,568.8L489.0,567.7L486.3,566.4L483.6,565.0L480.9,563.4L478.4,561.6L475.9,559.7L473.5,557.7L471.1,555.5L468.9,553.2L466.8,550.7L464.8,548.1L463.0,545.4L461.2,542.6L459.7,539.6L458.2,536.6L456.9,533.4L455.8,530.2L454.9,526.8L454.1,523.5L453.5,520.0L453.1,516.5L452.9,512.9L452.8,509.4L453.0,505.8L453.3,502.1L453.9,498.5L454.6,494.9L455.5,491.3L456.7,487.7L458.0,484.2L459.5,480.7L461.3,477.3L463.2,474.0L465.3,470.7L467.6,467.6L470.1,464.5L472.7,461.6L475.5,458.8L478.5,456.1L481.7,453.6L485.0,451.2L488.4,449.0L492.0,447.0L495.7,445.2L499.5,443.5L503.4,442.0L507.5,440.8L511.6,439.7L515.7,438.9L520.0,438.2L524.3,437.9L528.7,437.7L533.0,437.8L537.4,438.0L541.8,438.6L546.2,439.4L550.6,440.4L554.9,441.6L559.2,443.1L563.4,444.8L567.6,446.7L571.6,448.9L575.6,451.3L579.5,454.0L583.2,456.8L586.8,459.9L590.2,463.1L593.5,466.6L596.7,470.2L599.6,474.0L602.4,478.0L604.9,482.2L607.2,486.5L609.4,491.0L611.2,495.6L612.9,500.3L614.3,505.1L615.5,510.0L616.4,515.0L617.0,520.0L617.4,525.1L617.5,530.2L617.3,535.4L616.9,540.6L616.1,545.8L615.2,550.9L613.9,556.0L612.3,561.1L610.5,566.1L608.4,571.0L606.0,575.9L603.4,580.6L600.5,585.2L597.4,589.7L594.0,594.0L590.3,598.1L586.5,602.1L582.4,605.9L578.1,609.5L573.6,612.8L568.9,615.9L564.0,618.8L559.0,621.5L553.7,623.9L548.4,626.0L542.9,627.8L537.3,629.4L531.6,630.6L525.8,631.6L520.0,632.2L514.1,632.6L508.2,632.6L502.2,632.4L496.2,631.8L490.3,630.9L484.4,629.7L478.5,628.1L472.7,626.3L467.0,624.1L461.3,621.6L455.8,618.8L450.4,615.7L445.2,612.4L440.1,608.7L435.2,604.8L430.5,600.6L426.0,596.1L421.8,591.4L417.8,586.4L414.0,581.2L410.5,575.8L407.2,570.2L404.3,564.4L401.6,558.5L399.3,552.3L397.3,546.1L395.6,539.7L394.2,533.2L393.2,526.6L392.5,520.0L392.2,513.3L392.2,506.6L392.6,499.8L393.3,493.1L394.4,486.3L395.8,479.7L397.6,473.0L399.8,466.5L402.3,460.0L405.2,453.7L408.4,447.5L411.9,441.5L415.8,435.6L420.0,429.9L424.5,424.5L429.2,419.2L434.3,414.2L439.7,409.4L445.3,405.0L451.2,400.8L457.3,396.9L463.6,393.3L470.1,390.1L476.8,387.1L483.7,384.6L490.7,382.4L497.9,380.5L505.2,379.0L512.6,378.0L520.0,377.2L527.5,376.9L535.0,377.0L542.6,377.5L550.1,378.4L557.6,379.7L565.1,381.3L572.4,383.4L579.7,385.9L586.9,388.7L593.9,392.0L600.8,395.6L607.5,399.6L614.0,403.9L620.3,408.6L626.3,413.7L632.1,419.0L637.7,424.7L642.9,430.7L647.8,437.0L652.4,443.5L656.7,450.3L660.6,457.4L664.2,464.7L667.4,472.1L670.2,479.8L672.6,487.6L674.5,495.5L676.1,503.6L677.3,511.8L678.0,520.0L678.3,528.3L678.1,536.6L677.6,545.0L676.5,553.3L675.1,561.6L673.2,569.8L670.8,577.9L668.1,585.9L664.9,593.8L661.2,601.5L657.2,609.1L652.8,616.5L647.9,623.6L642.7,630.5L637.1,637.1L631.2,643.5L624.9,649.5L618.2,655.2L611.3,660.6L604.1,665.6L596.6,670.3L588.8,674.6L580.8,678.4L572.6,681.9L564.2,684.9L555.6,687.5L546.9,689.6L538.0,691.3L529.0,692.5L520.0,693.2L510.9,693.5L501.8,693.3L492.7,692.6L483.6,691.5L474.5,689.8L465.5,687.7L456.6,685.1L447.9,682.0L439.3,678.4L430.8,674.4L422.6,670.0L414.6,665.1L406.8,659.8L399.3,654.0L392.1,647.9L385.2,641.4L378.6,634.5L372.4,627.2L366.6,619.6L361.2,611.7L356.1,603.5L351.5,595.0L347.3,586.3L343.6,577.3L340.4,568.1L337.6,558.8L335.3,549.2L333.5,539.6L332.3,529.8L331.5,520.0L331.3,510.1L331.5,500.2L332.3,490.3L333.6,480.4L335.5,470.6L337.8,460.8L340.7,451.2L344.1,441.7L348.0,432.3L352.4,423.2L357.2,414.3L362.6,405.6L368.4,397.2L374.6,389.1L381.3,381.3L388.4,373.9L395.9,366.8L403.8,360.1L412.1,353.8L420.7,347.9L429.6,342.5L438.8,337.6L448.3,333.1L458.0,329.1L467.9,325.6L478.1,322.7L488.4,320.3L498.8,318.4L509.4,317.0L520.0,316.2L530.7,316.0L541.4,316.4L552.1,317.3L562.8,318.7L573.4,320.7L583.9,323.3L594.3,326.5L604.5,330.2L614.6,334.4L624.4,339.1L634.0,344.4L643.3,350.2L652.4,356.5L661.1,363.3L669.5,370.5L677.5,378.2L685.1,386.3L692.2,394.9L699.0,403.8L705.3,413.0L711.1,422.7L716.4,432.6L721.1,442.8L725.4,453.3L729.1,464.0L732.2,474.9L734.8,486.0L736.8,497.2L738.2,508.6L739.0,520.0L739.2,531.5L738.8,543.0L737.8,554.5L736.2,566.0L734.0,577.3L731.2,588.6L727.8,599.8L723.8,610.7L719.2,621.5L714.1,632.0L708.4,642.3L702.1,652.3L695.3,662.0L688.0,671.3L680.2,680.2L672.0,688.8L663.3,696.9L654.1,704.6L644.5,711.8L634.6,718.5L624.3,724.6L613.6,730.3L602.7,735.4L591.4,739.9L580.0,743.8L568.3,747.1L556.4,749.9L544.4,752.0L532.2,753.4L520.0,754.2L507.7,754.4L495.4,754.0L483.1,752.9L470.9,751.1L458.7,748.7L446.7,745.7L434.8,742.0L423.1,737.7L411.6,732.8L400.3,727.3L389.4,721.1L378.7,714.4L368.4,707.2L358.5,699.4L349.0,691.0L339.9,682.2L331.2,672.9L323.1,663.1L315.4,652.8L308.3,642.2L301.8,631.2L295.8,619.8L290.4,608.1L285.6,596.2L281.5,583.9L277.9,571.5L275.1,558.8L272.9,546.0L271.3,533.0L270.5,520.0L270.3,506.9L270.9,493.8L272.1,480.7L274.0,467.7L276.5,454.8L279.8,442.0L283.7,429.3L288.4,416.9L293.6,404.7L299.5,392.7L306.1,381.1L313.2,369.8L321.0,358.8L329.3,348.3L338.2,338.2L347.6,328.5L357.5,319.4L368.0,310.7L378.9,302.7L390.2,295.1L401.9,288.2L414.0,281.9L426.4,276.2L439.1,271.1L452.1,266.7L465.4,263.0L478.8,260.0L492.4,257.7L506.2,256.1L520.0,255.2L533.9,255.1L547.8,255.7L561.7,257.0L575.5,259.0L589.2,261.8L602.8,265.3L616.2,269.5L629.3,274.4L642.3,280.0L654.9,286.3L667.2,293.3L679.2,300.9L690.8,309.1L701.9,318.0L712.6,327.4L722.8,337.4L732.5,347.9L741.6,359.0L750.1,370.5L758.1,382.5L765.4,395.0L772.1,407.8L778.1,420.9L783.4,434.4L788.0,448.2L791.9,462.2L795.0,476.4L797.5,490.8L799.1,505.4L800.0,520.0" fill="none" stroke="#000000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Quadrant phase labels -->
+  <text x="720" y="175" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">1. Planning</text>
+  <text x="320" y="175" text-anchor="end" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">2. Risk Analysis</text>
+  <text x="320" y="870" text-anchor="end" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">3. Engineering</text>
+  <text x="720" y="870" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">4. Evaluation / Review</text>
+
+  <!-- Iteration nodes + labels -->
+  <circle cx="520.0" cy="438.2" r="16" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="520.0" y="446.2" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="22" font-weight="700" fill="#000000">1</text><text x="820.0" y="446.2" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">S1 Prototype / Circuit Breaker</text><circle cx="520.0" cy="377.2" r="16" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="520.0" y="385.2" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="22" font-weight="700" fill="#000000">2</text><text x="820.0" y="385.2" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">S2 Auth / RBAC</text><circle cx="520.0" cy="316.2" r="16" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="520.0" y="324.2" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="22" font-weight="700" fill="#000000">3</text><text x="820.0" y="324.2" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">S3 Commerce</text><circle cx="520.0" cy="255.2" r="16" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="520.0" y="263.2" text-anchor="middle" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="22" font-weight="700" fill="#000000">4</text><text x="820.0" y="263.2" text-anchor="start" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="28" font-weight="700" fill="#000000">S4 Polish / Deploy</text>
+</svg>`;
+
+function getSvgElement() {
+  return document.querySelector("#diagram svg");
+}
+
+function applyDiagramWidth(px) {
+  const n = Math.max(240, Math.min(2400, Number(px) || 900));
+  document.documentElement.style.setProperty("--diagram-width", n + "px");
+  const num = document.getElementById("width-num");
+  const range = document.getElementById("width-range");
+  if (num && String(num.value) !== String(n)) num.value = String(n);
+  if (range && String(range.value) !== String(n)) range.value = String(n);
+  try { localStorage.setItem("tryme-diagram-width", String(n)); } catch (_) {}
+  return n;
+}
+
+function serializeSvg() {
+  const svg = getSvgElement();
+  if (!svg) throw new Error("SVG not ready");
+  const clone = svg.cloneNode(true);
+  if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  clone.style.background = "transparent";
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(clone);
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function downloadSvg(filename) {
+  const status = document.getElementById("status");
+  try {
+    downloadBlob(new Blob([serializeSvg()], { type: "image/svg+xml;charset=utf-8" }), filename);
+    if (status) status.textContent = "SVG saved: " + filename;
+  } catch (err) {
+    if (status) status.textContent = "SVG export failed: " + err.message;
+    console.error(err);
+  }
+}
+
+function copySvg() {
+  const status = document.getElementById("status");
+  navigator.clipboard.writeText(serializeSvg()).then(
+    () => { if (status) status.textContent = "SVG copied to clipboard"; },
+    (err) => { if (status) status.textContent = "Copy SVG failed: " + err; }
+  );
+}
+
+function dataUrlToBlob(dataUrl) {
+  const parts = dataUrl.split(",");
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const bin = atob(parts[1]);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+async function diagramToPngBlob(pixelRatio) {
+  const node = document.getElementById("diagram");
+  if (!node || !getSvgElement()) throw new Error("SVG not ready");
+  if (typeof htmlToImage === "undefined" || !htmlToImage.toPng) {
+    throw new Error("html-to-image failed to load");
+  }
+  const dataUrl = await htmlToImage.toPng(node, {
+    backgroundColor: null,
+    pixelRatio: pixelRatio || 2,
+    cacheBust: true,
+    style: { background: "transparent", backgroundColor: "transparent" }
+  });
+  return dataUrlToBlob(dataUrl);
+}
+
+async function downloadPng(filename) {
+  const status = document.getElementById("status");
+  try {
+    if (status) status.textContent = "Rendering PNG…";
+    const blob = await diagramToPngBlob(2);
+    downloadBlob(blob, filename);
+    if (status) status.textContent = "PNG saved: " + filename;
+  } catch (err) {
+    if (status) status.textContent = "PNG export failed: " + err.message;
+    console.error(err);
+  }
+}
+
+async function copyPng() {
+  const status = document.getElementById("status");
+  try {
+    if (status) status.textContent = "Copying PNG…";
+    const blob = await diagramToPngBlob(2);
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    if (status) status.textContent = "PNG copied to clipboard";
+  } catch (err) {
+    if (status) status.textContent = "Copy PNG failed: " + err.message;
+    console.error(err);
+  }
+}
+
+function setExportEnabled(on) {
+  ["btn-svg", "btn-copy-svg", "btn-png", "btn-copy-png"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !on;
+  });
+}
+
+function renderDiagram() {
+  const status = document.getElementById("status");
+  document.getElementById("diagram").innerHTML = SPIRAL_SVG;
+  setExportEnabled(true);
+  if (status) status.textContent = "Ready — set width, then Save SVG/PNG";
+}
+
+function wireControls() {
+  let saved = 900;
+  try {
+    const v = localStorage.getItem("tryme-diagram-width");
+    if (v) saved = Number(v) || 900;
+  } catch (_) {}
+  applyDiagramWidth(saved);
+
+  const range = document.getElementById("width-range");
+  const num = document.getElementById("width-num");
+  if (range) range.addEventListener("input", () => applyDiagramWidth(range.value));
+  if (num) {
+    num.addEventListener("change", () => applyDiagramWidth(num.value));
+    num.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") applyDiagramWidth(num.value);
+    });
+  }
+
+  document.getElementById("btn-svg").addEventListener("click", () => {
+    downloadSvg(window.SVG_FILENAME || "diagram.svg");
+  });
+  document.getElementById("btn-copy-svg").addEventListener("click", copySvg);
+  document.getElementById("btn-png").addEventListener("click", () => {
+    downloadPng(window.PNG_FILENAME || "diagram.png");
+  });
+  document.getElementById("btn-copy-png").addEventListener("click", copyPng);
+  document.getElementById("btn-rerender").addEventListener("click", renderDiagram);
+}
+
+wireControls();
+setExportEnabled(true);
+document.getElementById("status").textContent = "Ready — set width, then Save SVG/PNG";
+  </script>
+</body>
+</html>

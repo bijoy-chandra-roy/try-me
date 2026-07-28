@@ -1,0 +1,71 @@
+<mxfile host="app.diagrams.net" agent="TryMe" version="22.1.0" type="device">
+  <diagram id="tryme-er" name="TryMe ER Diagram">
+    <mxGraphModel dx="1200" dy="800" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="411" math="0" shadow="0" background="none">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Entity style: header + key attrs — physical MongoDB collections -->
+        <mxCell id="USER" value="&lt;b&gt;USER&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;_id PK&#xa;email&#xa;role&#xa;merchantId FK&#xa;status" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontColor=#000000;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="130" width="120" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="MERCHANT" value="&lt;b&gt;MERCHANT&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;_id PK&#xa;name&#xa;ownerId FK&#xa;status" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="240" y="20" width="120" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="PRODUCT" value="&lt;b&gt;PRODUCT&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;_id PK&#xa;name · price&#xa;category&#xa;imageUrl&#xa;merchantId FK&#xa;inStock" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="440" y="20" width="130" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="CART" value="&lt;b&gt;CART&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;_id PK&#xa;userId FK&#xa;items[]" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="240" y="290" width="110" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="ORDER" value="&lt;b&gt;ORDER&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;_id PK&#xa;userId FK&#xa;orderNumber&#xa;status&#xa;total" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="420" y="280" width="120" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="ADDRESS" value="&lt;b&gt;ADDRESS&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;_id PK&#xa;userId FK&#xa;line1&#xa;isDefault" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="290" width="110" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="REVIEW" value="&lt;b&gt;REVIEW&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;_id PK&#xa;userId FK&#xa;productId FK&#xa;orderId FK&#xa;rating" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="640" y="150" width="125" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="TRYON" value="&lt;b&gt;TRYON_HISTORY&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;_id PK&#xa;userId FK (nullable)&#xa;productId FK&#xa;compositeImageUrl&#xa;fromFallback" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="640" y="20" width="145" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="SYS" value="&lt;b&gt;SYSTEM_CONFIG&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;_id PK&#xa;maintenanceMode&#xa;guestTryOnLimit&#xa;(singleton)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="880" y="150" width="145" height="105" as="geometry" />
+        </mxCell>
+
+        <!-- Crow's foot relationships -->
+        <mxCell id="r1" value="owns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERzeroToOne;startArrow=ERone;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="USER" target="MERCHANT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" value="lists" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERzeroToMany;startArrow=ERone;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="MERCHANT" target="PRODUCT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r3" value="has" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERone;startArrow=ERone;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="USER" target="CART">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r4" value="places" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERzeroToMany;startArrow=ERone;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="USER" target="ORDER">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r5" value="stores" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERzeroToMany;startArrow=ERone;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="USER" target="ADDRESS">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r6" value="writes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERzeroToMany;startArrow=ERone;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="USER" target="REVIEW">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r7" value="records" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERzeroToMany;startArrow=ERzeroToOne;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="USER" target="TRYON">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r8" value="used_in" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERzeroToMany;startArrow=ERone;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="PRODUCT" target="TRYON">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r9" value="receives" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERzeroToMany;startArrow=ERone;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="PRODUCT" target="REVIEW">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r10" value="eligible" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERzeroToMany;startArrow=ERone;startFill=0;endFill=0;strokeColor=#000000;fontSize=9;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="ORDER" target="REVIEW">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

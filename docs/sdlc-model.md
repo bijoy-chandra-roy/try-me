@@ -6,18 +6,20 @@ How TryMe was planned, built, and evolved. This document describes the **actual 
 
 ## Overview
 
-TryMe uses the **Spiral Model** (Evolutionary Prototyping) as its Software Development Life Cycle. Each spiral delivers a working, deployable increment of the product. Risk is addressed early (VTO API resilience in Spiral 1), and scope expands only after the previous increment is validated.
+TryMe uses the **Spiral Model** as its Software Development Life Cycle — a risk-driven, iterative **meta-model** that combines controlled Waterfall-style engineering with continuous prototyping feedback. Each loop of the spiral is one full cycle; the spiral grows as cumulative effort increases and scope is validated.
+
+Primary focus: **proactive risk management** before committing to a full feature build (e.g. VTO API resilience in Spiral 1 via Circuit Breaker + fallback). TryMe’s increments follow **evolutionary prototyping**: working software is refined across spirals rather than thrown away.
 
 ```mermaid
 flowchart LR
     subgraph Spiral["Each Spiral Cycle"]
         direction TB
-        OBJ["1. Determine Objectives"]
-        RISK["2. Identify & Resolve Risks"]
-        DEV["3. Develop & Test"]
-        REV["4. Review & Plan Next"]
-        OBJ --> RISK --> DEV --> REV
-        REV -->|"Next spiral"| OBJ
+        PLAN["1. Planning<br/>Objectives and alternatives"]
+        RISK["2. Risk Analysis<br/>and Prototyping"]
+        ENG["3. Engineering<br/>Product development"]
+        REV["4. Evaluation / Review<br/>Plan next cycle"]
+        PLAN --> RISK --> ENG --> REV
+        REV -->|"Next spiral"| PLAN
     end
 ```
 
@@ -25,25 +27,28 @@ flowchart LR
 
 ## Spirals Delivered
 
-| Spiral | Name | Duration | Outcome |
-|--------|------|----------|---------|
-| **1** | Operational Prototype | ~21 days | End-to-end VTO workflow, product catalog, circuit-breaker fallback |
-| **2** | Auth & RBAC | ~13 days | Auth.js, 6 roles, 21 permissions, role-specific dashboards |
-| **3** | Commerce | ~10 days | Cart, checkout (COD), orders, addresses, reviews, merchant ops |
-| **4** | Design & Polish | ~13 days | Design system, Astryx-informed UI, settings/i18n, VTO SSE fix, Vercel deploy |
+| Spiral | Name | Outcome |
+|--------|------|---------|
+| **1** | Operational Prototype | End-to-end VTO workflow, product catalog, circuit-breaker fallback |
+| **2** | Auth & RBAC | Auth.js, 6 roles, permissions, role-specific dashboards |
+| **3** | Commerce | Cart, checkout (COD), orders, addresses, reviews, merchant ops |
+| **4** | Design & Polish | Design system, Astryx-informed UI, settings/i18n, VTO SSE fix, Vercel deploy |
 
-See [project-network-diagram.md](diagrams/project-network-diagram.md) for the full CPM schedule.
+Spirals are **logical delivery increments** (objectives → risks → build → review), not calendar-day estimates. Git history for this repository spans a short commit window (20–21 Jul 2026); the spiral names describe scope order, not multi-week wall-clock durations.
+
+See [project-network-diagram.md](diagrams/project-network-diagram.md) for the CPM schedule used in planning docs.
 
 ---
 
 ## Process Per Spiral
 
-Each spiral followed the same four-phase cycle:
+Each spiral followed the same four-quadrant cycle (Boehm / course meta-model):
 
-### Phase 1 — Determine Objectives
+### Phase 1 — Planning (Objectives & Alternatives)
 
 - Define what the spiral must deliver (user stories, acceptance criteria).
 - Scope is **fixed per spiral** — features outside scope are deferred to the next spiral.
+- Explore alternatives and constraints (e.g. free-tier VTO/ImgBB only).
 - Example (Spiral 1): "A shopper can browse products and receive a try-on result, even when the VTO API is down."
 
 **How we did it:**
@@ -51,10 +56,10 @@ Each spiral followed the same four-phase cycle:
 - Used Cursor **Plan Mode** for large features (auth RBAC, design refactor) to agree on scope before coding.
 - Documented actors and use cases in [use-case-diagram.md](diagrams/use-case-diagram.md) at spiral start.
 
-### Phase 2 — Identify & Resolve Risks
+### Phase 2 — Risk Analysis & Prototyping
 
-- Prototype the highest-risk component first.
-- Spiral 1 risk: VTO API latency, rate limits, and downtime → **Circuit Breaker + Fallback Cache**.
+- Identify technical/business risks; prototype the highest-risk part first.
+- Spiral 1 risk: VTO API latency, rate limits, and downtime → **Circuit Breaker + Fallback Cache** (evolutionary prototype kept in the product).
 - Spiral 2 risk: Role complexity → **Centralized permission matrix** before building dashboards.
 - Spiral 4 risk: Hugging Face Gradio upgrade killed sync `/api/predict` → **SSE `/call/tryon` rewrite**.
 
@@ -62,9 +67,11 @@ Each spiral followed the same four-phase cycle:
 - Built the circuit breaker before the try-on UI.
 - Implemented auth guards and middleware before role dashboards.
 - When the public VTO Space changed its API, we patched the SSE client and embraced Fallback as a demo feature rather than chasing guaranteed Live results on a free tier.
+- Prototyping style: **evolutionary** (refined in place) with occasional **throwaway** spikes; UI explored with low- then higher-fidelity iterations in later spirals.
 
-### Phase 3 — Develop & Test
+### Phase 3 — Engineering (Product Development)
 
+- After risks are mitigated, build and test the increment (feature slices can follow a linear path inside the spiral).
 - Feature-based vertical slices: model → repository → service → route handler → client hook → UI.
 - One commit per logical feature increment.
 - Manual end-to-end testing after each slice; no separate QA phase.
@@ -75,11 +82,10 @@ Each spiral followed the same four-phase cycle:
 - Demo accounts for every role (password: `TryMe123!`).
 - Deployed to Vercel for production validation.
 
-### Phase 4 — Review & Plan Next
+### Phase 4 — Evaluation / Review & Plan Next
 
-- Evaluate the working prototype against spiral objectives.
-- Update diagrams and README to reflect current state.
-- Define the next spiral's scope based on gaps and priorities.
+- Customer/team evaluates the spiral’s output against objectives.
+- Update diagrams and README; plan the next loop from gaps and priorities.
 
 **How we did it:**
 - README "Spiral Model Notes" section updated per spiral.

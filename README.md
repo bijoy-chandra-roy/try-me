@@ -185,6 +185,7 @@ Full index: [docs/README.md](docs/README.md)
 | SDLC / Spirals | [docs/sdlc-model.md](docs/sdlc-model.md) |
 | Engineering model | [docs/swe-model.md](docs/swe-model.md) |
 | Diagrams | [docs/diagrams/README.md](docs/diagrams/README.md) |
+| Defense deck | [docs/defense/README.md](docs/defense/README.md) |
 | Design system | [docs/design/design.md](docs/design/design.md) |
 
 ## License

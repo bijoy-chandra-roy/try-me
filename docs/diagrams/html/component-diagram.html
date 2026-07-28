@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Component Diagram — TryMe (B&amp;W)</title>
+  <style>
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: #f0f0f0;
+  color: #000000;
+  font-family: "Segoe UI", Calibri, Arial, sans-serif;
+}
+header {
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+  gap: 0.75rem; padding: 0.75rem 1.1rem;
+  border-bottom: 1px solid #000000; background: #ffffff;
+  position: sticky; top: 0; z-index: 10;
+}
+h1 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.meta { margin: 0.15rem 0 0; font-size: 0.78rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; max-width: 52rem; justify-content: flex-end; }
+button, label.ctrl {
+  background: #ffffff; color: #000000; border: 1px solid #000000;
+  padding: 0.4rem 0.7rem; font-size: 0.8rem; cursor: pointer; border-radius: 0;
+}
+button:hover, button:focus { background: #000000; color: #ffffff; outline: none; }
+button.active { background: #000000; color: #ffffff; }
+button:disabled { opacity: 0.45; cursor: wait; background: #ffffff; color: #000000; }
+label.ctrl {
+  display: inline-flex; align-items: center; gap: 0.4rem; cursor: default;
+}
+label.ctrl input[type="range"] { width: 7.5rem; cursor: pointer; }
+label.ctrl input[type="number"] {
+  width: 4.2rem; border: 1px solid #000000; padding: 0.15rem 0.25rem; font-size: 0.8rem;
+}
+main {
+  padding: 1.25rem;
+  overflow: auto;
+  /* Checkerboard only for on-screen preview of transparency — not baked into exports */
+  background-color: #e8e8e8;
+  background-image:
+    linear-gradient(45deg, #d0d0d0 25%, transparent 25%),
+    linear-gradient(-45deg, #d0d0d0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #d0d0d0 75%),
+    linear-gradient(-45deg, transparent 75%, #d0d0d0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  min-height: calc(100vh - 8rem);
+}
+#diagram-frame {
+  margin: 0 auto;
+  width: var(--diagram-width, 720px);
+  max-width: 100%;
+  background: transparent;
+}
+#diagram { background: transparent; }
+#diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent !important;
+}
+footer {
+  padding: 0.65rem 1.25rem 1.25rem; font-size: 0.75rem;
+  border-top: 1px solid #000000; background: #ffffff;
+}
+.status { font-size: 0.78rem; min-width: 10rem; }
+@media print {
+  header .actions, footer { display: none; }
+  header { position: static; border: none; }
+  main {
+    padding: 0;
+    background: transparent;
+    background-image: none;
+  }
+}
+</style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Component Diagram</h1>
+      <p class="meta">Unified Next.js 15 App Router — Client, API, Server, External</p>
+    </div>
+    <div class="actions">
+
+      <label class="ctrl">Width <input type="range" id="width-range" min="240" max="1800" step="20" value="720" /><input type="number" id="width-num" min="240" max="2400" step="10" value="720" /> px</label>
+      <button type="button" id="btn-svg" disabled>Save SVG</button>
+      <button type="button" id="btn-copy-svg" disabled>Copy SVG</button>
+      <button type="button" id="btn-png" disabled>Save PNG</button>
+      <button type="button" id="btn-copy-png" disabled>Copy PNG</button>
+      <button type="button" id="btn-copy-mermaid">Copy Mermaid</button>
+      <button type="button" id="btn-rerender">Re-render</button>
+      <span class="status" id="status">Loading Mermaid…</span>
+    </div>
+  </header>
+  <main>
+    <div id="diagram-frame"><div id="diagram"></div></div>
+  </main>
+  <footer>TryMe — Sonargaon University. Black ink on <strong>transparent</strong> background (checkerboard is preview-only). Adjust <strong>Width</strong>, then Save/Copy SVG or PNG for slide embedding.</footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+  <script>
+
+const BW_THEME = {
+  theme: "base",
+  securityLevel: "loose",
+  startOnLoad: false,
+  themeVariables: {
+    darkMode: false,
+    background: "transparent",
+    mainBkg: "transparent",
+    primaryColor: "transparent",
+    primaryTextColor: "#000000",
+    primaryBorderColor: "#000000",
+    secondaryColor: "transparent",
+    secondaryTextColor: "#000000",
+    secondaryBorderColor: "#000000",
+    tertiaryColor: "transparent",
+    tertiaryTextColor: "#000000",
+    tertiaryBorderColor: "#000000",
+    lineColor: "#000000",
+    textColor: "#000000",
+    titleColor: "#000000",
+    nodeTextColor: "#000000",
+    fontSize: "24px",
+    clusterBkg: "transparent",
+    clusterBorder: "#000000",
+    edgeLabelBackground: "transparent",
+    actorBkg: "transparent",
+    actorBorder: "#000000",
+    actorTextColor: "#000000",
+    actorLineColor: "#000000",
+    labelBoxBkgColor: "transparent",
+    labelBoxBorderColor: "#000000",
+    labelTextColor: "#000000",
+    noteBkgColor: "transparent",
+    noteTextColor: "#000000",
+    noteBorderColor: "#000000",
+    classText: "#000000",
+    attributeBackgroundColorOdd: "transparent",
+    attributeBackgroundColorEven: "transparent",
+    relationColor: "#000000",
+    relationLabelBackground: "transparent",
+    relationLabelColor: "#000000"
+  },
+  flowchart: { htmlLabels: false, curve: "basis", diagramPadding: 12, nodeSpacing: 28, rankSpacing: 36 },
+  er: { diagramPadding: 16 },
+  class: { hideEmptyMembersBox: false }
+};
+
+function isInkElement(el) {
+  const tag = el.tagName.toLowerCase();
+  const cls = el.getAttribute("class") || "";
+  if (tag === "text" || tag === "tspan") return true;
+  if (cls.includes("nodeLabel") || cls.includes("edgeLabel") || cls.includes("label")) return true;
+  if (cls.includes("flowchart-link") || cls.includes("edgePath") || cls.includes("relation")) return true;
+  if (cls.includes("arrow") || cls.includes("marker") || tag === "marker") return true;
+  return false;
+}
+
+function forceBlackInkTransparentBg(root) {
+  if (!root) return;
+  root.querySelectorAll("style").forEach((el) => {
+    let css = el.textContent || "";
+    css = css.replace(/background(-color)?\s*:\s*[^;]+/gi, "background$1:transparent");
+    css = css.replace(/fill\s*:\s*#[0-9a-fA-F]{3,8}/gi, (m) => {
+      const hex = m.split(":")[1].trim().toLowerCase();
+      if (hex === "#000" || hex === "#000000") return "fill:#000000";
+      return "fill:none";
+    });
+    css = css.replace(/fill\s*:\s*rgb\([^)]+\)/gi, "fill:none");
+    css = css.replace(/stroke\s*:\s*[^;]+/gi, "stroke:#000000");
+    css = css.replace(/color\s*:\s*[^;]+/gi, "color:#000000");
+    el.textContent = css;
+  });
+  root.querySelectorAll("rect.bw-bg").forEach((el) => el.remove());
+  root.querySelectorAll("*").forEach((el) => {
+    const style = el.style;
+    const tag = el.tagName.toLowerCase();
+    const cls = el.getAttribute("class") || "";
+    if (style.filter) style.filter = "none";
+    if (style.boxShadow) style.boxShadow = "none";
+    if (style.textShadow) style.textShadow = "none";
+    if (style.background || style.backgroundColor) {
+      style.background = "transparent";
+      style.backgroundColor = "transparent";
+    }
+
+    if (el.hasAttribute("stroke") && el.getAttribute("stroke") !== "none") {
+      el.setAttribute("stroke", "#000000");
+    }
+    if (style.stroke && style.stroke !== "none") style.stroke = "#000000";
+
+    if (isInkElement(el) || cls.includes("arrowMarkerPath") || tag === "polygon" && cls.includes("arrow")) {
+      if (el.hasAttribute("fill") && el.getAttribute("fill") !== "none") el.setAttribute("fill", "#000000");
+      if (style.fill && style.fill !== "none") style.fill = "#000000";
+      if (style.color) style.color = "#000000";
+      return;
+    }
+
+    // Shape / cluster fills → transparent (outline-only diagram)
+    if (["rect", "polygon", "circle", "ellipse", "path"].includes(tag)) {
+      if (cls.includes("flowchart-link") || cls.includes("edgePath") || cls.includes("relation") || cls.includes("messageLine")) {
+        el.setAttribute("stroke", "#000000");
+        if (el.getAttribute("fill") && el.getAttribute("fill") !== "none") el.setAttribute("fill", "none");
+      } else {
+        if (el.hasAttribute("fill") && el.getAttribute("fill") !== "none") el.setAttribute("fill", "none");
+        if (style.fill && style.fill !== "none") style.fill = "none";
+        if (el.hasAttribute("stroke") || ["rect", "polygon", "circle", "ellipse"].includes(tag)) {
+          el.setAttribute("stroke", "#000000");
+        }
+      }
+    }
+  });
+  root.querySelectorAll("text, tspan, .nodeLabel, .edgeLabel, .label, foreignObject, foreignObject *").forEach((el) => {
+    if (el.style) {
+      el.style.color = "#000000";
+      el.style.fill = "#000000";
+      el.style.background = "transparent";
+      el.style.backgroundColor = "transparent";
+      el.style.boxShadow = "none";
+      el.style.textShadow = "none";
+    }
+    if (el.setAttribute && el.hasAttribute && el.hasAttribute("fill")) el.setAttribute("fill", "#000000");
+  });
+  if (root.tagName && root.tagName.toLowerCase() === "svg") {
+    root.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    root.style.background = "transparent";
+    root.removeAttribute("style"); // clear any leftover bg; re-apply transparent
+    root.style.background = "transparent";
+  }
+}
+
+function getSvgElement() {
+  return document.querySelector("#diagram svg");
+}
+
+function applyDiagramWidth(px) {
+  const n = Math.max(240, Math.min(2400, Number(px) || 720));
+  document.documentElement.style.setProperty("--diagram-width", n + "px");
+  const num = document.getElementById("width-num");
+  const range = document.getElementById("width-range");
+  if (num && String(num.value) !== String(n)) num.value = String(n);
+  if (range && String(range.value) !== String(n)) range.value = String(n);
+  try { localStorage.setItem("tryme-diagram-width", String(n)); } catch (_) {}
+  return n;
+}
+
+function serializeSvg() {
+  const svg = getSvgElement();
+  if (!svg) throw new Error("SVG not ready");
+  const clone = svg.cloneNode(true);
+  forceBlackInkTransparentBg(clone);
+  if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  // Ensure no opaque background in export
+  clone.style.background = "transparent";
+  clone.querySelectorAll("rect.bw-bg").forEach((el) => el.remove());
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(clone);
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function downloadSvg(filename) {
+  const status = document.getElementById("status");
+  try {
+    downloadBlob(new Blob([serializeSvg()], { type: "image/svg+xml;charset=utf-8" }), filename);
+    if (status) status.textContent = "SVG saved: " + filename;
+  } catch (err) {
+    if (status) status.textContent = "SVG export failed: " + err.message;
+    console.error(err);
+  }
+}
+
+function copySvg() {
+  const status = document.getElementById("status");
+  navigator.clipboard.writeText(serializeSvg()).then(
+    () => { if (status) status.textContent = "SVG copied to clipboard"; },
+    (err) => { if (status) status.textContent = "Copy SVG failed: " + err; }
+  );
+}
+
+function dataUrlToBlob(dataUrl) {
+  const parts = dataUrl.split(",");
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const bin = atob(parts[1]);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+/** Rasterize via DOM capture — avoids tainted-canvas from Mermaid foreignObject / SVG-as-Image. */
+async function diagramToPngBlob(pixelRatio) {
+  const node = document.getElementById("diagram");
+  if (!node || !getSvgElement()) throw new Error("SVG not ready");
+  if (typeof htmlToImage === "undefined" || !htmlToImage.toPng) {
+    throw new Error("html-to-image failed to load");
+  }
+  // Re-apply ink styles right before capture
+  forceBlackInkTransparentBg(getSvgElement());
+  const dataUrl = await htmlToImage.toPng(node, {
+    backgroundColor: null,
+    pixelRatio: pixelRatio || 2,
+    cacheBust: true,
+    style: { background: "transparent", backgroundColor: "transparent" }
+  });
+  return dataUrlToBlob(dataUrl);
+}
+
+async function downloadPng(filename) {
+  const status = document.getElementById("status");
+  try {
+    if (status) status.textContent = "Rendering PNG…";
+    const blob = await diagramToPngBlob(2);
+    downloadBlob(blob, filename);
+    if (status) status.textContent = "PNG saved: " + filename;
+  } catch (err) {
+    if (status) status.textContent = "PNG export failed: " + err.message;
+    console.error(err);
+  }
+}
+
+async function copyPng() {
+  const status = document.getElementById("status");
+  try {
+    if (status) status.textContent = "Copying PNG…";
+    const blob = await diagramToPngBlob(2);
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    if (status) status.textContent = "PNG copied to clipboard";
+  } catch (err) {
+    if (status) status.textContent = "Copy PNG failed: " + err.message;
+    console.error(err);
+  }
+}
+
+function setExportEnabled(on) {
+  ["btn-svg", "btn-copy-svg", "btn-png", "btn-copy-png"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !on;
+  });
+}
+
+async function paintDefinition(definition) {
+  const status = document.getElementById("status");
+  setExportEnabled(false);
+  if (status) status.textContent = "Rendering…";
+  mermaid.initialize(BW_THEME);
+  const el = document.getElementById("diagram");
+  const id = "bw-diagram-" + Date.now();
+  const { svg } = await mermaid.render(id, definition);
+  el.innerHTML = svg;
+  forceBlackInkTransparentBg(getSvgElement());
+  setExportEnabled(true);
+}
+
+function copyMermaid() {
+  const status = document.getElementById("status");
+  let src = "";
+  if (typeof window.getMermaidSource === "function") {
+    src = window.getMermaidSource() || "";
+  } else if (typeof SOURCE === "string") {
+    src = SOURCE;
+  } else if (typeof SOURCES === "object" && SOURCES && window.ACTIVE_VIEW) {
+    src = SOURCES[window.ACTIVE_VIEW] || "";
+  }
+  if (!src) {
+    if (status) status.textContent = "No Mermaid source to copy";
+    return;
+  }
+  navigator.clipboard.writeText(src).then(
+    () => { if (status) status.textContent = "Mermaid copied — paste into Draw.io (Arrange → Insert → Advanced → Mermaid)"; },
+    (err) => { if (status) status.textContent = "Copy Mermaid failed: " + err; }
+  );
+}
+
+function wireControls() {
+  let saved = 720;
+  try {
+    const v = localStorage.getItem("tryme-diagram-width");
+    if (v) saved = Number(v) || 720;
+  } catch (_) {}
+  applyDiagramWidth(saved);
+
+  const range = document.getElementById("width-range");
+  const num = document.getElementById("width-num");
+  if (range) range.addEventListener("input", () => applyDiagramWidth(range.value));
+  if (num) {
+    num.addEventListener("change", () => applyDiagramWidth(num.value));
+    num.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") applyDiagramWidth(num.value);
+    });
+  }
+
+  document.getElementById("btn-svg").addEventListener("click", () => {
+    downloadSvg(window.SVG_FILENAME || "diagram.svg");
+  });
+  document.getElementById("btn-copy-svg").addEventListener("click", copySvg);
+  document.getElementById("btn-png").addEventListener("click", () => {
+    const name = (window.PNG_FILENAME || (window.SVG_FILENAME || "diagram.svg").replace(/\.svg$/i, ".png"));
+    downloadPng(name);
+  });
+  document.getElementById("btn-copy-png").addEventListener("click", () => {
+    copyPng();
+  });
+  const btnMermaid = document.getElementById("btn-copy-mermaid");
+  if (btnMermaid) btnMermaid.addEventListener("click", copyMermaid);
+}
+
+// Back-compat alias used by older page boots
+function wireExportButtons() { wireControls(); }
+
+
+const SOURCE = 'graph TB\n    subgraph Client["Client Layer src/app + src/features"]\n        Pages["App Router Pages<br/>public, auth, dashboard, settings"]\n        Features["Feature Modules<br/>products, try-on, cart, orders"]\n        SharedUI["Shared UI and Hooks<br/>Button, GlassCard, useAuth, useT"]\n        Middleware["Edge Middleware<br/>JWT + RBAC route guard"]\n    end\n    subgraph API["API Layer src/app/api"]\n        AuthRoutes["/api/auth/*<br/>NextAuth + register + SSE events"]\n        ProductRoutes["/api/products/*"]\n        TryOnRoutes["/api/try-on/*"]\n        CartRoutes["/api/cart · /api/checkout"]\n        OrderRoutes["/api/orders/*"]\n        UserRoutes["/api/users · /api/merchants"]\n        SystemRoutes["/api/system · /api/dashboard · /api/health"]\n    end\n    subgraph Server["Server Layer src/server/features"]\n        AuthSvc["auth.service"]\n        ProductSvc["product.service"]\n        TryOnSvc["try-on.service"]\n        CartSvc["cart.service"]\n        OrderSvc["order.service"]\n        MerchantSvc["merchant.service"]\n        ReviewSvc["review.service"]\n        AddressSvc["address.service"]\n        UploadSvc["upload.service"]\n        DashboardSvc["dashboard.service"]\n        SystemSvc["system-config.service"]\n        CB["Circuit Breaker<br/>VTO timeout"]\n        VTOClient["VTO API Client<br/>SSE /call/tryon"]\n        ImgBBClient["ImgBB Client"]\n        Fallback["Fallback Cache<br/>local image"]\n        Repos["Repositories<br/>Mongoose models"]\n    end\n    subgraph External["External Services"]\n        MongoDB[("MongoDB")]\n        ImgBB["ImgBB API"]\n        VTO["IDM-VTON<br/>Hugging Face Space"]\n        Google["Google OAuth"]\n    end\n    Pages --> Features\n    Features --> SharedUI\n    Middleware --> Pages\n    Features -->|"fetch /api/*"| AuthRoutes\n    Features --> ProductRoutes\n    Features --> TryOnRoutes\n    Features --> CartRoutes\n    Features --> OrderRoutes\n    Features --> UserRoutes\n    Features --> SystemRoutes\n    AuthRoutes --> AuthSvc\n    ProductRoutes --> ProductSvc\n    TryOnRoutes --> TryOnSvc\n    CartRoutes --> CartSvc\n    CartRoutes --> OrderSvc\n    OrderRoutes --> OrderSvc\n    UserRoutes --> AuthSvc\n    UserRoutes --> MerchantSvc\n    SystemRoutes --> DashboardSvc\n    SystemRoutes --> SystemSvc\n    AuthSvc --> Repos\n    ProductSvc --> Repos\n    TryOnSvc --> UploadSvc\n    TryOnSvc --> ProductSvc\n    TryOnSvc --> CB\n    CartSvc --> Repos\n    OrderSvc --> Repos\n    MerchantSvc --> Repos\n    ReviewSvc --> Repos\n    AddressSvc --> Repos\n    Repos --> MongoDB\n    UploadSvc --> ImgBBClient\n    ImgBBClient --> ImgBB\n    CB --> VTOClient\n    CB -->|"timeout / HTTP error"| Fallback\n    VTOClient --> VTO\n    AuthSvc --> Google';
+window.SVG_FILENAME = 'tryme-component-diagram.svg';
+window.PNG_FILENAME = 'tryme-component-diagram.svg'.replace('.svg', '.png');
+
+async function renderDiagram() {
+  await paintDefinition(SOURCE);
+  const status = document.getElementById("status");
+  if (status) status.textContent = "Ready — set width, then Save SVG/PNG";
+}
+
+wireExportButtons();
+applyDiagramWidth(720);
+document.getElementById("btn-rerender").addEventListener("click", () => renderDiagram().catch(console.error));
+renderDiagram().catch((err) => {
+  const status = document.getElementById("status");
+  if (status) status.textContent = "Render error: " + err.message;
+  console.error(err);
+});
+
+  </script>
+</body>
+</html>

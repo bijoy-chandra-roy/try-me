@@ -1,6 +1,8 @@
 # Class Diagram — TryMe (Current)
 
-Domain models, server service layers, auth/RBAC, and key frontend types.
+Domain Mongoose models (+ slim service deps for the layering story). **Defense source of truth:** [tryme-class-diagram.drawio](drawio/tryme-class-diagram.drawio) (page **1100×411**).
+
+Full Mermaid below remains a detailed reference; the Draw.io file is the slide-sized cut.
 
 ```mermaid
 classDiagram
